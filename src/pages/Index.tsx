@@ -18,14 +18,18 @@ const Index = () => {
         {/* Categorias principais */}
         <section>
           <h2 className="mb-4 text-xl font-bold">Categorias principais</h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-4 gap-4">
             {mainCategories.map((category, i) => (
-              <CategoryCard
+              <div
                 key={category.id}
-                label={category.label}
-                icon={category.icon}
-                delay={i * 75}
-              />
+                className="flex flex-col items-center gap-2 animate-fade-in cursor-pointer"
+                style={{ animationDelay: `${i * 50}ms` }}
+              >
+                <div className="w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center text-2xl hover:border-primary/50 transition-colors">
+                  {category.icon}
+                </div>
+                <span className="text-xs text-center text-muted-foreground">{category.label}</span>
+              </div>
             ))}
           </div>
         </section>
