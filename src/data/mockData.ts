@@ -25,6 +25,16 @@ export const categories: Category[] = [
   { id: "4", label: "Segurança & Sinalização", icon: "⚠️" },
 ];
 
+export const mainCategories: Category[] = [
+  { id: "1", label: "Peças", icon: "🔧" },
+  { id: "2", label: "Carroçaria", icon: "🚗" },
+  { id: "3", label: "Travagem", icon: "🛞" },
+  { id: "4", label: "Filtros", icon: "🛢️" },
+  { id: "5", label: "Suspensão e Direção", icon: "⚙️" },
+  { id: "6", label: "Motor", icon: "🔩" },
+  { id: "7", label: "Sistema de Escape", icon: "💨" },
+];
+
 export const initialProducts: Product[] = [
   {
     id: "1",
