@@ -57,6 +57,35 @@ export const lubrificantesSubCategories: Category[] = [
   { id: "l9", label: "Óleos Especiais", icon: "✨" },
 ];
 
+export const acessoriosSubCategories: Category[] = [
+  { id: "a1", label: "Interior", icon: "🚗" },
+  { id: "a2", label: "Exterior", icon: "🚙" },
+  { id: "a3", label: "Multimédia & Eletrónica", icon: "📱" },
+  { id: "a4", label: "Conforto & Utilitários", icon: "💺" },
+];
+
+export const cuidadoDetalheSubCategories: Category[] = [
+  { id: "c1", label: "Shampoos & Limpeza", icon: "🧴" },
+  { id: "c2", label: "Ceras & Selantes", icon: "✨" },
+  { id: "c3", label: "Polimento & Correção", icon: "🔧" },
+  { id: "c4", label: "Exterior", icon: "🚙" },
+  { id: "c5", label: "Interiores", icon: "🪑" },
+  { id: "c6", label: "Vidros & Espelhos", icon: "🪟" },
+  { id: "c7", label: "Panos & Acessórios", icon: "🧽" },
+  { id: "c8", label: "Odorizantes", icon: "🌸" },
+];
+
+export const desempenhoUpgradeSubCategories: Category[] = [
+  { id: "d1", label: "Filtros de Ar Desportivos", icon: "💨" },
+  { id: "d2", label: "Escapes & Silenciosos", icon: "🔊" },
+  { id: "d3", label: "Suspensões & Molas", icon: "🔩" },
+  { id: "d4", label: "Travagem Performance", icon: "🛞" },
+  { id: "d5", label: "Jantes & Acessórios", icon: "⚙️" },
+  { id: "d6", label: "Iluminação Upgrade", icon: "💡" },
+  { id: "d7", label: "Eletrónica & Chip Tuning", icon: "🔌" },
+  { id: "d8", label: "Acessórios Desportivos", icon: "🏁" },
+];
+
 export const initialProducts: Product[] = [
   {
     id: "1",

@@ -1,7 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
-import { pecasSubCategories, lubrificantesSubCategories } from "@/data/mockData";
+import { 
+  pecasSubCategories, 
+  lubrificantesSubCategories, 
+  acessoriosSubCategories, 
+  cuidadoDetalheSubCategories, 
+  desempenhoUpgradeSubCategories 
+} from "@/data/mockData";
 import { Home } from "lucide-react";
 
 const SubCategories = () => {
@@ -11,6 +17,9 @@ const SubCategories = () => {
   const getSubCategories = () => {
     if (category === "pecas") return { name: "Peças", items: pecasSubCategories };
     if (category === "lubrificantes") return { name: "Lubrificantes", items: lubrificantesSubCategories };
+    if (category === "acessorios") return { name: "Acessórios", items: acessoriosSubCategories };
+    if (category === "cuidado-detalhe") return { name: "Cuidado e Detalhe", items: cuidadoDetalheSubCategories };
+    if (category === "desempenho-upgrade") return { name: "Desempenho e Upgrade", items: desempenhoUpgradeSubCategories };
     return null;
   };
 
