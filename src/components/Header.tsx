@@ -39,9 +39,6 @@ export function Header({ title = "Início" }: HeaderProps) {
                 <Link to="/" className="text-lg font-medium hover:text-primary transition-colors">
                   Início
                 </Link>
-                <Link to="/products" className="text-lg font-medium hover:text-primary transition-colors">
-                  Produtos
-                </Link>
                 <Link to="/admin" className="text-lg font-medium hover:text-primary transition-colors">
                   Admin
                 </Link>
