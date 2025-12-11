@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Products from "./pages/Products";
 import Promotions from "./pages/Promotions";
 import Admin from "./pages/Admin";
+import SubCategories from "./pages/SubCategories";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/products" element={<Products />} />
             <Route path="/promotions" element={<Promotions />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/subcategories/:category" element={<SubCategories />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
