@@ -46,20 +46,17 @@ export const pecasSubCategories: Category[] = [
 ];
 
 export const carrocariaSubSubCategories: Category[] = [
-  { id: "car1", label: "Discos", icon: "⚫" },
-  { id: "car2", label: "Pastilhas de Travão", icon: "🔲" },
-  { id: "car3", label: "Maxilas / Calços de Tambor", icon: "🔧" },
-  { id: "car4", label: "Tambores de Travão", icon: "🥁" },
-  { id: "car5", label: "Pinças de Travão & Reparações", icon: "🔩" },
-  { id: "car6", label: "Bombas de Travão", icon: "💧" },
-  { id: "car7", label: "Servofreio (Hidrovácuo)", icon: "⚙️" },
-  { id: "car8", label: "Bombitos / Cilindros de Roda", icon: "🔘" },
-  { id: "car9", label: "Sensores ABS / Velocidade", icon: "📡" },
-  { id: "car10", label: "Tubos & Mangueiras de Travão", icon: "🔌" },
-  { id: "car11", label: "Óleo / Líquido de Travões", icon: "🛢️" },
-  { id: "car12", label: "Chapas de Proteção / Deflectores", icon: "🛡️" },
-  { id: "car13", label: "Parafusos & Acessórios", icon: "🔩" },
-  { id: "car14", label: "Kits de Travagem", icon: "📦" },
+  { id: "car1", label: "Revestimentos Interiores", icon: "🪑" },
+  { id: "car2", label: "Faróis & Farolins", icon: "💡" },
+  { id: "car3", label: "Retrovisores", icon: "🪞" },
+  { id: "car4", label: "Fechos & Dobradiças", icon: "🔐" },
+  { id: "car5", label: "Para-choques", icon: "🛡️" },
+  { id: "car6", label: "Grelhas", icon: "▦" },
+  { id: "car7", label: "Guarda-lamas & Extensões", icon: "🚗" },
+  { id: "car8", label: "Capôs & Tampas", icon: "📦" },
+  { id: "car9", label: "Portas & Painéis Laterais", icon: "🚪" },
+  { id: "car10", label: "Frisos & Molduras", icon: "➖" },
+  { id: "car11", label: "Suportes & Estruturas", icon: "🔩" },
 ];
 
 export const travagemSubSubCategories: Category[] = [
