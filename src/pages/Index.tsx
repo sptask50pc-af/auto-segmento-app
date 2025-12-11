@@ -58,31 +58,7 @@ const Index = () => {
                 ))}
               </div>
             )}
-            <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Segmento">
-<link rel="apple-touch-icon" href="/icon.png">
-
-  {
-  "name": "Segmento",
-  "short_name": "Segmento",
-  "display": "standalone",
-  "start_url": "/",
-  "icons": [
-    {
-      "src": "/icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    }
-  ]
-}
- }
-
-
-
-"display": "standalone"
-
-</div>
+          </div>
         </section>
       </main>
 
@@ -90,6 +66,5 @@ const Index = () => {
     </div>
   );
 };
-
 
 export default Index;
