@@ -121,66 +121,9 @@ export const sistemaEscapeSubSubCategories: Category[] = [
   { id: "esc3", label: "Braçadeiras de Escape", icon: "🔧" },
 ];
 
-export const spraysManutencaoSubSubCategories: Category[] = [
-  { id: "spray1", label: "Colas & Selantes", icon: "🧴" },
-  { id: "spray2", label: "Sprays", icon: "💨" },
-  { id: "spray3", label: "Massas/Pastas", icon: "🧈" },
-];
+// spraysManutencaoSubSubCategories removed - now shows products directly
 
-// Removed - now shows products directly
-
-export const oleosMotorSubSubCategories: Category[] = [
-  { id: "om1", label: "5W-30", icon: "🛢️" },
-  { id: "om2", label: "5W-40", icon: "🛢️" },
-  { id: "om3", label: "10W-40", icon: "🛢️" },
-  { id: "om4", label: "0W-20", icon: "🛢️" },
-  { id: "om5", label: "0W-30", icon: "🛢️" },
-  { id: "om6", label: "15W-40", icon: "🛢️" },
-  { id: "om7", label: "Óleos Diesel", icon: "⛽" },
-  { id: "om8", label: "Óleos Moto", icon: "🏍️" },
-];
-
-export const oleosTransmissaoSubSubCategories: Category[] = [
-  { id: "ot1", label: "ATF (Automático)", icon: "⚙️" },
-  { id: "ot2", label: "MTF (Manual)", icon: "🔧" },
-  { id: "ot3", label: "Diferencial", icon: "🔩" },
-  { id: "ot4", label: "CVT", icon: "⚡" },
-  { id: "ot5", label: "DSG/PDK", icon: "🏎️" },
-];
-
-export const aditivosCombustivelSubSubCategories: Category[] = [
-  { id: "ac1", label: "Limpeza Injetores Gasolina", icon: "⛽" },
-  { id: "ac2", label: "Limpeza Injetores Diesel", icon: "🛢️" },
-  { id: "ac3", label: "Estabilizador Combustível", icon: "🧪" },
-  { id: "ac4", label: "Aditivo Anti-Gelo", icon: "❄️" },
-  { id: "ac5", label: "Catalisador", icon: "🔧" },
-];
-
-export const aditivosOleoSubSubCategories: Category[] = [
-  { id: "ao1", label: "Tapa Fugas", icon: "🔧" },
-  { id: "ao2", label: "Anti-Desgaste", icon: "🛡️" },
-  { id: "ao3", label: "Limpeza Motor", icon: "✨" },
-  { id: "ao4", label: "Estabilizador Óleo", icon: "🧪" },
-];
-
-export const liquidosTravaoSubSubCategories: Category[] = [
-  { id: "lt1", label: "DOT 4", icon: "🛞" },
-  { id: "lt2", label: "DOT 5.1", icon: "🏎️" },
-  { id: "lt3", label: "DOT 3", icon: "🔧" },
-];
-
-export const oleosHidraulicosSubSubCategories: Category[] = [
-  { id: "oh1", label: "Direção Assistida", icon: "💧" },
-  { id: "oh2", label: "Hidráulico Industrial", icon: "🔧" },
-  { id: "oh3", label: "Suspensão Hidráulica", icon: "⚙️" },
-];
-
-export const oleosEspeciaisSubSubCategories: Category[] = [
-  { id: "oe1", label: "Ar Condicionado", icon: "❄️" },
-  { id: "oe2", label: "Compressores", icon: "💨" },
-  { id: "oe3", label: "Correntes", icon: "🔗" },
-  { id: "oe4", label: "Náuticos", icon: "⚓" },
-];
+// Lubrificantes subcategories now show products directly - no sub-subcategories needed
 
 export const lubrificantesSubCategories: Category[] = [
   { id: "l1", label: "Óleos de Motor", icon: "🛢️" },

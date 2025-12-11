@@ -18,15 +18,7 @@ import {
   suspensaoDirecaoSubSubCategories,
   motorSubSubCategories,
   sistemaEscapeSubSubCategories,
-  spraysManutencaoSubSubCategories,
   multimediaEletronicaSubSubCategories,
-  oleosMotorSubSubCategories,
-  oleosTransmissaoSubSubCategories,
-  aditivosCombustivelSubSubCategories,
-  aditivosOleoSubSubCategories,
-  liquidosTravaoSubSubCategories,
-  oleosHidraulicosSubSubCategories,
-  oleosEspeciaisSubSubCategories,
   shampoosLimpezaSubSubCategories,
   cerasSelantesSubSubCategories,
   polimentoCorrecaoSubSubCategories,
@@ -41,7 +33,18 @@ import {
 import { Home, ChevronLeft } from "lucide-react";
 
 // Categories that show products directly instead of sub-subcategories
-const PRODUCT_DISPLAY_CATEGORIES = ["liquidos-arrefecimento"];
+const PRODUCT_DISPLAY_CATEGORIES = [
+  // All Lubrificantes subcategories
+  "oleos-motor",
+  "oleos-transmissao", 
+  "oleos-hidraulicos",
+  "liquidos-travao",
+  "liquidos-arrefecimento",
+  "aditivos-combustivel",
+  "aditivos-oleo",
+  "sprays-manutencao",
+  "oleos-especiais",
+];
 
 const SubCategories = () => {
   const { category, subcategory } = useParams<{ category: string; subcategory?: string }>();
@@ -53,13 +56,21 @@ const SubCategories = () => {
 
   const getCategoryDisplayName = (slug: string): string => {
     const nameMap: Record<string, string> = {
+      "oleos-motor": "Óleos de Motor",
+      "oleos-transmissao": "Óleos de Transmissão",
+      "oleos-hidraulicos": "Óleos Hidráulicos",
+      "liquidos-travao": "Líquidos de Travões",
       "liquidos-arrefecimento": "Líquidos de Arrefecimento",
+      "aditivos-combustivel": "Aditivos de Combustível",
+      "aditivos-oleo": "Aditivos de Óleo",
+      "sprays-manutencao": "Sprays & Manutenção",
+      "oleos-especiais": "Óleos Especiais",
     };
     return nameMap[slug] || slug;
   };
 
   const getSubCategories = () => {
-    // Handle sub-subcategories (third level)
+    // Handle sub-subcategories (third level) - only for non-Lubrificantes categories
     if (subcategory && !shouldShowProducts) {
       // Peças sub-subcategories
       if (subcategory === "carrocaria") return { name: "Carroçaria", items: carrocariaSubSubCategories, parent: "pecas" };
@@ -68,16 +79,6 @@ const SubCategories = () => {
       if (subcategory === "suspensao-direcao") return { name: "Suspensão e Direção", items: suspensaoDirecaoSubSubCategories, parent: "pecas" };
       if (subcategory === "motor") return { name: "Motor", items: motorSubSubCategories, parent: "pecas" };
       if (subcategory === "sistema-escape") return { name: "Sistema de Escape", items: sistemaEscapeSubSubCategories, parent: "pecas" };
-      
-      // Lubrificantes sub-subcategories
-      if (subcategory === "oleos-motor") return { name: "Óleos de Motor", items: oleosMotorSubSubCategories, parent: "lubrificantes" };
-      if (subcategory === "oleos-transmissao") return { name: "Óleos de Transmissão & Diferencial", items: oleosTransmissaoSubSubCategories, parent: "lubrificantes" };
-      if (subcategory === "oleos-hidraulicos") return { name: "Óleos Hidráulicos & Direção Assistida", items: oleosHidraulicosSubSubCategories, parent: "lubrificantes" };
-      if (subcategory === "liquidos-travao") return { name: "Líquidos de Travões", items: liquidosTravaoSubSubCategories, parent: "lubrificantes" };
-      if (subcategory === "aditivos-combustivel") return { name: "Aditivos de Combustível", items: aditivosCombustivelSubSubCategories, parent: "lubrificantes" };
-      if (subcategory === "aditivos-oleo") return { name: "Aditivos de Óleo", items: aditivosOleoSubSubCategories, parent: "lubrificantes" };
-      if (subcategory === "sprays-manutencao") return { name: "Sprays & Manutenção", items: spraysManutencaoSubSubCategories, parent: "lubrificantes" };
-      if (subcategory === "oleos-especiais") return { name: "Óleos Especiais", items: oleosEspeciaisSubSubCategories, parent: "lubrificantes" };
       
       // Cuidado e Detalhe sub-subcategories
       if (subcategory === "shampoos-limpeza") return { name: "Shampoos & Limpeza", items: shampoosLimpezaSubSubCategories, parent: "cuidado-detalhe" };
