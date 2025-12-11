@@ -199,6 +199,43 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
   return products;
 }
 
+// Category URLs to scrape for comprehensive product coverage
+const CATEGORY_URLS = [
+  '/lubrificantes',
+  '/lubrificantes/oleos-de-motor',
+  '/lubrificantes/oleos-de-transmissao',
+  '/lubrificantes/oleos-hidraulicos',
+  '/lubrificantes/oleos-especiais',
+  '/lubrificantes/liquidos-de-travoes',
+  '/lubrificantes/liquidos-de-arrefecimento',
+  '/lubrificantes/aditivos-de-oleo',
+  '/lubrificantes/aditivos-de-combustivel',
+  '/cuidado-detalhe',
+  '/cuidado-detalhe/shampoos-limpeza',
+  '/cuidado-detalhe/ceras-selantes',
+  '/cuidado-detalhe/polimento-correcao',
+  '/cuidado-detalhe/exterior',
+  '/cuidado-detalhe/interiores',
+  '/cuidado-detalhe/vidros-espelhos',
+  '/cuidado-detalhe/panos-acessorios',
+  '/cuidado-detalhe/odorizantes',
+  '/eletrica',
+  '/eletrica/baterias',
+  '/eletrica/iluminacao-lampadas',
+  '/eletrica/fusiveis-reles',
+  '/eletrica/cablagens-conectores',
+  '/pecas',
+  '/pecas/filtros',
+  '/pecas/travagem',
+  '/pecas/suspensao-direcao',
+  '/pecas/motor',
+  '/pecas/sistema-escape',
+  '/acessorios',
+  '/desempenho-upgrade',
+  '/universal',
+  '/sinaletica-seguranca',
+];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -217,13 +254,37 @@ serve(async (req) => {
     console.log('Starting product scrape from segmentopositivo.pt with Firecrawl');
     
     const allProducts: ScrapedProduct[] = [];
+    const seenProducts = new Set<string>();
     
-    // Scrape the main page first
-    const mainHtml = await scrapeWithFirecrawl(BASE_URL, apiKey);
-    const mainProducts = parseProductsFromHtml(mainHtml, BASE_URL);
-    allProducts.push(...mainProducts);
+    // Scrape each category page
+    for (const categoryPath of CATEGORY_URLS) {
+      try {
+        const categoryUrl = BASE_URL + categoryPath;
+        console.log(`Scraping category: ${categoryUrl}`);
+        
+        const html = await scrapeWithFirecrawl(categoryUrl, apiKey);
+        const products = parseProductsFromHtml(html, categoryUrl);
+        
+        // Add unique products only
+        for (const product of products) {
+          const productKey = product.name.toLowerCase();
+          if (!seenProducts.has(productKey)) {
+            seenProducts.add(productKey);
+            allProducts.push(product);
+          }
+        }
+        
+        console.log(`Category ${categoryPath}: found ${products.length} products (total unique: ${allProducts.length})`);
+        
+        // Small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (categoryError) {
+        console.error(`Error scraping category ${categoryPath}:`, categoryError);
+        // Continue with other categories even if one fails
+      }
+    }
     
-    console.log(`Total products scraped: ${allProducts.length}`);
+    console.log(`Total unique products scraped: ${allProducts.length}`);
 
     return new Response(
       JSON.stringify({ 

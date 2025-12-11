@@ -7,6 +7,7 @@ interface ProductContextType {
   addProduct: (product: Omit<Product, "id">) => void;
   updateProduct: (id: string, product: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
+  getProductsByCategory: (category: string) => Product[];
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -32,9 +33,16 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
+  const getProductsByCategory = (category: string): Product[] => {
+    return products.filter((p) => 
+      p.category.toLowerCase() === category.toLowerCase() ||
+      p.category.toLowerCase().includes(category.toLowerCase())
+    );
+  };
+
   return (
     <ProductContext.Provider
-      value={{ products, addProduct, updateProduct, deleteProduct }}
+      value={{ products, addProduct, updateProduct, deleteProduct, getProductsByCategory }}
     >
       {children}
     </ProductContext.Provider>
