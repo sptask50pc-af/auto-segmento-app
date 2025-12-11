@@ -135,6 +135,59 @@ export const liquidosArrefecimentoSubSubCategories: Category[] = [
   { id: "arr5", label: "Aditivos de Arrefecimento", icon: "🔧" },
 ];
 
+export const oleosMotorSubSubCategories: Category[] = [
+  { id: "om1", label: "5W-30", icon: "🛢️" },
+  { id: "om2", label: "5W-40", icon: "🛢️" },
+  { id: "om3", label: "10W-40", icon: "🛢️" },
+  { id: "om4", label: "0W-20", icon: "🛢️" },
+  { id: "om5", label: "0W-30", icon: "🛢️" },
+  { id: "om6", label: "15W-40", icon: "🛢️" },
+  { id: "om7", label: "Óleos Diesel", icon: "⛽" },
+  { id: "om8", label: "Óleos Moto", icon: "🏍️" },
+];
+
+export const oleosTransmissaoSubSubCategories: Category[] = [
+  { id: "ot1", label: "ATF (Automático)", icon: "⚙️" },
+  { id: "ot2", label: "MTF (Manual)", icon: "🔧" },
+  { id: "ot3", label: "Diferencial", icon: "🔩" },
+  { id: "ot4", label: "CVT", icon: "⚡" },
+  { id: "ot5", label: "DSG/PDK", icon: "🏎️" },
+];
+
+export const aditivosCombustivelSubSubCategories: Category[] = [
+  { id: "ac1", label: "Limpeza Injetores Gasolina", icon: "⛽" },
+  { id: "ac2", label: "Limpeza Injetores Diesel", icon: "🛢️" },
+  { id: "ac3", label: "Estabilizador Combustível", icon: "🧪" },
+  { id: "ac4", label: "Aditivo Anti-Gelo", icon: "❄️" },
+  { id: "ac5", label: "Catalisador", icon: "🔧" },
+];
+
+export const aditivosOleoSubSubCategories: Category[] = [
+  { id: "ao1", label: "Tapa Fugas", icon: "🔧" },
+  { id: "ao2", label: "Anti-Desgaste", icon: "🛡️" },
+  { id: "ao3", label: "Limpeza Motor", icon: "✨" },
+  { id: "ao4", label: "Estabilizador Óleo", icon: "🧪" },
+];
+
+export const liquidosTravaoSubSubCategories: Category[] = [
+  { id: "lt1", label: "DOT 4", icon: "🛞" },
+  { id: "lt2", label: "DOT 5.1", icon: "🏎️" },
+  { id: "lt3", label: "DOT 3", icon: "🔧" },
+];
+
+export const oleosHidraulicosSubSubCategories: Category[] = [
+  { id: "oh1", label: "Direção Assistida", icon: "💧" },
+  { id: "oh2", label: "Hidráulico Industrial", icon: "🔧" },
+  { id: "oh3", label: "Suspensão Hidráulica", icon: "⚙️" },
+];
+
+export const oleosEspeciaisSubSubCategories: Category[] = [
+  { id: "oe1", label: "Ar Condicionado", icon: "❄️" },
+  { id: "oe2", label: "Compressores", icon: "💨" },
+  { id: "oe3", label: "Correntes", icon: "🔗" },
+  { id: "oe4", label: "Náuticos", icon: "⚓" },
+];
+
 export const lubrificantesSubCategories: Category[] = [
   { id: "l1", label: "Óleos de Motor", icon: "🛢️" },
   { id: "l2", label: "Óleos de Transmissão & Diferencial", icon: "⚙️" },
@@ -147,6 +200,62 @@ export const lubrificantesSubCategories: Category[] = [
   { id: "l9", label: "Óleos Especiais", icon: "✨" },
 ];
 
+// Cuidado e Detalhe sub-subcategories
+export const shampoosLimpezaSubSubCategories: Category[] = [
+  { id: "sh1", label: "Shampoo Concentrado", icon: "🧴" },
+  { id: "sh2", label: "Shampoo com Cera", icon: "✨" },
+  { id: "sh3", label: "Desengorduante", icon: "💪" },
+  { id: "sh4", label: "Limpa Jantes", icon: "⚙️" },
+];
+
+export const cerasSelantesSubSubCategories: Category[] = [
+  { id: "cs1", label: "Cera Líquida", icon: "💧" },
+  { id: "cs2", label: "Cera em Pasta", icon: "🧈" },
+  { id: "cs3", label: "Selante Sintético", icon: "🛡️" },
+  { id: "cs4", label: "Coating Cerâmico", icon: "✨" },
+];
+
+export const polimentoCorrecaoSubSubCategories: Category[] = [
+  { id: "pc1", label: "Polimento Fino", icon: "✨" },
+  { id: "pc2", label: "Composto de Corte", icon: "🔧" },
+  { id: "pc3", label: "Removedor Riscos", icon: "🔍" },
+  { id: "pc4", label: "Boinas & Discos", icon: "⚙️" },
+];
+
+export const exteriorSubSubCategories: Category[] = [
+  { id: "ext1", label: "Limpa Pneus", icon: "🛞" },
+  { id: "ext2", label: "Restaurador Plásticos", icon: "🔧" },
+  { id: "ext3", label: "Limpa Motor", icon: "⚙️" },
+  { id: "ext4", label: "Removedor Insetos", icon: "🦟" },
+];
+
+export const interioresSubSubCategories: Category[] = [
+  { id: "int1", label: "Limpa Estofos", icon: "🪑" },
+  { id: "int2", label: "Limpa Pele", icon: "✨" },
+  { id: "int3", label: "Limpa Tablier", icon: "📱" },
+  { id: "int4", label: "Limpa Tapetes", icon: "🧹" },
+];
+
+export const vidrosEspelhosSubSubCategories: Category[] = [
+  { id: "ve1", label: "Limpa Vidros", icon: "🪟" },
+  { id: "ve2", label: "Anti-Embaciante", icon: "💨" },
+  { id: "ve3", label: "Repelente Água", icon: "💧" },
+  { id: "ve4", label: "Removedor Película", icon: "🔍" },
+];
+
+export const panosAcessoriosSubSubCategories: Category[] = [
+  { id: "pa1", label: "Panos Microfibra", icon: "🧽" },
+  { id: "pa2", label: "Esponjas", icon: "🧼" },
+  { id: "pa3", label: "Luvas de Lavagem", icon: "🧤" },
+  { id: "pa4", label: "Aplicadores", icon: "🔧" },
+];
+
+export const odorizantesSubSubCategories: Category[] = [
+  { id: "od1", label: "Ambientadores", icon: "🌸" },
+  { id: "od2", label: "Eliminador Odores", icon: "💨" },
+  { id: "od3", label: "Fragrâncias Auto", icon: "🚗" },
+];
+
 export const acessoriosSubCategories: Category[] = [
   { id: "a1", label: "Interior", icon: "🚗" },
   { id: "a2", label: "Exterior", icon: "🚙" },
@@ -156,6 +265,9 @@ export const acessoriosSubCategories: Category[] = [
 
 export const multimediaEletronicaSubSubCategories: Category[] = [
   { id: "mult1", label: "Pilhas", icon: "🔋" },
+  { id: "mult2", label: "Carregadores", icon: "🔌" },
+  { id: "mult3", label: "Suportes Telemóvel", icon: "📱" },
+  { id: "mult4", label: "Câmaras", icon: "📷" },
 ];
 
 export const cuidadoDetalheSubCategories: Category[] = [
@@ -180,6 +292,21 @@ export const desempenhoUpgradeSubCategories: Category[] = [
   { id: "d8", label: "Acessórios Desportivos", icon: "🏁" },
 ];
 
+export const bateriasSubSubCategories: Category[] = [
+  { id: "bat1", label: "Baterias Auto", icon: "🔋" },
+  { id: "bat2", label: "Baterias Moto", icon: "🏍️" },
+  { id: "bat3", label: "Baterias AGM", icon: "⚡" },
+  { id: "bat4", label: "Carregadores", icon: "🔌" },
+];
+
+export const iluminacaoLampadasSubSubCategories: Category[] = [
+  { id: "il1", label: "Lâmpadas H7", icon: "💡" },
+  { id: "il2", label: "Lâmpadas H4", icon: "💡" },
+  { id: "il3", label: "LED", icon: "⚡" },
+  { id: "il4", label: "Xenon", icon: "✨" },
+  { id: "il5", label: "Lanternas", icon: "🔦" },
+];
+
 export const eletricaSubCategories: Category[] = [
   { id: "e1", label: "Baterias", icon: "🔋" },
   { id: "e2", label: "Interruptores", icon: "🔘" },
@@ -189,12 +316,18 @@ export const eletricaSubCategories: Category[] = [
 ];
 
 export const universalSubCategories: Category[] = [
-  { id: "u1", label: "Relas", icon: "🔩" },
+  { id: "u1", label: "Ferramentas", icon: "🔧" },
+  { id: "u2", label: "Fixações", icon: "🔩" },
+  { id: "u3", label: "Adesivos", icon: "🧴" },
+  { id: "u4", label: "Diversos", icon: "📦" },
 ];
 
 export const sinaleticaSegurancaSubCategories: Category[] = [
   { id: "s1", label: "Sinalética Interior & Exterior", icon: "⚠️" },
   { id: "s2", label: "Kits de Emergência", icon: "🚨" },
+  { id: "s3", label: "Coletes Refletores", icon: "🦺" },
+  { id: "s4", label: "Triângulos", icon: "🔺" },
+  { id: "s5", label: "Extintores", icon: "🧯" },
 ];
 
 export const initialProducts: Product[] = [
