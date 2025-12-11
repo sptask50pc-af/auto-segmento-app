@@ -5,8 +5,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Admin panel URL for product listing
-const ADMIN_URL = 'https://www.segmentopositivo.pt/adminloja/index.php/sell/catalog/products?_token=b2rr8ahBFUB0r-_5ro5TzkBUQX_iRMCxqHjQnNoppP0';
+// Base URL for scraping
+const BASE_URL = 'https://www.segmentopositivo.pt';
 
 interface ScrapedProduct {
   name: string;
@@ -47,71 +47,44 @@ async function scrapeWithFirecrawl(url: string, apiKey: string): Promise<string>
   return data.data?.html || data.data?.markdown || '';
 }
 
-function parseProductsFromAdminHtml(html: string): ScrapedProduct[] {
+function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduct[] {
   const products: ScrapedProduct[] = [];
   
-  console.log('Parsing admin panel HTML, length:', html.length);
+  console.log('Parsing HTML, length:', html.length);
   
-  // Admin panels typically use tables - look for table rows
-  const tableRowPatterns = [
-    /<tr[^>]*>([\s\S]*?)<\/tr>/gi,
+  // Look for product elements
+  const productPatterns = [
+    /<div[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi,
+    /<article[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/article>/gi,
+    /<li[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
   ];
 
-  let rows: string[] = [];
-  for (const pattern of tableRowPatterns) {
+  let productElements: string[] = [];
+  for (const pattern of productPatterns) {
     const matches = html.match(pattern);
-    if (matches && matches.length > 1) {
-      // Skip header row
-      rows = matches.slice(1);
+    if (matches && matches.length > 0) {
+      productElements = matches;
+      console.log(`Found ${productElements.length} product elements`);
       break;
     }
   }
 
-  console.log(`Found ${rows.length} table rows`);
-
-  // Also try to find product data in other formats (grid, list, etc.)
-  if (rows.length === 0) {
-    // Try product cards/items
-    const productPatterns = [
-      /<div[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi,
-      /<article[^>]*>([\s\S]*?)<\/article>/gi,
-      /<li[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
-    ];
-    
-    for (const pattern of productPatterns) {
-      const matches = html.match(pattern);
-      if (matches && matches.length > 0) {
-        rows = matches;
-        console.log(`Found ${rows.length} product items with pattern`);
-        break;
-      }
-    }
-  }
-
-  // Parse each row/item
-  for (const rowHtml of rows.slice(0, 500)) {
+  for (const productHtml of productElements.slice(0, 100)) {
     try {
-      // Extract product name from various patterns
+      // Extract product name
       const namePatterns = [
-        /<td[^>]*>([^<]{3,100})<\/td>/i,
-        /<a[^>]*>([^<]{3,100})<\/a>/i,
+        /<h[1-6][^>]*class="[^"]*product[^"]*name[^"]*"[^>]*>([^<]+)/i,
+        /<a[^>]*class="[^"]*product[^"]*name[^"]*"[^>]*>([^<]+)/i,
         /title="([^"]{3,100})"/i,
         /<span[^>]*class="[^"]*name[^"]*"[^>]*>([^<]+)/i,
-        /<h[1-6][^>]*>([^<]+)<\/h[1-6]>/i,
       ];
 
       let name = '';
       for (const pattern of namePatterns) {
-        const match = rowHtml.match(pattern);
+        const match = productHtml.match(pattern);
         if (match && match[1].trim().length > 2) {
           name = match[1].trim();
-          // Skip if it looks like a header or action
-          if (!name.toLowerCase().includes('action') && 
-              !name.toLowerCase().includes('editar') &&
-              !name.toLowerCase().includes('apagar')) {
-            break;
-          }
-          name = '';
+          break;
         }
       }
 
@@ -123,9 +96,12 @@ function parseProductsFromAdminHtml(html: string): ScrapedProduct[] {
 
       let image = '/placeholder.svg';
       for (const pattern of imagePatterns) {
-        const match = rowHtml.match(pattern);
+        const match = productHtml.match(pattern);
         if (match) {
           image = match[1];
+          if (!image.startsWith('http')) {
+            image = BASE_URL + image;
+          }
           break;
         }
       }
@@ -134,48 +110,36 @@ function parseProductsFromAdminHtml(html: string): ScrapedProduct[] {
       const pricePatterns = [
         /(\d+[.,]\d{2})\s*€/,
         /€\s*(\d+[.,]\d{2})/,
-        />(\d+[.,]\d{2})</,
         /price[^>]*>(\d+[.,]\d{2})/i,
       ];
 
       let price = 0;
       for (const pattern of pricePatterns) {
-        const match = rowHtml.match(pattern);
+        const match = productHtml.match(pattern);
         if (match) {
           price = parseFloat(match[1].replace(',', '.'));
           if (price > 0) break;
         }
       }
 
-      // Extract category if available
-      const categoryMatch = rowHtml.match(/category[^>]*>([^<]+)/i) ||
-                           rowHtml.match(/data-category="([^"]+)"/i);
-      const category = categoryMatch ? categoryMatch[1].trim() : 'Geral';
-
       // Check stock status
-      const inStock = !rowHtml.toLowerCase().includes('esgotado') && 
-                     !rowHtml.toLowerCase().includes('out of stock') &&
-                     !rowHtml.toLowerCase().includes('indisponível') &&
-                     !rowHtml.includes('inactive');
-
-      // Extract brand if available
-      const brandMatch = rowHtml.match(/brand[^>]*>([^<]+)/i) ||
-                        rowHtml.match(/data-brand="([^"]+)"/i);
-      const brand = brandMatch ? brandMatch[1].trim() : 'Segmento Positivo';
+      const inStock = !productHtml.toLowerCase().includes('esgotado') && 
+                     !productHtml.toLowerCase().includes('out of stock') &&
+                     !productHtml.toLowerCase().includes('indisponível');
 
       if (name && name.length > 2) {
         products.push({
           name,
-          brand,
-          category,
+          brand: 'Segmento Positivo',
+          category: 'Geral',
           price,
           image,
           inStock,
-          sourceUrl: ADMIN_URL,
+          sourceUrl: categoryUrl,
         });
       }
     } catch (e) {
-      console.error('Error parsing product row:', e);
+      console.error('Error parsing product:', e);
     }
   }
 
@@ -197,19 +161,23 @@ serve(async (req) => {
       );
     }
 
-    console.log('Starting product scrape from admin panel with Firecrawl');
+    console.log('Starting product scrape from segmentopositivo.pt with Firecrawl');
     
-    const html = await scrapeWithFirecrawl(ADMIN_URL, apiKey);
-    const products = parseProductsFromAdminHtml(html);
+    const allProducts: ScrapedProduct[] = [];
     
-    console.log(`Total products scraped: ${products.length}`);
+    // Scrape the main page first
+    const mainHtml = await scrapeWithFirecrawl(BASE_URL, apiKey);
+    const mainProducts = parseProductsFromHtml(mainHtml, BASE_URL);
+    allProducts.push(...mainProducts);
+    
+    console.log(`Total products scraped: ${allProducts.length}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        products,
+        products: allProducts,
         timestamp: new Date().toISOString(),
-        message: `Scraped ${products.length} products from admin panel`,
+        message: `Scraped ${allProducts.length} products from segmentopositivo.pt`,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
