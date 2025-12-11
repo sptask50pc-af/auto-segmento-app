@@ -9,6 +9,7 @@ import Products from "./pages/Products";
 import Promotions from "./pages/Promotions";
 import Admin from "./pages/Admin";
 import SubCategories from "./pages/SubCategories";
+import Website from "./pages/Website";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/subcategories/:category" element={<SubCategories />} />
             <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
+            <Route path="/website" element={<Website />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
