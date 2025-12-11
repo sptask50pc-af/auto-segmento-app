@@ -83,12 +83,14 @@ const Admin = () => {
           );
 
           if (existingProduct) {
-            // Check if price or name changed
+            // Check if price, name, or category changed
             if (existingProduct.price !== scrapedProduct.price || 
-                existingProduct.name !== scrapedProduct.name) {
+                existingProduct.name !== scrapedProduct.name ||
+                existingProduct.category !== scrapedProduct.category) {
               updateProduct(existingProduct.id, {
                 price: scrapedProduct.price,
                 name: scrapedProduct.name,
+                category: scrapedProduct.category,
                 inStock: scrapedProduct.inStock,
               });
               updatedCount++;
