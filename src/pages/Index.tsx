@@ -38,7 +38,7 @@ const Index = () => {
                   onClick={() => hasSubCategories && handleCategoryClick(category.label)}
                   className="flex flex-col items-center gap-2 cursor-pointer"
                 >
-                  <div className="w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center text-2xl hover:border-primary/50 transition-colors">
+                  <div className="w-20 h-20 rounded-lg bg-card border border-border flex items-center justify-center text-3xl hover:border-primary/50 transition-colors">
                     {category.icon}
                   </div>
                   <span className="text-xs text-center text-muted-foreground leading-tight">{category.label}</span>
