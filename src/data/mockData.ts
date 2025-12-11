@@ -86,6 +86,23 @@ export const desempenhoUpgradeSubCategories: Category[] = [
   { id: "d8", label: "Acessórios Desportivos", icon: "🏁" },
 ];
 
+export const eletricaSubCategories: Category[] = [
+  { id: "e1", label: "Baterias", icon: "🔋" },
+  { id: "e2", label: "Interruptores", icon: "🔘" },
+  { id: "e3", label: "Iluminação & Lâmpadas", icon: "💡" },
+  { id: "e4", label: "Fusíveis & Relés", icon: "⚡" },
+  { id: "e5", label: "Cablagens & Conectores", icon: "🔌" },
+];
+
+export const universalSubCategories: Category[] = [
+  { id: "u1", label: "Relas", icon: "🔩" },
+];
+
+export const sinaleticaSegurancaSubCategories: Category[] = [
+  { id: "s1", label: "Sinalética Interior & Exterior", icon: "⚠️" },
+  { id: "s2", label: "Kits de Emergência", icon: "🚨" },
+];
+
 export const initialProducts: Product[] = [
   {
     id: "1",

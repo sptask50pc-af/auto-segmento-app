@@ -6,7 +6,10 @@ import {
   lubrificantesSubCategories, 
   acessoriosSubCategories, 
   cuidadoDetalheSubCategories, 
-  desempenhoUpgradeSubCategories 
+  desempenhoUpgradeSubCategories,
+  eletricaSubCategories,
+  universalSubCategories,
+  sinaleticaSegurancaSubCategories
 } from "@/data/mockData";
 import { Home } from "lucide-react";
 
@@ -20,6 +23,9 @@ const SubCategories = () => {
     if (category === "acessorios") return { name: "Acessórios", items: acessoriosSubCategories };
     if (category === "cuidado-detalhe") return { name: "Cuidado e Detalhe", items: cuidadoDetalheSubCategories };
     if (category === "desempenho-upgrade") return { name: "Desempenho e Upgrade", items: desempenhoUpgradeSubCategories };
+    if (category === "eletrica") return { name: "Elétrica", items: eletricaSubCategories };
+    if (category === "universal") return { name: "Universal", items: universalSubCategories };
+    if (category === "sinaletica-seguranca") return { name: "Sinalética e Segurança", items: sinaleticaSegurancaSubCategories };
     return null;
   };
 
