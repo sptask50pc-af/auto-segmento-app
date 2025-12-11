@@ -2,6 +2,7 @@ import { Settings, ShoppingCart, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import logo from "@/assets/logo.png";
 
 interface HeaderProps {
   title?: string;
@@ -13,9 +14,7 @@ export function Header({ title = "Início" }: HeaderProps) {
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
-              SP
-            </div>
+            <img src={logo} alt="Segmento Positivo" className="h-10 w-10 rounded-lg object-contain" />
             <span className="text-xl font-bold tracking-tight">{title}</span>
           </Link>
         </div>
