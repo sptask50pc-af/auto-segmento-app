@@ -6,14 +6,16 @@ import { ProductForm } from "@/components/ProductForm";
 import { useProducts } from "@/context/ProductContext";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Package } from "lucide-react";
+import { Plus, Package, RefreshCw } from "lucide-react";
 import { Product } from "@/types/product";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Admin = () => {
   const { products, addProduct, updateProduct, deleteProduct } = useProducts();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
@@ -56,6 +58,78 @@ const Admin = () => {
     setIsDialogOpen(true);
   };
 
+  const handleUpdateFromWebsite = async () => {
+    setIsUpdating(true);
+    toast({
+      title: "A atualizar...",
+      description: "A verificar produtos em segmentopositivo.pt",
+    });
+
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-products');
+      
+      if (error) {
+        throw error;
+      }
+
+      if (data?.success && data.products?.length > 0) {
+        let newCount = 0;
+        let updatedCount = 0;
+
+        for (const scrapedProduct of data.products) {
+          // Check if product already exists (by name)
+          const existingProduct = products.find(
+            p => p.name.toLowerCase() === scrapedProduct.name.toLowerCase()
+          );
+
+          if (existingProduct) {
+            // Check if price or name changed
+            if (existingProduct.price !== scrapedProduct.price || 
+                existingProduct.name !== scrapedProduct.name) {
+              updateProduct(existingProduct.id, {
+                price: scrapedProduct.price,
+                name: scrapedProduct.name,
+                inStock: scrapedProduct.inStock,
+              });
+              updatedCount++;
+            }
+          } else {
+            // Add new product
+            addProduct({
+              name: scrapedProduct.name,
+              brand: scrapedProduct.brand,
+              category: scrapedProduct.category,
+              price: scrapedProduct.price,
+              image: scrapedProduct.image,
+              inStock: scrapedProduct.inStock,
+              description: '',
+            });
+            newCount++;
+          }
+        }
+
+        toast({
+          title: "Atualização concluída",
+          description: `${newCount} novos produtos, ${updatedCount} atualizados.`,
+        });
+      } else {
+        toast({
+          title: "Sem novos produtos",
+          description: "Não foram encontrados produtos novos.",
+        });
+      }
+    } catch (error) {
+      console.error('Error updating from website:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao atualizar produtos do website.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <Header title="Admin" />
@@ -89,11 +163,22 @@ const Admin = () => {
           </div>
         </div>
 
-        {/* Add Button */}
-        <Button onClick={handleAddNew} className="w-full gap-2">
-          <Plus className="h-5 w-5" />
-          Adicionar Produto
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          <Button onClick={handleAddNew} className="flex-1 gap-2">
+            <Plus className="h-5 w-5" />
+            Adicionar
+          </Button>
+          <Button 
+            onClick={handleUpdateFromWebsite} 
+            variant="secondary"
+            className="flex-1 gap-2"
+            disabled={isUpdating}
+          >
+            <RefreshCw className={`h-5 w-5 ${isUpdating ? 'animate-spin' : ''}`} />
+            {isUpdating ? 'A atualizar...' : 'Update'}
+          </Button>
+        </div>
 
         {/* Products Grid */}
         <div className="grid grid-cols-2 gap-4">
