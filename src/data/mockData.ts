@@ -121,6 +121,12 @@ export const sistemaEscapeSubSubCategories: Category[] = [
   { id: "esc3", label: "Braçadeiras de Escape", icon: "🔧" },
 ];
 
+export const spraysManutencaoSubSubCategories: Category[] = [
+  { id: "spray1", label: "Colas & Selantes", icon: "🧴" },
+  { id: "spray2", label: "Sprays", icon: "💨" },
+  { id: "spray3", label: "Massas/Pastas", icon: "🧈" },
+];
+
 export const lubrificantesSubCategories: Category[] = [
   { id: "l1", label: "Óleos de Motor", icon: "🛢️" },
   { id: "l2", label: "Óleos de Transmissão & Diferencial", icon: "⚙️" },
