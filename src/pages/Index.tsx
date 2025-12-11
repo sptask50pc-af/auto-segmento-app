@@ -38,7 +38,7 @@ const Index = () => {
                   onClick={() => hasSubCategories && toggleCategory(category.label)}
                   className="flex flex-col items-center gap-2 cursor-pointer"
                 >
-                  <div className="w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center text-2xl hover:border-primary/50 transition-colors">
+                  <div className={`w-16 h-16 rounded-full bg-card border flex items-center justify-center text-2xl transition-colors ${isExpanded ? 'border-primary' : 'border-border hover:border-primary/50'}`}>
                     {category.icon}
                   </div>
                   <span className="text-xs text-center text-muted-foreground leading-tight">{category.label}</span>
@@ -51,23 +51,25 @@ const Index = () => {
               );
             })}
           </div>
-          
-          {/* Sub-categories */}
+
+          {/* Sub-categories - separate section */}
           {expandedCategory && getSubCategories(expandedCategory) && (
-            <div className="grid grid-cols-3 gap-3 mt-6 pt-4 border-t border-border animate-fade-in">
-              <h3 className="col-span-3 text-sm font-medium text-muted-foreground mb-2">Sub-categorias de {expandedCategory}</h3>
-              {getSubCategories(expandedCategory)!.map((category, i) => (
-                <div
-                  key={category.id}
-                  className="flex flex-col items-center gap-2 cursor-pointer"
-                  style={{ animationDelay: `${i * 50}ms` }}
-                >
-                  <div className="w-14 h-14 rounded-full bg-card border border-border flex items-center justify-center text-xl hover:border-primary/50 transition-colors">
-                    {category.icon}
+            <div className="mt-6 p-4 bg-card rounded-lg border border-border animate-fade-in">
+              <h3 className="text-sm font-medium text-foreground mb-4">{expandedCategory}</h3>
+              <div className="grid grid-cols-3 gap-4">
+                {getSubCategories(expandedCategory)!.map((category, i) => (
+                  <div
+                    key={category.id}
+                    className="flex flex-col items-center gap-2 cursor-pointer animate-fade-in"
+                    style={{ animationDelay: `${i * 50}ms` }}
+                  >
+                    <div className="w-14 h-14 rounded-full bg-background border border-border flex items-center justify-center text-xl hover:border-primary/50 transition-colors">
+                      {category.icon}
+                    </div>
+                    <span className="text-xs text-center text-muted-foreground">{category.label}</span>
                   </div>
-                  <span className="text-xs text-center text-muted-foreground">{category.label}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </section>
