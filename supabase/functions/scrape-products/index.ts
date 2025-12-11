@@ -52,90 +52,65 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
   
   console.log('Parsing HTML, length:', html.length);
   
-  // Look for product elements
-  const productPatterns = [
-    /<div[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi,
-    /<article[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/article>/gi,
-    /<li[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
-  ];
-
-  let productElements: string[] = [];
-  for (const pattern of productPatterns) {
-    const matches = html.match(pattern);
-    if (matches && matches.length > 0) {
-      productElements = matches;
-      console.log(`Found ${productElements.length} product elements`);
-      break;
-    }
+  // PrestaShop uses article.product-miniature for products
+  const productPattern = /<article[^>]*class="[^"]*product-miniature[^"]*"[^>]*>([\s\S]*?)<\/article>/gi;
+  const productMatches = html.match(productPattern);
+  
+  if (!productMatches) {
+    console.log('No product-miniature articles found');
+    return products;
   }
+  
+  console.log(`Found ${productMatches.length} product elements`);
 
-  for (const productHtml of productElements.slice(0, 100)) {
+  for (const productHtml of productMatches.slice(0, 100)) {
     try {
-      // Extract product name
-      const namePatterns = [
-        /<h[1-6][^>]*class="[^"]*product[^"]*name[^"]*"[^>]*>([^<]+)/i,
-        /<a[^>]*class="[^"]*product[^"]*name[^"]*"[^>]*>([^<]+)/i,
-        /title="([^"]{3,100})"/i,
-        /<span[^>]*class="[^"]*name[^"]*"[^>]*>([^<]+)/i,
-      ];
+      // Extract product name from h5.product-title or itemprop="name"
+      const nameMatch = productHtml.match(/<h5[^>]*class="[^"]*product-title[^"]*"[^>]*>[\s\S]*?<a[^>]*>([^<]+)<\/a>/i) ||
+                       productHtml.match(/itemprop="name"[^>]*>[\s\S]*?<a[^>]*>([^<]+)<\/a>/i) ||
+                       productHtml.match(/<a[^>]*class="[^"]*product-name[^"]*"[^>]*>([^<]+)<\/a>/i);
+      
+      const name = nameMatch ? nameMatch[1].trim().replace(/\.{3}$/, '') : '';
 
-      let name = '';
-      for (const pattern of namePatterns) {
-        const match = productHtml.match(pattern);
-        if (match && match[1].trim().length > 2) {
-          name = match[1].trim();
-          break;
-        }
-      }
-
-      // Extract image
-      const imagePatterns = [
-        /src="([^"]+\.(?:jpg|jpeg|png|webp|gif)[^"]*)"/i,
-        /data-src="([^"]+\.(?:jpg|jpeg|png|webp|gif)[^"]*)"/i,
-      ];
-
+      // Extract image - look for src in img tags
+      const imageMatch = productHtml.match(/<img[^>]*src="([^"]+)"[^>]*>/i);
       let image = '/placeholder.svg';
-      for (const pattern of imagePatterns) {
-        const match = productHtml.match(pattern);
-        if (match) {
-          image = match[1];
-          if (!image.startsWith('http')) {
-            image = BASE_URL + image;
-          }
-          break;
+      if (imageMatch) {
+        image = imageMatch[1];
+        if (!image.startsWith('http')) {
+          image = BASE_URL + image;
         }
       }
 
-      // Extract price
-      const pricePatterns = [
-        /(\d+[.,]\d{2})\s*€/,
-        /€\s*(\d+[.,]\d{2})/,
-        /price[^>]*>(\d+[.,]\d{2})/i,
-      ];
-
+      // Extract price - PrestaShop uses span.price with itemprop="price"
+      const priceMatch = productHtml.match(/class="price"[^>]*>([^<€]+)/i) ||
+                        productHtml.match(/itemprop="price"[^>]*class="price"[^>]*>([^<€]+)/i) ||
+                        productHtml.match(/(\d+[.,]\d{2})\s*[€&]/);
+      
       let price = 0;
-      for (const pattern of pricePatterns) {
-        const match = productHtml.match(pattern);
-        if (match) {
-          price = parseFloat(match[1].replace(',', '.'));
-          if (price > 0) break;
-        }
+      if (priceMatch) {
+        const priceStr = priceMatch[1].replace(/[^\d,.]/g, '').replace(',', '.');
+        price = parseFloat(priceStr) || 0;
       }
 
-      // Check stock status
-      const inStock = !productHtml.toLowerCase().includes('esgotado') && 
-                     !productHtml.toLowerCase().includes('out of stock') &&
-                     !productHtml.toLowerCase().includes('indisponível');
+      // Extract product URL
+      const urlMatch = productHtml.match(/<a[^>]*href="([^"]+segmentopositivo\.pt[^"]+)"[^>]*>/i);
+      const productUrl = urlMatch ? urlMatch[1] : categoryUrl;
+
+      // Check stock - look for InStock schema or absence of out-of-stock indicators
+      const inStock = productHtml.includes('InStock') || 
+                     (!productHtml.toLowerCase().includes('esgotado') && 
+                      !productHtml.toLowerCase().includes('out of stock'));
 
       if (name && name.length > 2) {
         products.push({
           name,
-          brand: 'Segmento Positivo',
+          brand: 'Liqui Moly', // Most products seem to be Liqui Moly
           category: 'Geral',
           price,
           image,
           inStock,
-          sourceUrl: categoryUrl,
+          sourceUrl: productUrl,
         });
       }
     } catch (e) {
