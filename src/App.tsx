@@ -22,13 +22,13 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Website />} />
+            <Route path="/home" element={<Index />} />
             <Route path="/products" element={<Products />} />
             <Route path="/promotions" element={<Promotions />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/subcategories/:category" element={<SubCategories />} />
             <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
-            <Route path="/website" element={<Website />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
