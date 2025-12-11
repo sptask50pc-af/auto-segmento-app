@@ -8,6 +8,51 @@ const corsHeaders = {
 // Base URL for scraping
 const BASE_URL = 'https://www.segmentopositivo.pt';
 
+// Category mapping from URL slugs to app categories
+const CATEGORY_MAP: Record<string, string> = {
+  'colas-selantes': 'Colas & Selantes',
+  'aditivos-de-oleo': 'Aditivos de Óleo',
+  'aditivos-de-combustivel': 'Aditivos de Combustível',
+  'oleos-de-motor': 'Óleos de Motor',
+  'oleos-de-transmissao': 'Óleos de Transmissão',
+  'oleos-hidraulicos': 'Óleos Hidráulicos',
+  'oleos-especiais': 'Óleos Especiais',
+  'liquidos-de-travoes': 'Líquidos de Travões',
+  'liquidos-de-arrefecimento': 'Líquidos de Arrefecimento',
+  'sprays-manutencao': 'Sprays & Manutenção',
+  'shampoos-limpeza': 'Shampoos & Limpeza',
+  'ceras-selantes': 'Ceras & Selantes',
+  'polimento-correcao': 'Polimento & Correção',
+  'exterior': 'Exterior',
+  'interiores': 'Interiores',
+  'vidros-espelhos': 'Vidros & Espelhos',
+  'panos-acessorios': 'Panos & Acessórios',
+  'odorizantes': 'Odorizantes',
+  'baterias': 'Baterias',
+  'iluminacao-lampadas': 'Iluminação & Lâmpadas',
+  'fusiveis-reles': 'Fusíveis & Relés',
+  'cablagens-conectores': 'Cablagens & Conectores',
+  'filtros': 'Filtros',
+  'filtros-de-oleo': 'Filtros de Óleo',
+  'filtros-de-ar': 'Filtros de Ar',
+  'filtros-de-combustivel': 'Filtros de Combustível',
+  'travagem': 'Travagem',
+  'discos': 'Discos',
+  'pastilhas': 'Pastilhas de Travão',
+  'suspensao-direcao': 'Suspensão e Direção',
+  'amortecedores': 'Amortecedores',
+  'motor': 'Motor',
+  'sistema-escape': 'Sistema de Escape',
+  'universal': 'Universal',
+  'sinaletica-seguranca': 'Sinalética e Segurança',
+  'acessorios': 'Acessórios',
+  'desempenho-upgrade': 'Desempenho e Upgrade',
+  'cuidado-detalhe': 'Cuidado e Detalhe',
+  'eletrica': 'Elétrica',
+  'lubrificantes': 'Lubrificantes',
+  'pecas': 'Peças',
+};
+
 interface ScrapedProduct {
   name: string;
   brand: string;
@@ -17,6 +62,21 @@ interface ScrapedProduct {
   image: string;
   inStock: boolean;
   sourceUrl: string;
+}
+
+function extractCategoryFromUrl(url: string): string {
+  try {
+    const urlPath = new URL(url).pathname;
+    const segments = urlPath.split('/').filter(Boolean);
+    
+    if (segments.length > 0) {
+      const categorySlug = segments[0].toLowerCase();
+      return CATEGORY_MAP[categorySlug] || categorySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+  } catch (e) {
+    console.error('Error extracting category from URL:', e);
+  }
+  return 'Geral';
 }
 
 async function scrapeWithFirecrawl(url: string, apiKey: string): Promise<string> {
@@ -45,6 +105,19 @@ async function scrapeWithFirecrawl(url: string, apiKey: string): Promise<string>
   const data = await response.json();
   console.log('Firecrawl response received, HTML length:', (data.data?.html || '').length);
   return data.data?.html || data.data?.markdown || '';
+}
+
+// Known brands to extract from product names
+const KNOWN_BRANDS = ['Liqui Moly', 'Mannol', 'Motul', 'Castrol', 'Shell', 'Total', 'Wurth', 'WD-40', 'Sonax', 'Meguiars', 'Chemical Guys', 'K2', 'MA', 'Petronas', 'Febi', 'UFI', 'FAST', 'Valvoline'];
+
+function extractBrandFromName(name: string): string {
+  const nameLower = name.toLowerCase();
+  for (const brand of KNOWN_BRANDS) {
+    if (nameLower.includes(brand.toLowerCase())) {
+      return brand;
+    }
+  }
+  return 'Segmento Positivo';
 }
 
 function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduct[] {
@@ -93,9 +166,13 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
         price = parseFloat(priceStr) || 0;
       }
 
-      // Extract product URL
+      // Extract product URL and category from it
       const urlMatch = productHtml.match(/<a[^>]*href="([^"]+segmentopositivo\.pt[^"]+)"[^>]*>/i);
       const productUrl = urlMatch ? urlMatch[1] : categoryUrl;
+      const category = extractCategoryFromUrl(productUrl);
+      
+      // Extract brand from product name
+      const brand = extractBrandFromName(name);
 
       // Check stock - look for InStock schema or absence of out-of-stock indicators
       const inStock = productHtml.includes('InStock') || 
@@ -105,13 +182,14 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
       if (name && name.length > 2) {
         products.push({
           name,
-          brand: 'Liqui Moly', // Most products seem to be Liqui Moly
-          category: 'Geral',
+          brand,
+          category,
           price,
           image,
           inStock,
           sourceUrl: productUrl,
         });
+        console.log(`Parsed product: ${name} | Category: ${category} | Brand: ${brand}`);
       }
     } catch (e) {
       console.error('Error parsing product:', e);
