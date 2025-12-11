@@ -127,13 +127,7 @@ export const spraysManutencaoSubSubCategories: Category[] = [
   { id: "spray3", label: "Massas/Pastas", icon: "🧈" },
 ];
 
-export const liquidosArrefecimentoSubSubCategories: Category[] = [
-  { id: "arr1", label: "Anticongelantes", icon: "❄️" },
-  { id: "arr2", label: "Líquido de Radiador", icon: "💧" },
-  { id: "arr3", label: "Concentrado", icon: "🧪" },
-  { id: "arr4", label: "Diluído / Pronto a Usar", icon: "✅" },
-  { id: "arr5", label: "Aditivos de Arrefecimento", icon: "🔧" },
-];
+// Removed - now shows products directly
 
 export const oleosMotorSubSubCategories: Category[] = [
   { id: "om1", label: "5W-30", icon: "🛢️" },
