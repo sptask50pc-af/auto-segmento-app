@@ -26,6 +26,7 @@ const App = () => (
             <Route path="/promotions" element={<Promotions />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/subcategories/:category" element={<SubCategories />} />
+            <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

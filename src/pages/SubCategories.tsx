@@ -9,15 +9,33 @@ import {
   desempenhoUpgradeSubCategories,
   eletricaSubCategories,
   universalSubCategories,
-  sinaleticaSegurancaSubCategories
+  sinaleticaSegurancaSubCategories,
+  carrocariaSubSubCategories,
+  travagemSubSubCategories,
+  filtrosSubSubCategories,
+  suspensaoDirecaoSubSubCategories,
+  motorSubSubCategories,
+  sistemaEscapeSubSubCategories
 } from "@/data/mockData";
-import { Home } from "lucide-react";
+import { Home, ChevronLeft } from "lucide-react";
 
 const SubCategories = () => {
-  const { category } = useParams<{ category: string }>();
+  const { category, subcategory } = useParams<{ category: string; subcategory?: string }>();
   const navigate = useNavigate();
 
   const getSubCategories = () => {
+    // Handle sub-subcategories (third level)
+    if (subcategory) {
+      if (subcategory === "carrocaria") return { name: "Carroçaria", items: carrocariaSubSubCategories, parent: "pecas" };
+      if (subcategory === "travagem") return { name: "Travagem", items: travagemSubSubCategories, parent: "pecas" };
+      if (subcategory === "filtros") return { name: "Filtros", items: filtrosSubSubCategories, parent: "pecas" };
+      if (subcategory === "suspensao-direcao") return { name: "Suspensão e Direção", items: suspensaoDirecaoSubSubCategories, parent: "pecas" };
+      if (subcategory === "motor") return { name: "Motor", items: motorSubSubCategories, parent: "pecas" };
+      if (subcategory === "sistema-escape") return { name: "Sistema de Escape", items: sistemaEscapeSubSubCategories, parent: "pecas" };
+      return null;
+    }
+
+    // Handle main subcategories (second level)
     if (category === "pecas") return { name: "Peças", items: pecasSubCategories };
     if (category === "lubrificantes") return { name: "Lubrificantes", items: lubrificantesSubCategories };
     if (category === "acessorios") return { name: "Acessórios", items: acessoriosSubCategories };
@@ -27,6 +45,17 @@ const SubCategories = () => {
     if (category === "universal") return { name: "Universal", items: universalSubCategories };
     if (category === "sinaletica-seguranca") return { name: "Sinalética e Segurança", items: sinaleticaSegurancaSubCategories };
     return null;
+  };
+
+  const handleSubCategoryClick = (label: string) => {
+    if (category === "pecas" && !subcategory) {
+      if (label === "Carroçaria") navigate("/subcategories/pecas/carrocaria");
+      else if (label === "Travagem") navigate("/subcategories/pecas/travagem");
+      else if (label === "Filtros") navigate("/subcategories/pecas/filtros");
+      else if (label === "Suspensão e Direção") navigate("/subcategories/pecas/suspensao-direcao");
+      else if (label === "Motor") navigate("/subcategories/pecas/motor");
+      else if (label === "Sistema de Escape") navigate("/subcategories/pecas/sistema-escape");
+    }
   };
 
   const data = getSubCategories();
@@ -43,18 +72,36 @@ const SubCategories = () => {
     );
   }
 
+  const isThirdLevel = !!subcategory;
+  const isPecasSecondLevel = category === "pecas" && !subcategory;
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <Header title={data.name} />
 
       <main className="container px-4 py-6 space-y-6">
-        {/* Back to home button */}
+        {/* Back button */}
         <button
-          onClick={() => navigate("/")}
+          onClick={() => {
+            if (isThirdLevel && 'parent' in data) {
+              navigate(`/subcategories/${data.parent}`);
+            } else {
+              navigate("/");
+            }
+          }}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <Home className="w-4 h-4" />
-          <span>Voltar às categorias</span>
+          {isThirdLevel ? (
+            <>
+              <ChevronLeft className="w-4 h-4" />
+              <span>Voltar</span>
+            </>
+          ) : (
+            <>
+              <Home className="w-4 h-4" />
+              <span>Voltar às categorias</span>
+            </>
+          )}
         </button>
 
         {/* Sub-categories grid */}
@@ -62,10 +109,11 @@ const SubCategories = () => {
           {data.items.map((item, i) => (
             <div
               key={item.id}
-              className="flex flex-col items-center gap-2 cursor-pointer animate-fade-in"
+              onClick={() => handleSubCategoryClick(item.label)}
+              className={`flex flex-col items-center gap-2 animate-fade-in ${isPecasSecondLevel ? 'cursor-pointer' : ''}`}
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className="w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center text-2xl hover:border-primary/50 transition-colors">
+              <div className={`w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center text-2xl transition-colors ${isPecasSecondLevel ? 'hover:border-primary/50' : ''}`}>
                 {item.icon}
               </div>
               <span className="text-xs text-center text-muted-foreground">{item.label}</span>

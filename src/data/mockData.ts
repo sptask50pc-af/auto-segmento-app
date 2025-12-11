@@ -45,6 +45,85 @@ export const pecasSubCategories: Category[] = [
   { id: "p6", label: "Sistema de Escape", icon: "💨" },
 ];
 
+export const carrocariaSubSubCategories: Category[] = [
+  { id: "car1", label: "Discos", icon: "⚫" },
+  { id: "car2", label: "Pastilhas de Travão", icon: "🔲" },
+  { id: "car3", label: "Maxilas / Calços de Tambor", icon: "🔧" },
+  { id: "car4", label: "Tambores de Travão", icon: "🥁" },
+  { id: "car5", label: "Pinças de Travão & Reparações", icon: "🔩" },
+  { id: "car6", label: "Bombas de Travão", icon: "💧" },
+  { id: "car7", label: "Servofreio (Hidrovácuo)", icon: "⚙️" },
+  { id: "car8", label: "Bombitos / Cilindros de Roda", icon: "🔘" },
+  { id: "car9", label: "Sensores ABS / Velocidade", icon: "📡" },
+  { id: "car10", label: "Tubos & Mangueiras de Travão", icon: "🔌" },
+  { id: "car11", label: "Óleo / Líquido de Travões", icon: "🛢️" },
+  { id: "car12", label: "Chapas de Proteção / Deflectores", icon: "🛡️" },
+  { id: "car13", label: "Parafusos & Acessórios", icon: "🔩" },
+  { id: "car14", label: "Kits de Travagem", icon: "📦" },
+];
+
+export const travagemSubSubCategories: Category[] = [
+  { id: "trav1", label: "Discos", icon: "⚫" },
+  { id: "trav2", label: "Pastilhas de Travão", icon: "🔲" },
+  { id: "trav3", label: "Maxilas / Calços de Tambor", icon: "🔧" },
+  { id: "trav4", label: "Tambores de Travão", icon: "🥁" },
+  { id: "trav5", label: "Pinças de Travão & Reparações", icon: "🔩" },
+  { id: "trav6", label: "Bombas de Travão", icon: "💧" },
+  { id: "trav7", label: "Servofreio (Hidrovácuo)", icon: "⚙️" },
+  { id: "trav8", label: "Bombitos / Cilindros de Roda", icon: "🔘" },
+  { id: "trav9", label: "Sensores ABS / Velocidade", icon: "📡" },
+  { id: "trav10", label: "Tubos & Mangueiras de Travão", icon: "🔌" },
+  { id: "trav11", label: "Óleo / Líquido de Travões", icon: "🛢️" },
+  { id: "trav12", label: "Chapas de Proteção / Deflectores", icon: "🛡️" },
+  { id: "trav13", label: "Parafusos & Acessórios", icon: "🔩" },
+  { id: "trav14", label: "Kits de Travagem", icon: "📦" },
+];
+
+export const filtrosSubSubCategories: Category[] = [
+  { id: "filt1", label: "Filtros de Óleo", icon: "🛢️" },
+  { id: "filt2", label: "Filtros de Ar", icon: "💨" },
+  { id: "filt3", label: "Filtros de Habitáculo (Pólen)", icon: "🌸" },
+  { id: "filt4", label: "Filtros de Combustível", icon: "⛽" },
+  { id: "filt5", label: "Filtros de Caixa de Velocidades", icon: "⚙️" },
+  { id: "filt6", label: "Filtros Hidráulicos", icon: "💧" },
+  { id: "filt7", label: "Filtros de Partículas (DPF/FAP)", icon: "🔘" },
+  { id: "filt8", label: "Filtros de Transmissão / Diferencial", icon: "🔧" },
+];
+
+export const suspensaoDirecaoSubSubCategories: Category[] = [
+  { id: "susp1", label: "Amortecedores", icon: "🔩" },
+  { id: "susp2", label: "Molas de Suspensão", icon: "🌀" },
+  { id: "susp3", label: "Topos de Amortecedor & Rolamentos", icon: "⚙️" },
+  { id: "susp4", label: "Braços de Suspensão", icon: "🦾" },
+  { id: "susp5", label: "Rótulas de Suspensão", icon: "🔘" },
+  { id: "susp6", label: "Barras Estabilizadoras & Tirantes", icon: "➖" },
+  { id: "susp7", label: "Casquilhos de Suspensão", icon: "🔧" },
+  { id: "susp8", label: "Colunas de Direção", icon: "🔌" },
+  { id: "susp9", label: "Caixas de Direção", icon: "📦" },
+  { id: "susp10", label: "Bombas de Direção Assistida", icon: "💧" },
+  { id: "susp11", label: "Rótulas de Direção / Terminais", icon: "🔘" },
+  { id: "susp12", label: "Volantes de Direção", icon: "🎡" },
+  { id: "susp13", label: "Servodireção Elétrica / Motores EPS", icon: "⚡" },
+  { id: "susp14", label: "Kits de Suspensão & Direção", icon: "📦" },
+];
+
+export const motorSubSubCategories: Category[] = [
+  { id: "mot1", label: "Correias", icon: "🔄" },
+  { id: "mot2", label: "Tensores & Rolamentos", icon: "⚙️" },
+  { id: "mot3", label: "Bombas de Água", icon: "💧" },
+  { id: "mot4", label: "Termóstatos", icon: "🌡️" },
+  { id: "mot5", label: "Juntas & Vedantes", icon: "🔲" },
+  { id: "mot6", label: "Válvulas", icon: "🔧" },
+  { id: "mot7", label: "Pistões & Segmentos", icon: "🔘" },
+  { id: "mot8", label: "Árvore de Cames", icon: "🔩" },
+];
+
+export const sistemaEscapeSubSubCategories: Category[] = [
+  { id: "esc1", label: "Flexível de Escape", icon: "🔌" },
+  { id: "esc2", label: "Uniões de Escape", icon: "🔗" },
+  { id: "esc3", label: "Braçadeiras de Escape", icon: "🔧" },
+];
+
 export const lubrificantesSubCategories: Category[] = [
   { id: "l1", label: "Óleos de Motor", icon: "🛢️" },
   { id: "l2", label: "Óleos de Transmissão & Diferencial", icon: "⚙️" },
