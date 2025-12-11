@@ -27,12 +27,22 @@ export const categories: Category[] = [
 
 export const mainCategories: Category[] = [
   { id: "1", label: "Peças", icon: "🔧" },
-  { id: "2", label: "Carroçaria", icon: "🚗" },
-  { id: "3", label: "Travagem", icon: "🛞" },
-  { id: "4", label: "Filtros", icon: "🛢️" },
-  { id: "5", label: "Suspensão e Direção", icon: "⚙️" },
-  { id: "6", label: "Motor", icon: "🔩" },
-  { id: "7", label: "Sistema de Escape", icon: "💨" },
+  { id: "2", label: "Lubrificantes", icon: "🛢️" },
+  { id: "3", label: "Acessórios", icon: "🎯" },
+  { id: "4", label: "Cuidado e Detalhe", icon: "✨" },
+  { id: "5", label: "Desempenho e Upgrade", icon: "⚡" },
+  { id: "6", label: "Elétrica", icon: "🔌" },
+  { id: "7", label: "Universal", icon: "🔩" },
+  { id: "8", label: "Sinalética e Segurança", icon: "⚠️" },
+];
+
+export const pecasSubCategories: Category[] = [
+  { id: "p1", label: "Carroçaria", icon: "🚗" },
+  { id: "p2", label: "Travagem", icon: "🛞" },
+  { id: "p3", label: "Filtros", icon: "🛢️" },
+  { id: "p4", label: "Suspensão e Direção", icon: "⚙️" },
+  { id: "p5", label: "Motor", icon: "🔩" },
+  { id: "p6", label: "Sistema de Escape", icon: "💨" },
 ];
 
 export const initialProducts: Product[] = [
