@@ -199,41 +199,16 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
   return products;
 }
 
-// Category URLs to scrape for comprehensive product coverage
+// Reduced category URLs to stay within rate limits
 const CATEGORY_URLS = [
-  '/lubrificantes',
+  '/lubrificantes/liquidos-de-arrefecimento',
   '/lubrificantes/oleos-de-motor',
   '/lubrificantes/oleos-de-transmissao',
-  '/lubrificantes/oleos-hidraulicos',
-  '/lubrificantes/oleos-especiais',
   '/lubrificantes/liquidos-de-travoes',
-  '/lubrificantes/liquidos-de-arrefecimento',
-  '/lubrificantes/aditivos-de-oleo',
-  '/lubrificantes/aditivos-de-combustivel',
   '/cuidado-detalhe',
-  '/cuidado-detalhe/shampoos-limpeza',
-  '/cuidado-detalhe/ceras-selantes',
-  '/cuidado-detalhe/polimento-correcao',
-  '/cuidado-detalhe/exterior',
-  '/cuidado-detalhe/interiores',
-  '/cuidado-detalhe/vidros-espelhos',
-  '/cuidado-detalhe/panos-acessorios',
-  '/cuidado-detalhe/odorizantes',
-  '/eletrica',
-  '/eletrica/baterias',
-  '/eletrica/iluminacao-lampadas',
-  '/eletrica/fusiveis-reles',
-  '/eletrica/cablagens-conectores',
-  '/pecas',
   '/pecas/filtros',
   '/pecas/travagem',
-  '/pecas/suspensao-direcao',
-  '/pecas/motor',
-  '/pecas/sistema-escape',
-  '/acessorios',
-  '/desempenho-upgrade',
-  '/universal',
-  '/sinaletica-seguranca',
+  '/eletrica',
 ];
 
 serve(async (req) => {
@@ -256,7 +231,7 @@ serve(async (req) => {
     const allProducts: ScrapedProduct[] = [];
     const seenProducts = new Set<string>();
     
-    // Scrape each category page
+    // Scrape each category page with delays to avoid rate limiting
     for (const categoryPath of CATEGORY_URLS) {
       try {
         const categoryUrl = BASE_URL + categoryPath;
@@ -276,8 +251,8 @@ serve(async (req) => {
         
         console.log(`Category ${categoryPath}: found ${products.length} products (total unique: ${allProducts.length})`);
         
-        // Small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Longer delay to avoid rate limiting (2 seconds between requests)
+        await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (categoryError) {
         console.error(`Error scraping category ${categoryPath}:`, categoryError);
         // Continue with other categories even if one fails
