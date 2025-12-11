@@ -146,6 +146,10 @@ export const acessoriosSubCategories: Category[] = [
   { id: "a4", label: "Conforto & Utilitários", icon: "💺" },
 ];
 
+export const multimediaEletronicaSubSubCategories: Category[] = [
+  { id: "mult1", label: "Pilhas", icon: "🔋" },
+];
+
 export const cuidadoDetalheSubCategories: Category[] = [
   { id: "c1", label: "Shampoos & Limpeza", icon: "🧴" },
   { id: "c2", label: "Ceras & Selantes", icon: "✨" },

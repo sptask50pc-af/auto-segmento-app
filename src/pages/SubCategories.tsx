@@ -16,7 +16,8 @@ import {
   suspensaoDirecaoSubSubCategories,
   motorSubSubCategories,
   sistemaEscapeSubSubCategories,
-  spraysManutencaoSubSubCategories
+  spraysManutencaoSubSubCategories,
+  multimediaEletronicaSubSubCategories
 } from "@/data/mockData";
 import { Home, ChevronLeft } from "lucide-react";
 
@@ -36,6 +37,8 @@ const SubCategories = () => {
       if (subcategory === "sistema-escape") return { name: "Sistema de Escape", items: sistemaEscapeSubSubCategories, parent: "pecas" };
       // Lubrificantes sub-subcategories
       if (subcategory === "sprays-manutencao") return { name: "Sprays & Manutenção", items: spraysManutencaoSubSubCategories, parent: "lubrificantes" };
+      // Acessórios sub-subcategories
+      if (subcategory === "multimedia-eletronica") return { name: "Multimédia & Eletrónica", items: multimediaEletronicaSubSubCategories, parent: "acessorios" };
       return null;
     }
 
@@ -63,6 +66,9 @@ const SubCategories = () => {
     if (category === "lubrificantes" && !subcategory) {
       if (label === "Sprays & Manutenção") navigate("/subcategories/lubrificantes/sprays-manutencao");
     }
+    if (category === "acessorios" && !subcategory) {
+      if (label === "Multimédia & Eletrónica") navigate("/subcategories/acessorios/multimedia-eletronica");
+    }
   };
 
   const data = getSubCategories();
@@ -82,7 +88,8 @@ const SubCategories = () => {
   const isThirdLevel = !!subcategory;
   const isPecasSecondLevel = category === "pecas" && !subcategory;
   const isLubrificantesSecondLevel = category === "lubrificantes" && !subcategory;
-  const hasClickableItems = isPecasSecondLevel || isLubrificantesSecondLevel;
+  const isAcessoriosSecondLevel = category === "acessorios" && !subcategory;
+  const hasClickableItems = isPecasSecondLevel || isLubrificantesSecondLevel || isAcessoriosSecondLevel;
 
   return (
     <div className="min-h-screen bg-background pb-20">
