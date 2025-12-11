@@ -15,7 +15,8 @@ import {
   filtrosSubSubCategories,
   suspensaoDirecaoSubSubCategories,
   motorSubSubCategories,
-  sistemaEscapeSubSubCategories
+  sistemaEscapeSubSubCategories,
+  spraysManutencaoSubSubCategories
 } from "@/data/mockData";
 import { Home, ChevronLeft } from "lucide-react";
 
@@ -26,12 +27,15 @@ const SubCategories = () => {
   const getSubCategories = () => {
     // Handle sub-subcategories (third level)
     if (subcategory) {
+      // Peças sub-subcategories
       if (subcategory === "carrocaria") return { name: "Carroçaria", items: carrocariaSubSubCategories, parent: "pecas" };
       if (subcategory === "travagem") return { name: "Travagem", items: travagemSubSubCategories, parent: "pecas" };
       if (subcategory === "filtros") return { name: "Filtros", items: filtrosSubSubCategories, parent: "pecas" };
       if (subcategory === "suspensao-direcao") return { name: "Suspensão e Direção", items: suspensaoDirecaoSubSubCategories, parent: "pecas" };
       if (subcategory === "motor") return { name: "Motor", items: motorSubSubCategories, parent: "pecas" };
       if (subcategory === "sistema-escape") return { name: "Sistema de Escape", items: sistemaEscapeSubSubCategories, parent: "pecas" };
+      // Lubrificantes sub-subcategories
+      if (subcategory === "sprays-manutencao") return { name: "Sprays & Manutenção", items: spraysManutencaoSubSubCategories, parent: "lubrificantes" };
       return null;
     }
 
@@ -56,6 +60,9 @@ const SubCategories = () => {
       else if (label === "Motor") navigate("/subcategories/pecas/motor");
       else if (label === "Sistema de Escape") navigate("/subcategories/pecas/sistema-escape");
     }
+    if (category === "lubrificantes" && !subcategory) {
+      if (label === "Sprays & Manutenção") navigate("/subcategories/lubrificantes/sprays-manutencao");
+    }
   };
 
   const data = getSubCategories();
@@ -74,6 +81,8 @@ const SubCategories = () => {
 
   const isThirdLevel = !!subcategory;
   const isPecasSecondLevel = category === "pecas" && !subcategory;
+  const isLubrificantesSecondLevel = category === "lubrificantes" && !subcategory;
+  const hasClickableItems = isPecasSecondLevel || isLubrificantesSecondLevel;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -110,10 +119,10 @@ const SubCategories = () => {
             <div
               key={item.id}
               onClick={() => handleSubCategoryClick(item.label)}
-              className={`flex flex-col items-center gap-2 animate-fade-in ${isPecasSecondLevel ? 'cursor-pointer' : ''}`}
+              className={`flex flex-col items-center gap-2 animate-fade-in ${hasClickableItems ? 'cursor-pointer' : ''}`}
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className={`w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center text-2xl transition-colors ${isPecasSecondLevel ? 'hover:border-primary/50' : ''}`}>
+              <div className={`w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center text-2xl transition-colors ${hasClickableItems ? 'hover:border-primary/50' : ''}`}>
                 {item.icon}
               </div>
               <span className="text-xs text-center text-muted-foreground">{item.label}</span>
