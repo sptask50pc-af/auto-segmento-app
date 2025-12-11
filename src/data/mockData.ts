@@ -127,6 +127,14 @@ export const spraysManutencaoSubSubCategories: Category[] = [
   { id: "spray3", label: "Massas/Pastas", icon: "🧈" },
 ];
 
+export const liquidosArrefecimentoSubSubCategories: Category[] = [
+  { id: "arr1", label: "Anticongelantes", icon: "❄️" },
+  { id: "arr2", label: "Líquido de Radiador", icon: "💧" },
+  { id: "arr3", label: "Concentrado", icon: "🧪" },
+  { id: "arr4", label: "Diluído / Pronto a Usar", icon: "✅" },
+  { id: "arr5", label: "Aditivos de Arrefecimento", icon: "🔧" },
+];
+
 export const lubrificantesSubCategories: Category[] = [
   { id: "l1", label: "Óleos de Motor", icon: "🛢️" },
   { id: "l2", label: "Óleos de Transmissão & Diferencial", icon: "⚙️" },

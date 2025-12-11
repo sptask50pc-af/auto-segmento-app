@@ -17,7 +17,8 @@ import {
   motorSubSubCategories,
   sistemaEscapeSubSubCategories,
   spraysManutencaoSubSubCategories,
-  multimediaEletronicaSubSubCategories
+  multimediaEletronicaSubSubCategories,
+  liquidosArrefecimentoSubSubCategories
 } from "@/data/mockData";
 import { Home, ChevronLeft } from "lucide-react";
 
@@ -37,6 +38,7 @@ const SubCategories = () => {
       if (subcategory === "sistema-escape") return { name: "Sistema de Escape", items: sistemaEscapeSubSubCategories, parent: "pecas" };
       // Lubrificantes sub-subcategories
       if (subcategory === "sprays-manutencao") return { name: "Sprays & Manutenção", items: spraysManutencaoSubSubCategories, parent: "lubrificantes" };
+      if (subcategory === "liquidos-arrefecimento") return { name: "Líquidos de Arrefecimento", items: liquidosArrefecimentoSubSubCategories, parent: "lubrificantes" };
       // Acessórios sub-subcategories
       if (subcategory === "multimedia-eletronica") return { name: "Multimédia & Eletrónica", items: multimediaEletronicaSubSubCategories, parent: "acessorios" };
       return null;
@@ -65,6 +67,7 @@ const SubCategories = () => {
     }
     if (category === "lubrificantes" && !subcategory) {
       if (label === "Sprays & Manutenção") navigate("/subcategories/lubrificantes/sprays-manutencao");
+      if (label === "Líquidos de Arrefecimento") navigate("/subcategories/lubrificantes/liquidos-arrefecimento");
     }
     if (category === "acessorios" && !subcategory) {
       if (label === "Multimédia & Eletrónica") navigate("/subcategories/acessorios/multimedia-eletronica");
