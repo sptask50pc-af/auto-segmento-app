@@ -45,6 +45,18 @@ export const pecasSubCategories: Category[] = [
   { id: "p6", label: "Sistema de Escape", icon: "💨" },
 ];
 
+export const lubrificantesSubCategories: Category[] = [
+  { id: "l1", label: "Óleos de Motor", icon: "🛢️" },
+  { id: "l2", label: "Óleos de Transmissão & Diferencial", icon: "⚙️" },
+  { id: "l3", label: "Óleos Hidráulicos & Direção Assistida", icon: "💧" },
+  { id: "l4", label: "Líquidos de Travões", icon: "🛞" },
+  { id: "l5", label: "Líquidos de Arrefecimento", icon: "❄️" },
+  { id: "l6", label: "Aditivos de Combustível", icon: "⛽" },
+  { id: "l7", label: "Aditivos de Óleo", icon: "🔧" },
+  { id: "l8", label: "Sprays & Manutenção", icon: "💨" },
+  { id: "l9", label: "Óleos Especiais", icon: "✨" },
+];
+
 export const initialProducts: Product[] = [
   {
     id: "1",
