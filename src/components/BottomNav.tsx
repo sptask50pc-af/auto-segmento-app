@@ -1,12 +1,10 @@
 import * as React from "react";
-import { Home, Package, Settings, Tag } from "lucide-react";
+import { Home, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: Home, label: "Início", path: "/" },
-  { icon: Tag, label: "Promoções", path: "/promotions" },
-  { icon: Package, label: "Produtos", path: "/products" },
   { icon: Settings, label: "Admin", path: "/admin" },
 ];
 
