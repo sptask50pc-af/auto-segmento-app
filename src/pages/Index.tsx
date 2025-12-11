@@ -10,6 +10,9 @@ const Index = () => {
   const handleCategoryClick = (label: string) => {
     if (label === "Peças") navigate("/subcategories/pecas");
     else if (label === "Lubrificantes") navigate("/subcategories/lubrificantes");
+    else if (label === "Acessórios") navigate("/subcategories/acessorios");
+    else if (label === "Cuidado e Detalhe") navigate("/subcategories/cuidado-detalhe");
+    else if (label === "Desempenho e Upgrade") navigate("/subcategories/desempenho-upgrade");
   };
 
   return (
@@ -24,7 +27,7 @@ const Index = () => {
           {/* Grid of main categories */}
           <div className="grid grid-cols-4 gap-4">
             {mainCategories.map((category) => {
-              const hasSubCategories = category.label === "Peças" || category.label === "Lubrificantes";
+              const hasSubCategories = category.label === "Peças" || category.label === "Lubrificantes" || category.label === "Acessórios" || category.label === "Cuidado e Detalhe" || category.label === "Desempenho e Upgrade";
               
               return (
                 <div
