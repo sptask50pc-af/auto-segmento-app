@@ -266,7 +266,7 @@ const SubCategories = () => {
               className={`flex flex-col items-center gap-2 animate-fade-in ${hasClickableItems ? 'cursor-pointer' : ''}`}
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className={`w-16 h-16 rounded-full bg-card border border-border flex items-center justify-center text-2xl transition-colors ${hasClickableItems ? 'hover:border-primary/50' : ''}`}>
+              <div className={`w-20 h-20 rounded-lg bg-card border border-border flex items-center justify-center text-3xl transition-colors ${hasClickableItems ? 'hover:border-primary/50' : ''}`}>
                 {item.icon}
               </div>
               <span className="text-xs text-center text-muted-foreground">{item.label}</span>
