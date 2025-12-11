@@ -5,17 +5,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Categories to scrape from segmentopositivo.pt
-const CATEGORIES = [
-  { url: 'https://www.segmentopositivo.pt/pecas', category: 'Peças' },
-  { url: 'https://www.segmentopositivo.pt/lubrificantes', category: 'Lubrificantes' },
-  { url: 'https://www.segmentopositivo.pt/acessorios', category: 'Acessórios' },
-  { url: 'https://www.segmentopositivo.pt/cuidado-e-detalhe', category: 'Cuidado e Detalhe' },
-  { url: 'https://www.segmentopositivo.pt/desempenho-e-upgrade', category: 'Desempenho e Upgrade' },
-  { url: 'https://www.segmentopositivo.pt/electrica', category: 'Elétrica' },
-  { url: 'https://www.segmentopositivo.pt/universal', category: 'Universal' },
-  { url: 'https://www.segmentopositivo.pt/sinaletica-e-seguranca', category: 'Sinalética e Segurança' },
-];
+// Admin panel URL for product listing
+const ADMIN_URL = 'https://www.segmentopositivo.pt/adminloja/index.php/sell/catalog/products?_token=b2rr8ahBFUB0r-_5ro5TzkBUQX_iRMCxqHjQnNoppP0';
 
 interface ScrapedProduct {
   name: string;
@@ -41,7 +32,7 @@ async function scrapeWithFirecrawl(url: string, apiKey: string): Promise<string>
       url,
       formats: ['html', 'markdown'],
       onlyMainContent: false,
-      waitFor: 2000,
+      waitFor: 3000,
     }),
   });
 
@@ -52,68 +43,87 @@ async function scrapeWithFirecrawl(url: string, apiKey: string): Promise<string>
   }
 
   const data = await response.json();
+  console.log('Firecrawl response received, HTML length:', (data.data?.html || '').length);
   return data.data?.html || data.data?.markdown || '';
 }
 
-function parseProductsFromHtml(html: string, categoryName: string, sourceUrl: string): ScrapedProduct[] {
+function parseProductsFromAdminHtml(html: string): ScrapedProduct[] {
   const products: ScrapedProduct[] = [];
   
-  // Try to find product listings in the HTML
-  // Common patterns for e-commerce sites
+  console.log('Parsing admin panel HTML, length:', html.length);
   
-  // Pattern 1: Look for product cards with price and name
-  const productPatterns = [
-    // WooCommerce style
-    /<li[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
-    // Generic product cards
-    /<div[^>]*class="[^"]*product-card[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/gi,
-    /<article[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/article>/gi,
-    // Grid items
-    /<div[^>]*class="[^"]*grid-item[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,
+  // Admin panels typically use tables - look for table rows
+  const tableRowPatterns = [
+    /<tr[^>]*>([\s\S]*?)<\/tr>/gi,
   ];
 
-  let productMatches: string[] = [];
-  for (const pattern of productPatterns) {
+  let rows: string[] = [];
+  for (const pattern of tableRowPatterns) {
     const matches = html.match(pattern);
-    if (matches && matches.length > 0) {
-      productMatches = matches;
+    if (matches && matches.length > 1) {
+      // Skip header row
+      rows = matches.slice(1);
       break;
     }
   }
 
-  console.log(`Found ${productMatches.length} potential product blocks in ${categoryName}`);
+  console.log(`Found ${rows.length} table rows`);
 
-  for (const productHtml of productMatches.slice(0, 100)) {
+  // Also try to find product data in other formats (grid, list, etc.)
+  if (rows.length === 0) {
+    // Try product cards/items
+    const productPatterns = [
+      /<div[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi,
+      /<article[^>]*>([\s\S]*?)<\/article>/gi,
+      /<li[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
+    ];
+    
+    for (const pattern of productPatterns) {
+      const matches = html.match(pattern);
+      if (matches && matches.length > 0) {
+        rows = matches;
+        console.log(`Found ${rows.length} product items with pattern`);
+        break;
+      }
+    }
+  }
+
+  // Parse each row/item
+  for (const rowHtml of rows.slice(0, 500)) {
     try {
-      // Extract product name
+      // Extract product name from various patterns
       const namePatterns = [
-        /<h[1-6][^>]*class="[^"]*(?:title|name|product-title|woocommerce-loop-product__title)[^"]*"[^>]*>([^<]+)/i,
-        /<a[^>]*class="[^"]*(?:title|name|product-title)[^"]*"[^>]*>([^<]+)/i,
-        /<a[^>]*title="([^"]+)"/i,
-        /data-product-name="([^"]+)"/i,
-        /<span[^>]*class="[^"]*product-name[^"]*"[^>]*>([^<]+)/i,
+        /<td[^>]*>([^<]{3,100})<\/td>/i,
+        /<a[^>]*>([^<]{3,100})<\/a>/i,
+        /title="([^"]{3,100})"/i,
+        /<span[^>]*class="[^"]*name[^"]*"[^>]*>([^<]+)/i,
+        /<h[1-6][^>]*>([^<]+)<\/h[1-6]>/i,
       ];
 
       let name = '';
       for (const pattern of namePatterns) {
-        const match = productHtml.match(pattern);
-        if (match) {
+        const match = rowHtml.match(pattern);
+        if (match && match[1].trim().length > 2) {
           name = match[1].trim();
-          break;
+          // Skip if it looks like a header or action
+          if (!name.toLowerCase().includes('action') && 
+              !name.toLowerCase().includes('editar') &&
+              !name.toLowerCase().includes('apagar')) {
+            break;
+          }
+          name = '';
         }
       }
 
       // Extract image
       const imagePatterns = [
-        /<img[^>]*src="([^"]+)"[^>]*class="[^"]*(?:product|attachment)[^"]*"/i,
-        /<img[^>]*class="[^"]*(?:product|attachment)[^"]*"[^>]*src="([^"]+)"/i,
-        /data-src="([^"]+\.(?:jpg|jpeg|png|webp|gif))"/i,
-        /<img[^>]*src="([^"]+\.(?:jpg|jpeg|png|webp|gif))"/i,
+        /src="([^"]+\.(?:jpg|jpeg|png|webp|gif)[^"]*)"/i,
+        /data-src="([^"]+\.(?:jpg|jpeg|png|webp|gif)[^"]*)"/i,
       ];
 
       let image = '/placeholder.svg';
       for (const pattern of imagePatterns) {
-        const match = productHtml.match(pattern);
+        const match = rowHtml.match(pattern);
         if (match) {
           image = match[1];
           break;
@@ -124,44 +134,48 @@ function parseProductsFromHtml(html: string, categoryName: string, sourceUrl: st
       const pricePatterns = [
         /(\d+[.,]\d{2})\s*€/,
         /€\s*(\d+[.,]\d{2})/,
-        /class="[^"]*price[^"]*"[^>]*>[^€]*€?\s*(\d+[.,]\d{2})/i,
-        /data-price="(\d+[.,]?\d*)"/i,
-        /<span[^>]*class="[^"]*amount[^"]*"[^>]*>(\d+[.,]\d{2})/i,
+        />(\d+[.,]\d{2})</,
+        /price[^>]*>(\d+[.,]\d{2})/i,
       ];
 
       let price = 0;
       for (const pattern of pricePatterns) {
-        const match = productHtml.match(pattern);
+        const match = rowHtml.match(pattern);
         if (match) {
           price = parseFloat(match[1].replace(',', '.'));
-          break;
+          if (price > 0) break;
         }
       }
 
+      // Extract category if available
+      const categoryMatch = rowHtml.match(/category[^>]*>([^<]+)/i) ||
+                           rowHtml.match(/data-category="([^"]+)"/i);
+      const category = categoryMatch ? categoryMatch[1].trim() : 'Geral';
+
       // Check stock status
-      const outOfStock = productHtml.toLowerCase().includes('esgotado') || 
-                        productHtml.toLowerCase().includes('out of stock') ||
-                        productHtml.toLowerCase().includes('indisponível') ||
-                        productHtml.includes('class="outofstock"');
+      const inStock = !rowHtml.toLowerCase().includes('esgotado') && 
+                     !rowHtml.toLowerCase().includes('out of stock') &&
+                     !rowHtml.toLowerCase().includes('indisponível') &&
+                     !rowHtml.includes('inactive');
 
       // Extract brand if available
-      const brandMatch = productHtml.match(/data-brand="([^"]+)"/i) ||
-                        productHtml.match(/<span[^>]*class="[^"]*brand[^"]*"[^>]*>([^<]+)/i);
+      const brandMatch = rowHtml.match(/brand[^>]*>([^<]+)/i) ||
+                        rowHtml.match(/data-brand="([^"]+)"/i);
       const brand = brandMatch ? brandMatch[1].trim() : 'Segmento Positivo';
 
       if (name && name.length > 2) {
         products.push({
           name,
           brand,
-          category: categoryName,
+          category,
           price,
           image,
-          inStock: !outOfStock,
-          sourceUrl,
+          inStock,
+          sourceUrl: ADMIN_URL,
         });
       }
     } catch (e) {
-      console.error('Error parsing product:', e);
+      console.error('Error parsing product row:', e);
     }
   }
 
@@ -183,36 +197,19 @@ serve(async (req) => {
       );
     }
 
-    console.log('Starting product scrape from segmentopositivo.pt with Firecrawl');
+    console.log('Starting product scrape from admin panel with Firecrawl');
     
-    const allProducts: ScrapedProduct[] = [];
-    const errors: string[] = [];
+    const html = await scrapeWithFirecrawl(ADMIN_URL, apiKey);
+    const products = parseProductsFromAdminHtml(html);
     
-    for (const { url, category } of CATEGORIES) {
-      try {
-        const html = await scrapeWithFirecrawl(url, apiKey);
-        const products = parseProductsFromHtml(html, category, url);
-        allProducts.push(...products);
-        console.log(`Scraped ${products.length} products from ${category}`);
-        
-        // Small delay between requests
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-        console.error(`Error scraping ${category}:`, errorMsg);
-        errors.push(`${category}: ${errorMsg}`);
-      }
-    }
-
-    console.log(`Total products scraped: ${allProducts.length}`);
+    console.log(`Total products scraped: ${products.length}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        products: allProducts,
+        products,
         timestamp: new Date().toISOString(),
-        message: `Scraped ${allProducts.length} products from ${CATEGORIES.length} categories`,
-        errors: errors.length > 0 ? errors : undefined,
+        message: `Scraped ${products.length} products from admin panel`,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
