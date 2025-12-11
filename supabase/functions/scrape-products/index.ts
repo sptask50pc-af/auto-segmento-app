@@ -28,124 +28,180 @@ interface ScrapedProduct {
   sourceUrl: string;
 }
 
-async function scrapeCategory(categoryUrl: string, categoryName: string): Promise<ScrapedProduct[]> {
+async function scrapeWithFirecrawl(url: string, apiKey: string): Promise<string> {
+  console.log(`Scraping ${url} with Firecrawl...`);
+  
+  const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      url,
+      formats: ['html', 'markdown'],
+      onlyMainContent: false,
+      waitFor: 2000,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Firecrawl error for ${url}:`, response.status, errorText);
+    throw new Error(`Firecrawl error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.data?.html || data.data?.markdown || '';
+}
+
+function parseProductsFromHtml(html: string, categoryName: string, sourceUrl: string): ScrapedProduct[] {
   const products: ScrapedProduct[] = [];
   
-  try {
-    console.log(`Scraping category: ${categoryName} from ${categoryUrl}`);
-    
-    const response = await fetch(categoryUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'pt-PT,pt;q=0.9,en;q=0.8',
-      },
-    });
+  // Try to find product listings in the HTML
+  // Common patterns for e-commerce sites
+  
+  // Pattern 1: Look for product cards with price and name
+  const productPatterns = [
+    // WooCommerce style
+    /<li[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/li>/gi,
+    // Generic product cards
+    /<div[^>]*class="[^"]*product-card[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/gi,
+    /<article[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/article>/gi,
+    // Grid items
+    /<div[^>]*class="[^"]*grid-item[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,
+  ];
 
-    if (!response.ok) {
-      console.error(`Failed to fetch ${categoryUrl}: ${response.status}`);
-      return products;
+  let productMatches: string[] = [];
+  for (const pattern of productPatterns) {
+    const matches = html.match(pattern);
+    if (matches && matches.length > 0) {
+      productMatches = matches;
+      break;
     }
+  }
 
-    const html = await response.text();
-    
-    // Extract product data using regex patterns
-    // Look for product cards/items in the HTML
-    const productPattern = /<div[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi;
-    const namePattern = /<h[23][^>]*class="[^"]*product[^"]*title[^"]*"[^>]*>([^<]+)<\/h[23]>/i;
-    const pricePattern = /(?:€|EUR)\s*(\d+[.,]\d{2})/gi;
-    const imagePattern = /<img[^>]*src="([^"]+)"[^>]*>/gi;
-    const linkPattern = /<a[^>]*href="([^"]+)"[^>]*>/gi;
-    
-    // Alternative: Look for JSON-LD structured data
-    const jsonLdPattern = /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi;
-    let match;
-    
-    while ((match = jsonLdPattern.exec(html)) !== null) {
-      try {
-        const jsonData = JSON.parse(match[1]);
-        if (jsonData['@type'] === 'Product' || (Array.isArray(jsonData['@graph']))) {
-          const items = jsonData['@graph'] || [jsonData];
-          for (const item of items) {
-            if (item['@type'] === 'Product') {
-              products.push({
-                name: item.name || 'Unknown Product',
-                brand: item.brand?.name || 'Segmento Positivo',
-                category: categoryName,
-                price: parseFloat(item.offers?.price || '0'),
-                image: item.image || '/placeholder.svg',
-                inStock: item.offers?.availability?.includes('InStock') ?? true,
-                sourceUrl: categoryUrl,
-              });
-            }
-          }
-        }
-      } catch (e) {
-        // JSON parse error, continue
-      }
-    }
+  console.log(`Found ${productMatches.length} potential product blocks in ${categoryName}`);
 
-    // If no JSON-LD found, try HTML parsing
-    if (products.length === 0) {
-      // Look for common e-commerce patterns
-      const productCardPattern = /<article[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/article>/gi;
-      const altProductPattern = /<div[^>]*class="[^"]*product-card[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/gi;
-      
-      // Try to find product listings
-      const listingPattern = /<li[^>]*class="[^"]*product[^"]*"[^>]*>([\s\S]*?)<\/li>/gi;
-      
-      let productMatches = html.match(productCardPattern) || html.match(altProductPattern) || html.match(listingPattern) || [];
-      
-      for (const productHtml of productMatches.slice(0, 50)) { // Limit to 50 products per category
-        const nameMatch = productHtml.match(/<(?:h[1-6]|span|a)[^>]*class="[^"]*(?:title|name)[^"]*"[^>]*>([^<]+)/i) ||
-                         productHtml.match(/<a[^>]*title="([^"]+)"/i) ||
-                         productHtml.match(/<img[^>]*alt="([^"]+)"/i);
-        
-        const priceMatch = productHtml.match(/(\d+[.,]\d{2})\s*€|€\s*(\d+[.,]\d{2})/);
-        const imageMatch = productHtml.match(/<img[^>]*src="([^"]+)"/i);
-        
-        if (nameMatch) {
-          const priceStr = priceMatch ? (priceMatch[1] || priceMatch[2]) : '0';
-          products.push({
-            name: nameMatch[1].trim(),
-            brand: 'Segmento Positivo',
-            category: categoryName,
-            price: parseFloat(priceStr.replace(',', '.')),
-            image: imageMatch ? imageMatch[1] : '/placeholder.svg',
-            inStock: !productHtml.toLowerCase().includes('esgotado') && !productHtml.toLowerCase().includes('out of stock'),
-            sourceUrl: categoryUrl,
-          });
+  for (const productHtml of productMatches.slice(0, 100)) {
+    try {
+      // Extract product name
+      const namePatterns = [
+        /<h[1-6][^>]*class="[^"]*(?:title|name|product-title|woocommerce-loop-product__title)[^"]*"[^>]*>([^<]+)/i,
+        /<a[^>]*class="[^"]*(?:title|name|product-title)[^"]*"[^>]*>([^<]+)/i,
+        /<a[^>]*title="([^"]+)"/i,
+        /data-product-name="([^"]+)"/i,
+        /<span[^>]*class="[^"]*product-name[^"]*"[^>]*>([^<]+)/i,
+      ];
+
+      let name = '';
+      for (const pattern of namePatterns) {
+        const match = productHtml.match(pattern);
+        if (match) {
+          name = match[1].trim();
+          break;
         }
       }
-    }
 
-    console.log(`Found ${products.length} products in ${categoryName}`);
-    
-  } catch (error) {
-    console.error(`Error scraping ${categoryName}:`, error);
+      // Extract image
+      const imagePatterns = [
+        /<img[^>]*src="([^"]+)"[^>]*class="[^"]*(?:product|attachment)[^"]*"/i,
+        /<img[^>]*class="[^"]*(?:product|attachment)[^"]*"[^>]*src="([^"]+)"/i,
+        /data-src="([^"]+\.(?:jpg|jpeg|png|webp|gif))"/i,
+        /<img[^>]*src="([^"]+\.(?:jpg|jpeg|png|webp|gif))"/i,
+      ];
+
+      let image = '/placeholder.svg';
+      for (const pattern of imagePatterns) {
+        const match = productHtml.match(pattern);
+        if (match) {
+          image = match[1];
+          break;
+        }
+      }
+
+      // Extract price
+      const pricePatterns = [
+        /(\d+[.,]\d{2})\s*€/,
+        /€\s*(\d+[.,]\d{2})/,
+        /class="[^"]*price[^"]*"[^>]*>[^€]*€?\s*(\d+[.,]\d{2})/i,
+        /data-price="(\d+[.,]?\d*)"/i,
+        /<span[^>]*class="[^"]*amount[^"]*"[^>]*>(\d+[.,]\d{2})/i,
+      ];
+
+      let price = 0;
+      for (const pattern of pricePatterns) {
+        const match = productHtml.match(pattern);
+        if (match) {
+          price = parseFloat(match[1].replace(',', '.'));
+          break;
+        }
+      }
+
+      // Check stock status
+      const outOfStock = productHtml.toLowerCase().includes('esgotado') || 
+                        productHtml.toLowerCase().includes('out of stock') ||
+                        productHtml.toLowerCase().includes('indisponível') ||
+                        productHtml.includes('class="outofstock"');
+
+      // Extract brand if available
+      const brandMatch = productHtml.match(/data-brand="([^"]+)"/i) ||
+                        productHtml.match(/<span[^>]*class="[^"]*brand[^"]*"[^>]*>([^<]+)/i);
+      const brand = brandMatch ? brandMatch[1].trim() : 'Segmento Positivo';
+
+      if (name && name.length > 2) {
+        products.push({
+          name,
+          brand,
+          category: categoryName,
+          price,
+          image,
+          inStock: !outOfStock,
+          sourceUrl,
+        });
+      }
+    } catch (e) {
+      console.error('Error parsing product:', e);
+    }
   }
 
   return products;
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Starting product scrape from segmentopositivo.pt');
+    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+    if (!apiKey) {
+      console.error('FIRECRAWL_API_KEY not configured');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Firecrawl API key not configured', products: [] }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Starting product scrape from segmentopositivo.pt with Firecrawl');
     
     const allProducts: ScrapedProduct[] = [];
+    const errors: string[] = [];
     
-    // Scrape each category
     for (const { url, category } of CATEGORIES) {
-      const products = await scrapeCategory(url, category);
-      allProducts.push(...products);
-      
-      // Add a small delay between requests to be polite
-      await new Promise(resolve => setTimeout(resolve, 500));
+      try {
+        const html = await scrapeWithFirecrawl(url, apiKey);
+        const products = parseProductsFromHtml(html, category, url);
+        allProducts.push(...products);
+        console.log(`Scraped ${products.length} products from ${category}`);
+        
+        // Small delay between requests
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`Error scraping ${category}:`, errorMsg);
+        errors.push(`${category}: ${errorMsg}`);
+      }
     }
 
     console.log(`Total products scraped: ${allProducts.length}`);
@@ -155,26 +211,18 @@ serve(async (req) => {
         success: true, 
         products: allProducts,
         timestamp: new Date().toISOString(),
-        message: `Scraped ${allProducts.length} products from ${CATEGORIES.length} categories`
+        message: `Scraped ${allProducts.length} products from ${CATEGORIES.length} categories`,
+        errors: errors.length > 0 ? errors : undefined,
       }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Error in scrape-products function:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: errorMessage,
-        products: []
-      }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      JSON.stringify({ success: false, error: errorMessage, products: [] }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
