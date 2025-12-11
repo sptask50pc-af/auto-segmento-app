@@ -22,7 +22,6 @@ import {
   suspensaoDirecaoSubSubCategories,
   motorSubSubCategories,
   sistemaEscapeSubSubCategories,
-  spraysManutencaoSubSubCategories,
   multimediaEletronicaSubSubCategories,
 } from "@/data/mockData";
 import { Category } from "@/types/product";
@@ -113,11 +112,6 @@ const allCategories: (Category & { path: string; type: string })[] = [
     ...c,
     path: `/subcategories/peças/sistema-de-escape`,
     type: "Sistema de Escape",
-  })),
-  ...spraysManutencaoSubSubCategories.map((c) => ({
-    ...c,
-    path: `/subcategories/lubrificantes/sprays-&-manutenção`,
-    type: "Sprays & Manutenção",
   })),
   ...multimediaEletronicaSubSubCategories.map((c) => ({
     ...c,
