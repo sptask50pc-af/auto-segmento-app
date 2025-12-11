@@ -13,6 +13,9 @@ const Index = () => {
     else if (label === "Acessórios") navigate("/subcategories/acessorios");
     else if (label === "Cuidado e Detalhe") navigate("/subcategories/cuidado-detalhe");
     else if (label === "Desempenho e Upgrade") navigate("/subcategories/desempenho-upgrade");
+    else if (label === "Elétrica") navigate("/subcategories/eletrica");
+    else if (label === "Universal") navigate("/subcategories/universal");
+    else if (label === "Sinalética e Segurança") navigate("/subcategories/sinaletica-seguranca");
   };
 
   return (
@@ -27,7 +30,7 @@ const Index = () => {
           {/* Grid of main categories */}
           <div className="grid grid-cols-4 gap-4">
             {mainCategories.map((category) => {
-              const hasSubCategories = category.label === "Peças" || category.label === "Lubrificantes" || category.label === "Acessórios" || category.label === "Cuidado e Detalhe" || category.label === "Desempenho e Upgrade";
+              const hasSubCategories = true;
               
               return (
                 <div
