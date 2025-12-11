@@ -1,6 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
+import { ProductCard } from "@/components/ProductCard";
+import { useProducts } from "@/context/ProductContext";
 import { 
   pecasSubCategories, 
   lubrificantesSubCategories, 
@@ -18,7 +20,6 @@ import {
   sistemaEscapeSubSubCategories,
   spraysManutencaoSubSubCategories,
   multimediaEletronicaSubSubCategories,
-  liquidosArrefecimentoSubSubCategories,
   oleosMotorSubSubCategories,
   oleosTransmissaoSubSubCategories,
   aditivosCombustivelSubSubCategories,
@@ -39,13 +40,27 @@ import {
 } from "@/data/mockData";
 import { Home, ChevronLeft } from "lucide-react";
 
+// Categories that show products directly instead of sub-subcategories
+const PRODUCT_DISPLAY_CATEGORIES = ["liquidos-arrefecimento"];
+
 const SubCategories = () => {
   const { category, subcategory } = useParams<{ category: string; subcategory?: string }>();
   const navigate = useNavigate();
+  const { getProductsByCategory } = useProducts();
+
+  // Check if this subcategory should show products directly
+  const shouldShowProducts = subcategory && PRODUCT_DISPLAY_CATEGORIES.includes(subcategory);
+
+  const getCategoryDisplayName = (slug: string): string => {
+    const nameMap: Record<string, string> = {
+      "liquidos-arrefecimento": "Líquidos de Arrefecimento",
+    };
+    return nameMap[slug] || slug;
+  };
 
   const getSubCategories = () => {
     // Handle sub-subcategories (third level)
-    if (subcategory) {
+    if (subcategory && !shouldShowProducts) {
       // Peças sub-subcategories
       if (subcategory === "carrocaria") return { name: "Carroçaria", items: carrocariaSubSubCategories, parent: "pecas" };
       if (subcategory === "travagem") return { name: "Travagem", items: travagemSubSubCategories, parent: "pecas" };
@@ -59,7 +74,6 @@ const SubCategories = () => {
       if (subcategory === "oleos-transmissao") return { name: "Óleos de Transmissão & Diferencial", items: oleosTransmissaoSubSubCategories, parent: "lubrificantes" };
       if (subcategory === "oleos-hidraulicos") return { name: "Óleos Hidráulicos & Direção Assistida", items: oleosHidraulicosSubSubCategories, parent: "lubrificantes" };
       if (subcategory === "liquidos-travao") return { name: "Líquidos de Travões", items: liquidosTravaoSubSubCategories, parent: "lubrificantes" };
-      if (subcategory === "liquidos-arrefecimento") return { name: "Líquidos de Arrefecimento", items: liquidosArrefecimentoSubSubCategories, parent: "lubrificantes" };
       if (subcategory === "aditivos-combustivel") return { name: "Aditivos de Combustível", items: aditivosCombustivelSubSubCategories, parent: "lubrificantes" };
       if (subcategory === "aditivos-oleo") return { name: "Aditivos de Óleo", items: aditivosOleoSubSubCategories, parent: "lubrificantes" };
       if (subcategory === "sprays-manutencao") return { name: "Sprays & Manutenção", items: spraysManutencaoSubSubCategories, parent: "lubrificantes" };
@@ -144,6 +158,49 @@ const SubCategories = () => {
       if (label === "Multimédia & Eletrónica") navigate("/subcategories/acessorios/multimedia-eletronica");
     }
   };
+
+  // If showing products for this category
+  if (shouldShowProducts && subcategory) {
+    const categoryName = getCategoryDisplayName(subcategory);
+    const categoryProducts = getProductsByCategory(categoryName);
+
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <Header title={categoryName} />
+
+        <main className="container px-4 py-6 space-y-6">
+          {/* Back button */}
+          <button
+            onClick={() => navigate(`/subcategories/${category}`)}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Voltar</span>
+          </button>
+
+          {/* Products grid */}
+          {categoryProducts.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4">
+              {categoryProducts.map((product, i) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  delay={i * 50}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Nenhum produto encontrado nesta categoria.</p>
+              <p className="text-sm text-muted-foreground mt-2">Use o botão "Update" na página Admin para importar produtos.</p>
+            </div>
+          )}
+        </main>
+
+        <BottomNav />
+      </div>
+    );
+  }
 
   const data = getSubCategories();
 
