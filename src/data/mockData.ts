@@ -26,14 +26,14 @@ export const categories: Category[] = [
 ];
 
 export const mainCategories: Category[] = [
-  { id: "1", label: "Peças", icon: "🔧" },
-  { id: "2", label: "Lubrificantes", icon: "🛢️" },
-  { id: "3", label: "Acessórios", icon: "🎯" },
-  { id: "4", label: "Cuidado e Detalhe", icon: "✨" },
-  { id: "5", label: "Desempenho e Upgrade", icon: "⚡" },
-  { id: "6", label: "Elétrica", icon: "🔌" },
-  { id: "7", label: "Universal", icon: "🔩" },
-  { id: "8", label: "Sinalética e Segurança", icon: "⚠️" },
+  { id: "1", label: "Peças", icon: "wrench" },
+  { id: "2", label: "Lubrificantes", icon: "droplets" },
+  { id: "3", label: "Acessórios", icon: "car" },
+  { id: "4", label: "Cuidado e Detalhe", icon: "sparkles" },
+  { id: "5", label: "Desempenho e Upgrade", icon: "gauge" },
+  { id: "6", label: "Elétrica", icon: "zap" },
+  { id: "7", label: "Universal", icon: "settings" },
+  { id: "8", label: "Sinalética e Segurança", icon: "shield-alert" },
 ];
 
 export const pecasSubCategories: Category[] = [
