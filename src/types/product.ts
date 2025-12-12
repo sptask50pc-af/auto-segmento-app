@@ -10,6 +10,7 @@ export interface Product {
   description?: string;
   sourceUrl?: string;
   reference?: string;
+  weight?: string; // e.g., "1L", "500ml", "5L", "300g"
 }
 
 export interface Brand {

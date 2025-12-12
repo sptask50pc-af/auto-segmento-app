@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
-import { ProductCard } from "@/components/ProductCard";
+import { ProductListView } from "@/components/ProductListView";
 import { useProducts } from "@/context/ProductContext";
 import { 
   pecasSubCategories, 
@@ -336,40 +336,11 @@ const SubCategories = () => {
     };
 
     return (
-      <div className="min-h-screen bg-background pb-20">
-        <Header title={categoryName} />
-
-        <main className="container px-4 py-6 space-y-6">
-          {/* Back button */}
-          <button
-            onClick={() => navigate(getBackPath())}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            <span>Voltar</span>
-          </button>
-
-          {/* Products grid */}
-          {categoryProducts.length > 0 ? (
-            <div className="grid grid-cols-2 gap-4">
-              {categoryProducts.map((product, i) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  delay={i * 50}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Nenhum produto encontrado nesta categoria.</p>
-              <p className="text-sm text-muted-foreground mt-2">Use o botão "Update" na página Admin para importar produtos.</p>
-            </div>
-          )}
-        </main>
-
-        <BottomNav />
-      </div>
+      <ProductListView 
+        categoryName={categoryName}
+        products={categoryProducts}
+        backPath={getBackPath()}
+      />
     );
   }
 
