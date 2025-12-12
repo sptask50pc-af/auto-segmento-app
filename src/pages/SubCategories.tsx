@@ -34,14 +34,14 @@ import { Home, ChevronLeft } from "lucide-react";
 
 // Map of category slugs to their display names for product matching
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
-  // Lubrificantes
-  "oleos-motor": "Óleos de Motor",
-  "oleos-transmissao": "Óleos de Transmissão",
-  "oleos-hidraulicos": "Óleos Hidráulicos",
-  "liquidos-travao": "Líquidos de Travões",
-  "liquidos-arrefecimento": "Líquidos de Arrefecimento",
-  "aditivos-combustivel": "Aditivos de Combustível",
-  "aditivos-oleo": "Aditivos de Óleo",
+  // Lubrificantes (slugs generated from lubrificantesSubCategories labels)
+  "oleos-de-motor": "Óleos de Motor",
+  "oleos-de-transmissao-diferencial": "Óleos de Transmissão & Diferencial",
+  "oleos-hidraulicos-direcao-assistida": "Óleos Hidráulicos & Direção Assistida",
+  "liquidos-de-travoes": "Líquidos de Travões",
+  "liquidos-de-arrefecimento": "Líquidos de Arrefecimento",
+  "aditivos-de-combustivel": "Aditivos de Combustível",
+  "aditivos-de-oleo": "Aditivos de Óleo",
   "sprays-manutencao": "Sprays & Manutenção",
   "oleos-especiais": "Óleos Especiais",
   
