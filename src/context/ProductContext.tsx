@@ -54,10 +54,14 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
   const addProduct = async (product: Omit<Product, "id">) => {
     try {
+      const id = (typeof crypto !== 'undefined' && 'randomUUID' in crypto)
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
       const { data, error } = await supabase
         .from('products')
         .insert({
-          id: Date.now().toString(),
+          id,
           name: product.name,
           price: product.price,
           original_price: product.originalPrice || null,
@@ -88,7 +92,6 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       throw error;
     }
   };
-
   const updateProduct = async (id: string, updatedFields: Partial<Product>) => {
     try {
       const updateData: Record<string, unknown> = {};
