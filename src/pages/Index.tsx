@@ -2,31 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { mainCategories } from "@/data/mockData";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { 
   ChevronRight, 
   Sparkles, 
   MapPin, 
   Phone, 
-  Clock,
-  Wrench,
-  Droplets,
-  Car,
-  Gauge,
-  Zap,
-  Settings,
-  ShieldAlert
+  Clock
 } from "lucide-react";
-
-const iconMap: Record<string, React.ReactNode> = {
-  wrench: <Wrench className="w-7 h-7" />,
-  droplets: <Droplets className="w-7 h-7" />,
-  car: <Car className="w-7 h-7" />,
-  sparkles: <Sparkles className="w-7 h-7" />,
-  gauge: <Gauge className="w-7 h-7" />,
-  zap: <Zap className="w-7 h-7" />,
-  settings: <Settings className="w-7 h-7" />,
-  "shield-alert": <ShieldAlert className="w-7 h-7" />,
-};
 
 const Index = () => {
   const navigate = useNavigate();
@@ -90,7 +73,7 @@ const Index = () => {
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="relative z-10 text-primary/80 group-hover:text-primary transition-colors duration-300 group-hover:scale-110 transform">
-                      {iconMap[category.icon] || category.icon}
+                      <CategoryIcon icon={category.icon} />
                     </div>
                   </div>
                   <span className="text-xs text-center text-muted-foreground leading-tight group-hover:text-foreground transition-colors font-medium">
