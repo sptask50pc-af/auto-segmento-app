@@ -126,16 +126,12 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
   
   console.log('Parsing HTML, length:', html.length);
   
-  // PrestaShop uses article.product-miniature for products - improved pattern
+  // PrestaShop uses article.product-miniature for products
   const productPattern = /<article[^>]*class="[^"]*product-miniature[^"]*"[^>]*>[\s\S]*?<\/article>/gi;
   const productMatches = html.match(productPattern);
   
   if (!productMatches) {
     console.log('No product-miniature articles found');
-    // Try alternative pattern for div-based products
-    const altPattern = /<div[^>]*class="[^"]*product-container[^"]*"[^>]*>[\s\S]*?<\/div>\s*<\/div>/gi;
-    const altMatches = html.match(altPattern);
-    console.log('Alternative pattern matches:', altMatches?.length || 0);
     return products;
   }
   
@@ -143,15 +139,14 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
 
   for (const productHtml of productMatches.slice(0, 100)) {
     try {
-      // Extract product name from h5.product-title or itemprop="name"
+      // Extract product name
       const nameMatch = productHtml.match(/<h5[^>]*class="[^"]*product-title[^"]*"[^>]*>[\s\S]*?<a[^>]*>([^<]+)<\/a>/i) ||
                        productHtml.match(/itemprop="name"[^>]*>[\s\S]*?<a[^>]*>([^<]+)<\/a>/i) ||
                        productHtml.match(/<a[^>]*class="[^"]*product-name[^"]*"[^>]*>([^<]+)<\/a>/i);
       
       const name = nameMatch ? nameMatch[1].trim().replace(/\.{3}$/, '') : '';
 
-      // Extract image - try multiple patterns for PrestaShop
-      // Priority: data-full-size-image-url > data-src > src (avoid lazy-load placeholders)
+      // Extract image
       let image = '/placeholder.svg';
       const fullSizeMatch = productHtml.match(/data-full-size-image-url="([^"]+)"/i);
       const dataSrcMatch = productHtml.match(/<img[^>]*data-src="([^"]+)"[^>]*>/i);
@@ -168,77 +163,33 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
         image = anySrcMatch[1];
       }
       
-      // Ensure full URL
       if (image && !image.startsWith('http') && image !== '/placeholder.svg') {
         image = BASE_URL + image;
       }
 
-      // Extract price - multiple patterns for PrestaShop price formats
-      let price = 0;
-      let originalPrice: number | undefined;
-      
-      // Try to get price from content attribute first (most reliable)
-      const contentPriceMatch = productHtml.match(/itemprop="price"[^>]*content="([^"]+)"/i) ||
-                                productHtml.match(/content="([^"]+)"[^>]*itemprop="price"/i);
-      
-      if (contentPriceMatch) {
-        price = parseFloat(contentPriceMatch[1]) || 0;
-      } else {
-        // Try various price patterns
-        const pricePatterns = [
-          /class="price"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i,
-          /class="price"[^>]*>([\d,]+[.,]\d{2})\s*€/i,
-          /<span[^>]*class="[^"]*price[^"]*"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i,
-          /price[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i,
-          /([\d]+[.,]\d{2})\s*€/,
-        ];
-        
-        for (const pattern of pricePatterns) {
-          const match = productHtml.match(pattern);
-          if (match) {
-            const priceStr = match[1].replace(/\s/g, '').replace(',', '.');
-            price = parseFloat(priceStr) || 0;
-            if (price > 0) break;
-          }
-        }
-      }
-      
-      // Try to get original price (regular-price class)
-      const regularPriceMatch = productHtml.match(/class="regular-price"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i) ||
-                                productHtml.match(/class="[^"]*regular-price[^"]*"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i);
-      if (regularPriceMatch) {
-        const origPriceStr = regularPriceMatch[1].replace(/\s/g, '').replace(',', '.');
-        originalPrice = parseFloat(origPriceStr) || undefined;
-      }
-
-      // Extract product URL and category from it
+      // Extract product URL - this is key for detail page scraping
       const urlMatch = productHtml.match(/<a[^>]*href="([^"]+segmentopositivo\.pt[^"]+)"[^>]*>/i);
-      const productUrl = urlMatch ? urlMatch[1] : categoryUrl;
-      const category = extractCategoryFromUrl(productUrl);
+      const productUrl = urlMatch ? urlMatch[1] : '';
+      const category = extractCategoryFromUrl(productUrl || categoryUrl);
       
       // Extract brand from product name
       const brand = extractBrandFromName(name);
 
-      // Check stock - look for InStock schema or absence of out-of-stock indicators
+      // Check stock
       const inStock = productHtml.includes('InStock') || 
                      (!productHtml.toLowerCase().includes('esgotado') && 
                       !productHtml.toLowerCase().includes('out of stock'));
 
-      if (name && name.length > 2) {
-        const productData: ScrapedProduct = {
+      if (name && name.length > 2 && productUrl) {
+        products.push({
           name,
           brand,
           category,
-          price,
+          price: 0, // Will be fetched from detail page
           image,
           inStock,
           sourceUrl: productUrl,
-        };
-        if (originalPrice && originalPrice > price) {
-          productData.originalPrice = originalPrice;
-        }
-        products.push(productData);
-        console.log(`Parsed product: ${name} | Category: ${category} | Price: €${price} | Image: ${image.substring(0, 50)}...`);
+        });
       }
     } catch (e) {
       console.error('Error parsing product:', e);
@@ -246,6 +197,76 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
   }
 
   return products;
+}
+
+// Scrape individual product page for accurate price
+async function scrapeProductPrice(productUrl: string, apiKey: string): Promise<{ price: number; originalPrice?: number }> {
+  try {
+    const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url: productUrl,
+        formats: ['html'],
+        onlyMainContent: true,
+        waitFor: 2000,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to scrape product page: ${productUrl}`);
+      return { price: 0 };
+    }
+
+    const data = await response.json();
+    const html = data.data?.html || '';
+    
+    let price = 0;
+    let originalPrice: number | undefined;
+    
+    // Try content attribute first (most reliable)
+    const contentPriceMatch = html.match(/itemprop="price"[^>]*content="([^"]+)"/i) ||
+                              html.match(/content="([^"]+)"[^>]*itemprop="price"/i);
+    
+    if (contentPriceMatch) {
+      price = parseFloat(contentPriceMatch[1]) || 0;
+    }
+    
+    // If no content price, try other patterns
+    if (price === 0) {
+      const pricePatterns = [
+        /class="current-price"[^>]*>[\s\S]*?<span[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i,
+        /class="product-price"[^>]*>[\s\S]*?€?\s*([\d,]+[.,]\d{2})/i,
+        /class="price"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i,
+        /<span[^>]*class="[^"]*price[^"]*"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i,
+      ];
+      
+      for (const pattern of pricePatterns) {
+        const match = html.match(pattern);
+        if (match) {
+          const priceStr = match[1].replace(/\s/g, '').replace(',', '.');
+          price = parseFloat(priceStr) || 0;
+          if (price > 0) break;
+        }
+      }
+    }
+    
+    // Try to get original price
+    const regularPriceMatch = html.match(/class="regular-price"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i);
+    if (regularPriceMatch) {
+      const origPriceStr = regularPriceMatch[1].replace(/\s/g, '').replace(',', '.');
+      originalPrice = parseFloat(origPriceStr) || undefined;
+    }
+    
+    console.log(`Price from detail page ${productUrl}: €${price}`);
+    return { price, originalPrice };
+  } catch (e) {
+    console.error(`Error scraping product price from ${productUrl}:`, e);
+    return { price: 0 };
+  }
 }
 
 // Actual category URLs from the website - limited to avoid rate limits
@@ -273,12 +294,12 @@ serve(async (req) => {
       );
     }
 
-    console.log('Starting product scrape from segmentopositivo.pt with Firecrawl');
+    console.log('Starting product scrape from segmentopositivo.pt with Firecrawl (detail page prices)');
     
     const allProducts: ScrapedProduct[] = [];
     const seenProducts = new Set<string>();
     
-    // Scrape each category page with delays to avoid rate limiting
+    // Step 1: Scrape category pages to get product list
     for (const categoryPath of CATEGORY_URLS) {
       try {
         const categoryUrl = BASE_URL + categoryPath;
@@ -289,7 +310,7 @@ serve(async (req) => {
         
         // Add unique products only
         for (const product of products) {
-          const productKey = product.name.toLowerCase();
+          const productKey = product.sourceUrl.toLowerCase();
           if (!seenProducts.has(productKey)) {
             seenProducts.add(productKey);
             allProducts.push(product);
@@ -298,22 +319,44 @@ serve(async (req) => {
         
         console.log(`Category ${categoryPath}: found ${products.length} products (total unique: ${allProducts.length})`);
         
-        // Longer delay to avoid rate limiting (2 seconds between requests)
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Delay between category requests
+        await new Promise(resolve => setTimeout(resolve, 1500));
       } catch (categoryError) {
         console.error(`Error scraping category ${categoryPath}:`, categoryError);
-        // Continue with other categories even if one fails
       }
     }
     
-    console.log(`Total unique products scraped: ${allProducts.length}`);
+    // Step 2: Scrape each product's detail page for accurate price
+    console.log(`Fetching prices from ${allProducts.length} product detail pages...`);
+    
+    for (let i = 0; i < allProducts.length; i++) {
+      const product = allProducts[i];
+      try {
+        const { price, originalPrice } = await scrapeProductPrice(product.sourceUrl, apiKey);
+        product.price = price;
+        if (originalPrice && originalPrice > price) {
+          product.originalPrice = originalPrice;
+        }
+        console.log(`[${i + 1}/${allProducts.length}] ${product.name}: €${price}`);
+        
+        // Small delay between product page requests to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (e) {
+        console.error(`Failed to get price for ${product.name}:`, e);
+      }
+    }
+    
+    // Filter out products with no price
+    const validProducts = allProducts.filter(p => p.price > 0);
+    
+    console.log(`Total products with valid prices: ${validProducts.length}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        products: allProducts,
+        products: validProducts,
         timestamp: new Date().toISOString(),
-        message: `Scraped ${allProducts.length} products from segmentopositivo.pt`,
+        message: `Scraped ${validProducts.length} products with detail page prices`,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
