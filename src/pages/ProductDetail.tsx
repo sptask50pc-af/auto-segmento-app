@@ -1,0 +1,150 @@
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useProducts } from "@/context/ProductContext";
+import { ProductCard } from "@/components/ProductCard";
+import { cn } from "@/lib/utils";
+import { useRef } from "react";
+
+export default function ProductDetail() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { products } = useProducts();
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  const product = products.find((p) => p.id === id);
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+          <h1 className="text-xl font-semibold mb-2">Produto não encontrado</h1>
+          <Button onClick={() => navigate(-1)}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPercent = hasDiscount
+    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
+    : 0;
+
+  // Find similar products (same category, excluding current product)
+  const similarProducts = products
+    .filter((p) => p.category === product.category && p.id !== product.id)
+    .slice(0, 10);
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-primary/30">
+        <div className="px-4 py-3 flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="font-semibold truncate">Detalhes do Produto</h1>
+        </div>
+      </header>
+
+      {/* Product Image */}
+      <div className="relative bg-secondary/30 flex items-center justify-center p-8 min-h-[300px]">
+        {hasDiscount && (
+          <Badge className="absolute right-4 top-4 bg-primary text-primary-foreground text-lg px-3 py-1">
+            -{discountPercent}%
+          </Badge>
+        )}
+        {product.image && product.image !== '/placeholder.svg' ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="max-h-[280px] max-w-full object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/placeholder.svg';
+            }}
+          />
+        ) : (
+          <Package className="h-32 w-32 text-muted-foreground" />
+        )}
+      </div>
+
+      {/* Product Info */}
+      <div className="p-6 space-y-6">
+        {/* Category Badge */}
+        <Badge variant="secondary" className="text-sm">
+          {product.category}
+        </Badge>
+
+        {/* Name and Brand */}
+        <div>
+          <p className="text-sm text-muted-foreground mb-1">{product.brand}</p>
+          <h2 className="text-2xl font-bold leading-tight">{product.name}</h2>
+        </div>
+
+        {/* Price */}
+        <div className="flex items-baseline gap-3">
+          <span className="text-3xl font-bold text-primary">
+            €{product.price.toFixed(2)}
+          </span>
+          {hasDiscount && (
+            <span className="text-xl text-muted-foreground line-through">
+              €{product.originalPrice!.toFixed(2)}
+            </span>
+          )}
+        </div>
+
+        {/* Stock Status */}
+        <Badge
+          variant={product.inStock ? "default" : "secondary"}
+          className={cn(
+            "text-sm px-4 py-1",
+            product.inStock
+              ? "bg-green-500/20 text-green-400"
+              : "bg-muted text-muted-foreground"
+          )}
+        >
+          {product.inStock ? "Em estoque" : "Indisponível"}
+        </Badge>
+
+        {/* Description */}
+        {product.description && (
+          <div className="pt-4 border-t border-border">
+            <h3 className="font-semibold mb-2">Descrição</h3>
+            <p className="text-muted-foreground">{product.description}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Similar Products Slider */}
+      {similarProducts.length > 0 && (
+        <div className="px-6 pb-8">
+          <h3 className="text-lg font-semibold mb-4">Produtos Similares</h3>
+          <div
+            ref={sliderRef}
+            className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {similarProducts.map((similarProduct, index) => (
+              <div
+                key={similarProduct.id}
+                className="min-w-[200px] max-w-[200px] snap-start"
+              >
+                <ProductCard product={similarProduct} delay={index * 50} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

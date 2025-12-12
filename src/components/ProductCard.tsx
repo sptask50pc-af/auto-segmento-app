@@ -3,6 +3,7 @@ import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface ProductCardProps {
   product: Product;
@@ -13,15 +14,26 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onEdit, onDelete, showActions = false, delay = 0 }: ProductCardProps) {
+  const navigate = useNavigate();
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercent = hasDiscount
     ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
     : 0;
 
+  const handleClick = () => {
+    if (!showActions) {
+      navigate(`/product/${product.id}`);
+    }
+  };
+
   return (
     <div
-      className="animate-slide-up group relative overflow-hidden rounded-xl bg-card p-4 transition-all hover:bg-secondary/50"
+      className={cn(
+        "animate-slide-up group relative overflow-hidden rounded-xl bg-card p-4 transition-all hover:bg-secondary/50",
+        !showActions && "cursor-pointer"
+      )}
       style={{ animationDelay: `${delay}ms` }}
+      onClick={handleClick}
     >
       {hasDiscount && (
         <Badge className="absolute right-3 top-3 bg-primary text-primary-foreground">
@@ -29,8 +41,19 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
         </Badge>
       )}
 
-      <div className="mb-3 flex h-20 w-full items-center justify-center rounded-lg bg-secondary text-4xl">
-        {product.image}
+      <div className="mb-3 flex h-20 w-full items-center justify-center rounded-lg bg-secondary overflow-hidden">
+        {product.image && product.image !== '/placeholder.svg' ? (
+          <img 
+            src={product.image} 
+            alt={product.name} 
+            className="h-full w-full object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/placeholder.svg';
+            }}
+          />
+        ) : (
+          <span className="text-4xl">📦</span>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -41,11 +64,11 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
 
         <div className="flex items-baseline gap-2">
           <span className="text-lg font-bold text-primary">
-            R$ {product.price.toFixed(2)}
+            €{product.price.toFixed(2)}
           </span>
           {hasDiscount && (
             <span className="text-sm text-muted-foreground line-through">
-              R$ {product.originalPrice!.toFixed(2)}
+              €{product.originalPrice!.toFixed(2)}
             </span>
           )}
         </div>
@@ -64,7 +87,7 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
       </div>
 
       {showActions && (
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex gap-2" onClick={(e) => e.stopPropagation()}>
           <Button
             size="sm"
             variant="secondary"
