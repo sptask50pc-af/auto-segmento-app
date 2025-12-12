@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductListView } from "@/components/ProductListView";
 import { useProducts } from "@/context/ProductContext";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { 
   pecasSubCategories, 
   lubrificantesSubCategories, 
@@ -395,13 +396,17 @@ const SubCategories = () => {
             <div
               key={item.id}
               onClick={() => handleItemClick(item.label)}
-              className="flex flex-col items-center gap-2 animate-fade-in cursor-pointer"
+              className="group flex flex-col items-center gap-2 animate-fade-in cursor-pointer"
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className="w-20 h-20 rounded-lg bg-card border border-border flex items-center justify-center text-3xl transition-colors hover:border-primary/50">
-                {item.icon}
+              <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-card via-secondary to-card border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative z-10 text-primary/80 group-hover:text-primary transition-colors duration-300 group-hover:scale-110 transform">
+                  <CategoryIcon icon={item.icon} />
+                </div>
               </div>
-              <span className="text-xs text-center text-muted-foreground">{item.label}</span>
+              <span className="text-xs text-center text-muted-foreground leading-tight group-hover:text-foreground transition-colors font-medium">{item.label}</span>
             </div>
           ))}
         </div>
