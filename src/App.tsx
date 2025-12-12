@@ -7,6 +7,7 @@ import { ProductProvider } from "@/context/ProductContext";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import SubCategories from "./pages/SubCategories";
+import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/subcategories/:category" element={<SubCategories />} />
             <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
             <Route path="/subcategories/:category/:subcategory/:subsubcategory" element={<SubCategories />} />
