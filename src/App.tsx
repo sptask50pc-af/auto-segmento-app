@@ -23,6 +23,7 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/subcategories/:category" element={<SubCategories />} />
             <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
+            <Route path="/subcategories/:category/:subcategory/:subsubcategory" element={<SubCategories />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
