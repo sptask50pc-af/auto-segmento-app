@@ -160,14 +160,16 @@ const Admin = () => {
           );
 
           if (existingProduct) {
-            // Check if price, name, or category changed
+            // Check if price, name, category, or image changed
             if (existingProduct.price !== scrapedProduct.price || 
                 existingProduct.name !== scrapedProduct.name ||
-                existingProduct.category !== normalizedCategory) {
+                existingProduct.category !== normalizedCategory ||
+                existingProduct.image !== scrapedProduct.image) {
               updateProduct(existingProduct.id, {
                 price: scrapedProduct.price,
                 name: scrapedProduct.name,
                 category: normalizedCategory,
+                image: scrapedProduct.image,
                 inStock: scrapedProduct.inStock,
               });
               updatedCount++;
