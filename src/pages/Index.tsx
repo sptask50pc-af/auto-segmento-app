@@ -32,8 +32,8 @@ const Index = () => {
               <Sparkles className="w-5 h-5 text-primary animate-pulse" />
               <span className="text-sm font-medium text-primary">Peças Premium</span>
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-1">
-              Bem-vindo ao Segmento
+            <h1 className="text-xl font-bold text-foreground mb-1">
+              Bem-vindo ao Segmento Positivo
             </h1>
             <p className="text-muted-foreground text-sm">
               Explore as melhores peças automotivas
