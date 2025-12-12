@@ -86,7 +86,7 @@ function normalizeCategory(scrapedCategory: string): string {
 }
 
 const Admin = () => {
-  const { products, addProduct, updateProduct, deleteProduct } = useProducts();
+  const { products, loading, addProduct, updateProduct, deleteProduct, deleteAllProducts } = useProducts();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -97,23 +97,23 @@ const Admin = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    deleteProduct(id);
+  const handleDelete = async (id: string) => {
+    await deleteProduct(id);
     toast({
       title: "Produto removido",
       description: "O produto foi removido com sucesso.",
     });
   };
 
-  const handleSubmit = (productData: Omit<Product, "id">) => {
+  const handleSubmit = async (productData: Omit<Product, "id">) => {
     if (editingProduct) {
-      updateProduct(editingProduct.id, productData);
+      await updateProduct(editingProduct.id, productData);
       toast({
         title: "Produto atualizado",
         description: "As alterações foram salvas.",
       });
     } else {
-      addProduct(productData);
+      await addProduct(productData);
       toast({
         title: "Produto adicionado",
         description: "O novo produto foi adicionado ao catálogo.",
@@ -225,6 +225,14 @@ const Admin = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <Header title="Admin" />
@@ -290,9 +298,12 @@ const Admin = () => {
             {isUpdating ? 'A atualizar...' : 'Update'}
           </Button>
           <Button 
-            onClick={() => {
-              localStorage.removeItem('segmento_products');
-              window.location.reload();
+            onClick={async () => {
+              await deleteAllProducts();
+              toast({
+                title: "Reset concluído",
+                description: "Todos os produtos foram removidos.",
+              });
             }} 
             variant="destructive"
             className="gap-2"
