@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { mainCategories } from "@/data/mockData";
@@ -7,11 +8,22 @@ import {
   ChevronRight, 
   MapPin, 
   Phone, 
-  Clock
+  Clock,
+  Sparkles
 } from "lucide-react";
+import liquiMolyLogo from "@/assets/liqui-moly-logo.png";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  // Auto-rotate slides every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveSlide((prev) => (prev === 0 ? 1 : 0));
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleCategoryClick = (label: string) => {
     if (label === "Peças") navigate("/subcategories/pecas");
@@ -29,47 +41,91 @@ const Index = () => {
       <Header title="Início" />
 
       <main className="container px-4 py-6 space-y-8">
-        {/* Hero Welcome Section - Liqui Moly Advertisement */}
-        <section className="animate-fade-in relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] p-6 border border-[#e31e24]/30 shadow-2xl shadow-[#e31e24]/10">
-          {/* Premium glow effects */}
-          <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#e31e24]/30 blur-3xl animate-pulse" />
-          <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-[#e31e24]/20 blur-2xl" />
-          <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-l from-[#e31e24]/5 to-transparent" />
-          
-          <div className="relative flex items-center justify-between">
-            <div className="flex-1">
-              {/* Liqui Moly Badge */}
-              <div className="inline-flex items-center gap-2 mb-3 bg-[#e31e24] px-3 py-1 rounded-full">
-                <span className="text-xs font-bold text-white tracking-wider uppercase">Distribuidor Oficial</span>
-              </div>
-              
-              {/* Brand Title */}
-              <h1 className="text-2xl font-black text-white mb-2 tracking-tight">
-                LIQUI <span className="text-[#e31e24]">MOLY</span>
-              </h1>
-              
-              {/* Tagline */}
-              <p className="text-[#94a3b8] text-sm font-medium mb-3">
-                Tecnologia Alemã de Lubrificação Premium
-              </p>
-              
-              {/* Features */}
-              <div className="flex flex-wrap gap-2">
-                <span className="text-[10px] font-semibold text-[#e31e24] bg-[#e31e24]/10 px-2 py-1 rounded-md border border-[#e31e24]/20">
-                  🇩🇪 Made in Germany
-                </span>
-                <span className="text-[10px] font-semibold text-white/70 bg-white/5 px-2 py-1 rounded-md border border-white/10">
-                  Óleos Premium
-                </span>
+        {/* Hero Carousel Section */}
+        <section className="relative h-[180px] overflow-hidden rounded-2xl">
+          {/* Slide Indicators */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {[0, 1].map((index) => (
+              <button
+                key={index}
+                onClick={() => setActiveSlide(index)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  activeSlide === index ? "w-6 bg-primary" : "w-2 bg-white/40"
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Slide 1: Welcome */}
+          <div
+            className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+              activeSlide === 0
+                ? "opacity-100 translate-x-0"
+                : "opacity-0 -translate-x-full"
+            }`}
+          >
+            <div className="h-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-card to-card p-6 border border-primary/20">
+              <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
+              <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-primary/10 blur-2xl" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+                  <span className="text-sm font-medium text-primary">Peças Premium</span>
+                </div>
+                <h1 className="text-xl font-bold text-foreground mb-1">
+                  Bem-vindo ao Segmento Positivo
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                  Explore as melhores peças automotivas
+                </p>
               </div>
             </div>
-            
-            {/* Liqui Moly Logo/Visual */}
-            <div className="flex-shrink-0 ml-4">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#e31e24] to-[#b91c1c] flex items-center justify-center shadow-lg shadow-[#e31e24]/30 border border-[#e31e24]/50">
-                <div className="text-center">
-                  <span className="text-2xl font-black text-white block leading-none">LM</span>
-                  <span className="text-[8px] font-bold text-white/80 tracking-widest">GERMANY</span>
+          </div>
+
+          {/* Slide 2: Liqui Moly Advertisement */}
+          <div
+            className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+              activeSlide === 1
+                ? "opacity-100 translate-x-0"
+                : "opacity-0 translate-x-full"
+            }`}
+          >
+            <div className="h-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] p-6 border border-[#e31e24]/30 shadow-2xl shadow-[#e31e24]/10">
+              {/* Premium glow effects */}
+              <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#e31e24]/30 blur-3xl animate-pulse" />
+              <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-[#e31e24]/20 blur-2xl" />
+              <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-l from-[#e31e24]/5 to-transparent" />
+              
+              <div className="relative flex items-center justify-between h-full">
+                <div className="flex-1">
+                  {/* Liqui Moly Badge */}
+                  <div className="inline-flex items-center gap-2 mb-2 bg-[#e31e24] px-3 py-1 rounded-full">
+                    <span className="text-[10px] font-bold text-white tracking-wider uppercase">Distribuidor Oficial</span>
+                  </div>
+                  
+                  {/* Tagline */}
+                  <p className="text-white text-sm font-semibold mb-2">
+                    Tecnologia Alemã Premium
+                  </p>
+                  
+                  {/* Features */}
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-[10px] font-semibold text-[#e31e24] bg-[#e31e24]/10 px-2 py-1 rounded-md border border-[#e31e24]/20">
+                      🇩🇪 Made in Germany
+                    </span>
+                    <span className="text-[10px] font-semibold text-white/70 bg-white/5 px-2 py-1 rounded-md border border-white/10">
+                      Óleos Premium
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Liqui Moly Logo */}
+                <div className="flex-shrink-0 ml-4">
+                  <img 
+                    src={liquiMolyLogo} 
+                    alt="Liqui Moly" 
+                    className="w-24 h-auto rounded-lg shadow-lg shadow-[#e31e24]/20"
+                  />
                 </div>
               </div>
             </div>
