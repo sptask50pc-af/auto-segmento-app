@@ -1,8 +1,7 @@
-import { Settings, ShoppingCart, Menu, LogOut } from "lucide-react";
+import { Settings, ShoppingCart, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/logo.png";
 
 interface HeaderProps {
@@ -10,8 +9,6 @@ interface HeaderProps {
 }
 
 export function Header({ title = "Início" }: HeaderProps) {
-  const { signOut } = useAuth();
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-primary bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container flex h-16 items-center justify-between px-4">
@@ -31,14 +28,6 @@ export function Header({ title = "Início" }: HeaderProps) {
           <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
             <ShoppingCart className="h-5 w-5" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-muted-foreground hover:text-destructive"
-            onClick={signOut}
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden text-muted-foreground hover:text-foreground">
@@ -53,12 +42,6 @@ export function Header({ title = "Início" }: HeaderProps) {
                 <Link to="/admin" className="text-lg font-medium hover:text-primary transition-colors">
                   Admin
                 </Link>
-                <button 
-                  onClick={signOut}
-                  className="text-lg font-medium text-left hover:text-destructive transition-colors"
-                >
-                  Sair
-                </button>
               </nav>
             </SheetContent>
           </Sheet>
