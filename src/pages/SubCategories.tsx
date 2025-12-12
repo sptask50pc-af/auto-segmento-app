@@ -32,70 +32,255 @@ import {
 } from "@/data/mockData";
 import { Home, ChevronLeft } from "lucide-react";
 
-// Categories that show products directly instead of sub-subcategories
-const PRODUCT_DISPLAY_CATEGORIES = [
-  // All Lubrificantes subcategories
-  "oleos-motor",
-  "oleos-transmissao", 
-  "oleos-hidraulicos",
-  "liquidos-travao",
-  "liquidos-arrefecimento",
-  "aditivos-combustivel",
-  "aditivos-oleo",
-  "sprays-manutencao",
-  "oleos-especiais",
-];
+// Map of category slugs to their display names for product matching
+const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
+  // Lubrificantes
+  "oleos-motor": "Óleos de Motor",
+  "oleos-transmissao": "Óleos de Transmissão",
+  "oleos-hidraulicos": "Óleos Hidráulicos",
+  "liquidos-travao": "Líquidos de Travões",
+  "liquidos-arrefecimento": "Líquidos de Arrefecimento",
+  "aditivos-combustivel": "Aditivos de Combustível",
+  "aditivos-oleo": "Aditivos de Óleo",
+  "sprays-manutencao": "Sprays & Manutenção",
+  "oleos-especiais": "Óleos Especiais",
+  
+  // Desempenho e Upgrade
+  "filtros-ar-desportivos": "Filtros de Ar Desportivos",
+  "escapes-silenciosos": "Escapes & Silenciosos",
+  "suspensoes-molas": "Suspensões & Molas",
+  "travagem-performance": "Travagem Performance",
+  "jantes-acessorios": "Jantes & Acessórios",
+  "iluminacao-upgrade": "Iluminação Upgrade",
+  "eletronica-chip-tuning": "Eletrónica & Chip Tuning",
+  "acessorios-desportivos": "Acessórios Desportivos",
+  
+  // Universal
+  "ferramentas": "Ferramentas",
+  "fixacoes": "Fixações",
+  "adesivos": "Adesivos",
+  "diversos": "Diversos",
+  
+  // Sinalética e Segurança
+  "sinaletica-interior-exterior": "Sinalética Interior & Exterior",
+  "kits-emergencia": "Kits de Emergência",
+  "coletes-refletores": "Coletes Refletores",
+  "triangulos": "Triângulos",
+  "extintores": "Extintores",
+  
+  // Acessórios (leaf categories)
+  "interior": "Interior",
+  "exterior-acessorios": "Exterior",
+  "conforto-utilitarios": "Conforto & Utilitários",
+  
+  // Elétrica (leaf categories)
+  "interruptores": "Interruptores",
+  "fusiveis-reles": "Fusíveis & Relés",
+  "cablagens-conectores": "Cablagens & Conectores",
+  
+  // Carroçaria sub-subcategories
+  "revestimentos-interiores": "Revestimentos Interiores",
+  "farois-farolins": "Faróis & Farolins",
+  "retrovisores": "Retrovisores",
+  "fechos-dobradicas": "Fechos & Dobradiças",
+  "para-choques": "Para-choques",
+  "grelhas": "Grelhas",
+  "guarda-lamas-extensoes": "Guarda-lamas & Extensões",
+  "capos-tampas": "Capôs & Tampas",
+  "portas-paineis-laterais": "Portas & Painéis Laterais",
+  "frisos-molduras": "Frisos & Molduras",
+  "suportes-estruturas": "Suportes & Estruturas",
+  
+  // Travagem sub-subcategories
+  "discos": "Discos",
+  "pastilhas-travao": "Pastilhas de Travão",
+  "maxilas-calcos-tambor": "Maxilas / Calços de Tambor",
+  "tambores-travao": "Tambores de Travão",
+  "pincas-travao-reparacoes": "Pinças de Travão & Reparações",
+  "bombas-travao": "Bombas de Travão",
+  "servofreio": "Servofreio (Hidrovácuo)",
+  "bombitos-cilindros-roda": "Bombitos / Cilindros de Roda",
+  "sensores-abs-velocidade": "Sensores ABS / Velocidade",
+  "tubos-mangueiras-travao": "Tubos & Mangueiras de Travão",
+  "oleo-liquido-travoes": "Óleo / Líquido de Travões",
+  "chapas-protecao-deflectores": "Chapas de Proteção / Deflectores",
+  "parafusos-acessorios": "Parafusos & Acessórios",
+  "kits-travagem": "Kits de Travagem",
+  
+  // Filtros sub-subcategories
+  "filtros-oleo": "Filtros de Óleo",
+  "filtros-ar": "Filtros de Ar",
+  "filtros-habitaculo": "Filtros de Habitáculo (Pólen)",
+  "filtros-combustivel": "Filtros de Combustível",
+  "filtros-caixa-velocidades": "Filtros de Caixa de Velocidades",
+  "filtros-hidraulicos": "Filtros Hidráulicos",
+  "filtros-particulas": "Filtros de Partículas (DPF/FAP)",
+  "filtros-transmissao-diferencial": "Filtros de Transmissão / Diferencial",
+  
+  // Suspensão e Direção sub-subcategories
+  "amortecedores": "Amortecedores",
+  "molas-suspensao": "Molas de Suspensão",
+  "topos-amortecedor-rolamentos": "Topos de Amortecedor & Rolamentos",
+  "bracos-suspensao": "Braços de Suspensão",
+  "rotulas-suspensao": "Rótulas de Suspensão",
+  "barras-estabilizadoras-tirantes": "Barras Estabilizadoras & Tirantes",
+  "casquilhos-suspensao": "Casquilhos de Suspensão",
+  "colunas-direcao": "Colunas de Direção",
+  "caixas-direcao": "Caixas de Direção",
+  "bombas-direcao-assistida": "Bombas de Direção Assistida",
+  "rotulas-direcao-terminais": "Rótulas de Direção / Terminais",
+  "volantes-direcao": "Volantes de Direção",
+  "servodirecao-eletrica-motores-eps": "Servodireção Elétrica / Motores EPS",
+  "kits-suspensao-direcao": "Kits de Suspensão & Direção",
+  
+  // Motor sub-subcategories
+  "correias": "Correias",
+  "tensores-rolamentos": "Tensores & Rolamentos",
+  "bombas-agua": "Bombas de Água",
+  "termostatos": "Termóstatos",
+  "juntas-vedantes": "Juntas & Vedantes",
+  "valvulas": "Válvulas",
+  "pistoes-segmentos": "Pistões & Segmentos",
+  "arvore-cames": "Árvore de Cames",
+  
+  // Sistema de Escape sub-subcategories
+  "flexivel-escape": "Flexível de Escape",
+  "unioes-escape": "Uniões de Escape",
+  "bracadeiras-escape": "Braçadeiras de Escape",
+  
+  // Shampoos & Limpeza sub-subcategories
+  "shampoo-concentrado": "Shampoo Concentrado",
+  "shampoo-com-cera": "Shampoo com Cera",
+  "desengorduante": "Desengorduante",
+  "limpa-jantes": "Limpa Jantes",
+  
+  // Ceras & Selantes sub-subcategories
+  "cera-liquida": "Cera Líquida",
+  "cera-pasta": "Cera em Pasta",
+  "selante-sintetico": "Selante Sintético",
+  "coating-ceramico": "Coating Cerâmico",
+  
+  // Polimento & Correção sub-subcategories
+  "polimento-fino": "Polimento Fino",
+  "composto-corte": "Composto de Corte",
+  "removedor-riscos": "Removedor Riscos",
+  "boinas-discos": "Boinas & Discos",
+  
+  // Exterior sub-subcategories (Cuidado e Detalhe)
+  "limpa-pneus": "Limpa Pneus",
+  "restaurador-plasticos": "Restaurador Plásticos",
+  "limpa-motor": "Limpa Motor",
+  "removedor-insetos": "Removedor Insetos",
+  
+  // Interiores sub-subcategories
+  "limpa-estofos": "Limpa Estofos",
+  "limpa-pele": "Limpa Pele",
+  "limpa-tablier": "Limpa Tablier",
+  "limpa-tapetes": "Limpa Tapetes",
+  
+  // Vidros & Espelhos sub-subcategories
+  "limpa-vidros": "Limpa Vidros",
+  "anti-embaciante": "Anti-Embaciante",
+  "repelente-agua": "Repelente Água",
+  "removedor-pelicula": "Removedor Película",
+  
+  // Panos & Acessórios sub-subcategories
+  "panos-microfibra": "Panos Microfibra",
+  "esponjas": "Esponjas",
+  "luvas-lavagem": "Luvas de Lavagem",
+  "aplicadores": "Aplicadores",
+  
+  // Odorizantes sub-subcategories
+  "ambientadores": "Ambientadores",
+  "eliminador-odores": "Eliminador Odores",
+  "fragrancias-auto": "Fragrâncias Auto",
+  
+  // Multimédia & Eletrónica sub-subcategories
+  "pilhas": "Pilhas",
+  "carregadores": "Carregadores",
+  "suportes-telemovel": "Suportes Telemóvel",
+  "camaras": "Câmaras",
+  
+  // Baterias sub-subcategories
+  "baterias-auto": "Baterias Auto",
+  "baterias-moto": "Baterias Moto",
+  "baterias-agm": "Baterias AGM",
+  "carregadores-baterias": "Carregadores",
+  
+  // Iluminação & Lâmpadas sub-subcategories
+  "lampadas-h7": "Lâmpadas H7",
+  "lampadas-h4": "Lâmpadas H4",
+  "led": "LED",
+  "xenon": "Xenon",
+  "lanternas": "Lanternas",
+};
+
+// Categories that have nested sub-subcategories
+const CATEGORIES_WITH_SUBSUB: Record<string, string[]> = {
+  "pecas": ["carrocaria", "travagem", "filtros", "suspensao-direcao", "motor", "sistema-escape"],
+  "cuidado-detalhe": ["shampoos-limpeza", "ceras-selantes", "polimento-correcao", "exterior", "interiores", "vidros-espelhos", "panos-acessorios", "odorizantes"],
+  "eletrica": ["baterias", "iluminacao-lampadas"],
+  "acessorios": ["multimedia-eletronica"],
+};
+
+// Subcategories that have their own sub-subcategories (and thus shouldn't show products directly)
+const hasSubSubCategories = (category: string, subcategory: string): boolean => {
+  return CATEGORIES_WITH_SUBSUB[category]?.includes(subcategory) || false;
+};
 
 const SubCategories = () => {
-  const { category, subcategory } = useParams<{ category: string; subcategory?: string }>();
+  const { category, subcategory, subsubcategory } = useParams<{ 
+    category: string; 
+    subcategory?: string;
+    subsubcategory?: string;
+  }>();
   const navigate = useNavigate();
   const { getProductsByCategory } = useProducts();
 
-  // Check if this subcategory should show products directly
-  const shouldShowProducts = subcategory && PRODUCT_DISPLAY_CATEGORIES.includes(subcategory);
+  // Determine if we should show products
+  const shouldShowProducts = (): boolean => {
+    if (!category) return false;
+    
+    // If we have a sub-subcategory, always show products
+    if (subsubcategory) return true;
+    
+    // If we have a subcategory but it doesn't have sub-subcategories, show products
+    if (subcategory && !hasSubSubCategories(category, subcategory)) return true;
+    
+    return false;
+  };
 
-  const getCategoryDisplayName = (slug: string): string => {
-    const nameMap: Record<string, string> = {
-      "oleos-motor": "Óleos de Motor",
-      "oleos-transmissao": "Óleos de Transmissão",
-      "oleos-hidraulicos": "Óleos Hidráulicos",
-      "liquidos-travao": "Líquidos de Travões",
-      "liquidos-arrefecimento": "Líquidos de Arrefecimento",
-      "aditivos-combustivel": "Aditivos de Combustível",
-      "aditivos-oleo": "Aditivos de Óleo",
-      "sprays-manutencao": "Sprays & Manutenção",
-      "oleos-especiais": "Óleos Especiais",
-    };
-    return nameMap[slug] || slug;
+  const getDisplayName = (slug: string): string => {
+    return CATEGORY_DISPLAY_NAMES[slug] || slug;
   };
 
   const getSubCategories = () => {
-    // Handle sub-subcategories (third level) - only for non-Lubrificantes categories
-    if (subcategory && !shouldShowProducts) {
+    // Handle sub-subcategories (third level)
+    if (subcategory && hasSubSubCategories(category!, subcategory)) {
       // Peças sub-subcategories
-      if (subcategory === "carrocaria") return { name: "Carroçaria", items: carrocariaSubSubCategories, parent: "pecas" };
-      if (subcategory === "travagem") return { name: "Travagem", items: travagemSubSubCategories, parent: "pecas" };
-      if (subcategory === "filtros") return { name: "Filtros", items: filtrosSubSubCategories, parent: "pecas" };
-      if (subcategory === "suspensao-direcao") return { name: "Suspensão e Direção", items: suspensaoDirecaoSubSubCategories, parent: "pecas" };
-      if (subcategory === "motor") return { name: "Motor", items: motorSubSubCategories, parent: "pecas" };
-      if (subcategory === "sistema-escape") return { name: "Sistema de Escape", items: sistemaEscapeSubSubCategories, parent: "pecas" };
+      if (subcategory === "carrocaria") return { name: "Carroçaria", items: carrocariaSubSubCategories, parent: category };
+      if (subcategory === "travagem") return { name: "Travagem", items: travagemSubSubCategories, parent: category };
+      if (subcategory === "filtros") return { name: "Filtros", items: filtrosSubSubCategories, parent: category };
+      if (subcategory === "suspensao-direcao") return { name: "Suspensão e Direção", items: suspensaoDirecaoSubSubCategories, parent: category };
+      if (subcategory === "motor") return { name: "Motor", items: motorSubSubCategories, parent: category };
+      if (subcategory === "sistema-escape") return { name: "Sistema de Escape", items: sistemaEscapeSubSubCategories, parent: category };
       
       // Cuidado e Detalhe sub-subcategories
-      if (subcategory === "shampoos-limpeza") return { name: "Shampoos & Limpeza", items: shampoosLimpezaSubSubCategories, parent: "cuidado-detalhe" };
-      if (subcategory === "ceras-selantes") return { name: "Ceras & Selantes", items: cerasSelantesSubSubCategories, parent: "cuidado-detalhe" };
-      if (subcategory === "polimento-correcao") return { name: "Polimento & Correção", items: polimentoCorrecaoSubSubCategories, parent: "cuidado-detalhe" };
-      if (subcategory === "exterior") return { name: "Exterior", items: exteriorSubSubCategories, parent: "cuidado-detalhe" };
-      if (subcategory === "interiores") return { name: "Interiores", items: interioresSubSubCategories, parent: "cuidado-detalhe" };
-      if (subcategory === "vidros-espelhos") return { name: "Vidros & Espelhos", items: vidrosEspelhosSubSubCategories, parent: "cuidado-detalhe" };
-      if (subcategory === "panos-acessorios") return { name: "Panos & Acessórios", items: panosAcessoriosSubSubCategories, parent: "cuidado-detalhe" };
-      if (subcategory === "odorizantes") return { name: "Odorizantes", items: odorizantesSubSubCategories, parent: "cuidado-detalhe" };
+      if (subcategory === "shampoos-limpeza") return { name: "Shampoos & Limpeza", items: shampoosLimpezaSubSubCategories, parent: category };
+      if (subcategory === "ceras-selantes") return { name: "Ceras & Selantes", items: cerasSelantesSubSubCategories, parent: category };
+      if (subcategory === "polimento-correcao") return { name: "Polimento & Correção", items: polimentoCorrecaoSubSubCategories, parent: category };
+      if (subcategory === "exterior") return { name: "Exterior", items: exteriorSubSubCategories, parent: category };
+      if (subcategory === "interiores") return { name: "Interiores", items: interioresSubSubCategories, parent: category };
+      if (subcategory === "vidros-espelhos") return { name: "Vidros & Espelhos", items: vidrosEspelhosSubSubCategories, parent: category };
+      if (subcategory === "panos-acessorios") return { name: "Panos & Acessórios", items: panosAcessoriosSubSubCategories, parent: category };
+      if (subcategory === "odorizantes") return { name: "Odorizantes", items: odorizantesSubSubCategories, parent: category };
       
       // Elétrica sub-subcategories
-      if (subcategory === "baterias") return { name: "Baterias", items: bateriasSubSubCategories, parent: "eletrica" };
-      if (subcategory === "iluminacao-lampadas") return { name: "Iluminação & Lâmpadas", items: iluminacaoLampadasSubSubCategories, parent: "eletrica" };
+      if (subcategory === "baterias") return { name: "Baterias", items: bateriasSubSubCategories, parent: category };
+      if (subcategory === "iluminacao-lampadas") return { name: "Iluminação & Lâmpadas", items: iluminacaoLampadasSubSubCategories, parent: category };
       
       // Acessórios sub-subcategories
-      if (subcategory === "multimedia-eletronica") return { name: "Multimédia & Eletrónica", items: multimediaEletronicaSubSubCategories, parent: "acessorios" };
+      if (subcategory === "multimedia-eletronica") return { name: "Multimédia & Eletrónica", items: multimediaEletronicaSubSubCategories, parent: category };
       
       return null;
     }
@@ -112,58 +297,43 @@ const SubCategories = () => {
     return null;
   };
 
-  const handleSubCategoryClick = (label: string) => {
-    // Peças subcategories
-    if (category === "pecas" && !subcategory) {
-      if (label === "Carroçaria") navigate("/subcategories/pecas/carrocaria");
-      else if (label === "Travagem") navigate("/subcategories/pecas/travagem");
-      else if (label === "Filtros") navigate("/subcategories/pecas/filtros");
-      else if (label === "Suspensão e Direção") navigate("/subcategories/pecas/suspensao-direcao");
-      else if (label === "Motor") navigate("/subcategories/pecas/motor");
-      else if (label === "Sistema de Escape") navigate("/subcategories/pecas/sistema-escape");
-    }
+  const labelToSlug = (label: string): string => {
+    return label
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/&/g, "")
+      .replace(/\//g, "-")
+      .replace(/\s+/g, "-")
+      .replace(/--+/g, "-")
+      .replace(/[()]/g, "")
+      .trim();
+  };
+
+  const handleItemClick = (label: string) => {
+    const slug = labelToSlug(label);
     
-    // Lubrificantes subcategories
-    if (category === "lubrificantes" && !subcategory) {
-      if (label === "Óleos de Motor") navigate("/subcategories/lubrificantes/oleos-motor");
-      else if (label === "Óleos de Transmissão & Diferencial") navigate("/subcategories/lubrificantes/oleos-transmissao");
-      else if (label === "Óleos Hidráulicos & Direção Assistida") navigate("/subcategories/lubrificantes/oleos-hidraulicos");
-      else if (label === "Líquidos de Travões") navigate("/subcategories/lubrificantes/liquidos-travao");
-      else if (label === "Líquidos de Arrefecimento") navigate("/subcategories/lubrificantes/liquidos-arrefecimento");
-      else if (label === "Aditivos de Combustível") navigate("/subcategories/lubrificantes/aditivos-combustivel");
-      else if (label === "Aditivos de Óleo") navigate("/subcategories/lubrificantes/aditivos-oleo");
-      else if (label === "Sprays & Manutenção") navigate("/subcategories/lubrificantes/sprays-manutencao");
-      else if (label === "Óleos Especiais") navigate("/subcategories/lubrificantes/oleos-especiais");
-    }
-    
-    // Cuidado e Detalhe subcategories
-    if (category === "cuidado-detalhe" && !subcategory) {
-      if (label === "Shampoos & Limpeza") navigate("/subcategories/cuidado-detalhe/shampoos-limpeza");
-      else if (label === "Ceras & Selantes") navigate("/subcategories/cuidado-detalhe/ceras-selantes");
-      else if (label === "Polimento & Correção") navigate("/subcategories/cuidado-detalhe/polimento-correcao");
-      else if (label === "Exterior") navigate("/subcategories/cuidado-detalhe/exterior");
-      else if (label === "Interiores") navigate("/subcategories/cuidado-detalhe/interiores");
-      else if (label === "Vidros & Espelhos") navigate("/subcategories/cuidado-detalhe/vidros-espelhos");
-      else if (label === "Panos & Acessórios") navigate("/subcategories/cuidado-detalhe/panos-acessorios");
-      else if (label === "Odorizantes") navigate("/subcategories/cuidado-detalhe/odorizantes");
-    }
-    
-    // Elétrica subcategories
-    if (category === "eletrica" && !subcategory) {
-      if (label === "Baterias") navigate("/subcategories/eletrica/baterias");
-      else if (label === "Iluminação & Lâmpadas") navigate("/subcategories/eletrica/iluminacao-lampadas");
-    }
-    
-    // Acessórios subcategories
-    if (category === "acessorios" && !subcategory) {
-      if (label === "Multimédia & Eletrónica") navigate("/subcategories/acessorios/multimedia-eletronica");
+    if (subcategory) {
+      // We're viewing sub-subcategories, navigate to product page
+      navigate(`/subcategories/${category}/${subcategory}/${slug}`);
+    } else {
+      // We're viewing subcategories
+      navigate(`/subcategories/${category}/${slug}`);
     }
   };
 
   // If showing products for this category
-  if (shouldShowProducts && subcategory) {
-    const categoryName = getCategoryDisplayName(subcategory);
+  if (shouldShowProducts()) {
+    const productSlug = subsubcategory || subcategory;
+    const categoryName = getDisplayName(productSlug!);
     const categoryProducts = getProductsByCategory(categoryName);
+
+    const getBackPath = () => {
+      if (subsubcategory) {
+        return `/subcategories/${category}/${subcategory}`;
+      }
+      return `/subcategories/${category}`;
+    };
 
     return (
       <div className="min-h-screen bg-background pb-20">
@@ -172,7 +342,7 @@ const SubCategories = () => {
         <main className="container px-4 py-6 space-y-6">
           {/* Back button */}
           <button
-            onClick={() => navigate(`/subcategories/${category}`)}
+            onClick={() => navigate(getBackPath())}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -218,15 +388,6 @@ const SubCategories = () => {
   }
 
   const isThirdLevel = !!subcategory;
-  
-  // Check which categories have clickable items
-  const hasClickableItems = !subcategory && (
-    category === "pecas" ||
-    category === "lubrificantes" ||
-    category === "cuidado-detalhe" ||
-    category === "eletrica" ||
-    category === "acessorios"
-  );
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -262,11 +423,11 @@ const SubCategories = () => {
           {data.items.map((item, i) => (
             <div
               key={item.id}
-              onClick={() => handleSubCategoryClick(item.label)}
-              className={`flex flex-col items-center gap-2 animate-fade-in ${hasClickableItems ? 'cursor-pointer' : ''}`}
+              onClick={() => handleItemClick(item.label)}
+              className="flex flex-col items-center gap-2 animate-fade-in cursor-pointer"
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className={`w-20 h-20 rounded-lg bg-card border border-border flex items-center justify-center text-3xl transition-colors ${hasClickableItems ? 'hover:border-primary/50' : ''}`}>
+              <div className="w-20 h-20 rounded-lg bg-card border border-border flex items-center justify-center text-3xl transition-colors hover:border-primary/50">
                 {item.icon}
               </div>
               <span className="text-xs text-center text-muted-foreground">{item.label}</span>
