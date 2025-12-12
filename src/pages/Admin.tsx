@@ -154,23 +154,27 @@ const Admin = () => {
           // Normalize the category to match app structure
           const normalizedCategory = normalizeCategory(scrapedProduct.category);
           
-          // Check if product already exists (by name)
+          // Check if product already exists - prefer sourceUrl match, fallback to name
           const existingProduct = products.find(
-            p => p.name.toLowerCase() === scrapedProduct.name.toLowerCase()
+            p => (p.sourceUrl && p.sourceUrl === scrapedProduct.sourceUrl) ||
+                 p.name.toLowerCase().trim() === scrapedProduct.name.toLowerCase().trim()
           );
 
           if (existingProduct) {
             // Check if price, name, category, or image changed
-            if (existingProduct.price !== scrapedProduct.price || 
+            const hasChanges = existingProduct.price !== scrapedProduct.price || 
                 existingProduct.name !== scrapedProduct.name ||
                 existingProduct.category !== normalizedCategory ||
-                existingProduct.image !== scrapedProduct.image) {
+                existingProduct.image !== scrapedProduct.image;
+            
+            if (hasChanges) {
               updateProduct(existingProduct.id, {
                 price: scrapedProduct.price,
                 name: scrapedProduct.name,
                 category: normalizedCategory,
                 image: scrapedProduct.image,
                 inStock: scrapedProduct.inStock,
+                sourceUrl: scrapedProduct.sourceUrl,
               });
               updatedCount++;
             }
@@ -183,6 +187,7 @@ const Admin = () => {
               price: scrapedProduct.price,
               image: scrapedProduct.image,
               inStock: scrapedProduct.inStock,
+              sourceUrl: scrapedProduct.sourceUrl,
               description: '',
             });
             newCount++;

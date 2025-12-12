@@ -8,6 +8,7 @@ export interface Product {
   image: string;
   inStock: boolean;
   description?: string;
+  sourceUrl?: string;
 }
 
 export interface Brand {
