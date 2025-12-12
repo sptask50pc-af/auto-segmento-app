@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { mainCategories } from "@/data/mockData";
-import { ChevronRight, Sparkles } from "lucide-react";
+import { ChevronRight, Sparkles, MapPin, Phone, Clock } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -93,6 +93,72 @@ const Index = () => {
           <div className="bg-card/80 backdrop-blur rounded-xl p-4 border border-border text-center">
             <p className="text-2xl font-bold text-foreground">100%</p>
             <p className="text-xs text-muted-foreground">Original</p>
+          </div>
+        </section>
+
+        {/* Store Details Section */}
+        <section className="animate-slide-up" style={{ animationDelay: "300ms" }}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <span className="w-1 h-6 bg-primary rounded-full" />
+              Visite-nos
+            </h2>
+          </div>
+          
+          <div className="bg-card/80 backdrop-blur rounded-2xl border border-border overflow-hidden">
+            <div className="p-5 space-y-4">
+              {/* Address */}
+              <a 
+                href="https://maps.google.com/?q=Rotunda Armindo Lousada n-º4C, 3400-076 Oliveira do Hospital"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-3 group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/30 transition-colors">
+                  <MapPin className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Morada</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Rotunda Armindo Lousada n-º4C,<br />
+                    3400-076 Oliveira do Hospital
+                  </p>
+                </div>
+              </a>
+
+              {/* Divider */}
+              <div className="h-px bg-border" />
+
+              {/* Phone */}
+              <a 
+                href="tel:238094280"
+                className="flex items-center gap-3 group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/30 transition-colors">
+                  <Phone className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Telefone</p>
+                  <p className="text-sm text-muted-foreground">238 094 280</p>
+                </div>
+              </a>
+
+              {/* Divider */}
+              <div className="h-px bg-border" />
+
+              {/* Hours */}
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">Horário</p>
+                  <p className="text-sm text-muted-foreground">
+                    <span className="text-primary font-medium">Fechado</span> · Abre às 9h Sábado
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
