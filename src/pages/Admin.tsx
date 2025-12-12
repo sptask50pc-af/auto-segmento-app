@@ -90,6 +90,7 @@ const Admin = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState({ current: 0, total: 0, status: '' });
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
@@ -134,10 +135,7 @@ const Admin = () => {
 
   const handleUpdateFromWebsite = async () => {
     setIsUpdating(true);
-    toast({
-      title: "A atualizar...",
-      description: "A verificar produtos em segmentopositivo.pt",
-    });
+    setUpdateProgress({ current: 0, total: 5, status: 'A carregar categorias...' });
 
     try {
       const { data, error } = await supabase.functions.invoke('scrape-products');
@@ -146,22 +144,31 @@ const Admin = () => {
         throw error;
       }
 
+      setUpdateProgress({ current: 3, total: 5, status: 'A processar produtos...' });
+
       if (data?.success && data.products?.length > 0) {
         let newCount = 0;
         let updatedCount = 0;
+        const totalProducts = data.products.length;
 
-        for (const scrapedProduct of data.products) {
-          // Normalize the category to match app structure
+        for (let i = 0; i < data.products.length; i++) {
+          const scrapedProduct = data.products[i];
           const normalizedCategory = normalizeCategory(scrapedProduct.category);
           
-          // Check if product already exists - prefer sourceUrl match, fallback to name
+          if (i % 10 === 0) {
+            setUpdateProgress({ 
+              current: 3 + Math.floor((i / totalProducts) * 2), 
+              total: 5, 
+              status: `A processar ${i + 1}/${totalProducts} produtos...` 
+            });
+          }
+          
           const existingProduct = products.find(
             p => (p.sourceUrl && p.sourceUrl === scrapedProduct.sourceUrl) ||
                  p.name.toLowerCase().trim() === scrapedProduct.name.toLowerCase().trim()
           );
 
           if (existingProduct) {
-            // Check if price, name, category, or image changed
             const hasChanges = existingProduct.price !== scrapedProduct.price || 
                 existingProduct.name !== scrapedProduct.name ||
                 existingProduct.category !== normalizedCategory ||
@@ -179,7 +186,6 @@ const Admin = () => {
               updatedCount++;
             }
           } else {
-            // Add new product with normalized category
             addProduct({
               name: scrapedProduct.name,
               brand: scrapedProduct.brand,
@@ -194,14 +200,16 @@ const Admin = () => {
           }
         }
 
+        setUpdateProgress({ current: 5, total: 5, status: 'Concluído!' });
         toast({
           title: "Atualização concluída",
-          description: `${newCount} novos produtos, ${updatedCount} atualizados.`,
+          description: `${newCount} novos produtos, ${updatedCount} atualizados de ${totalProducts} encontrados.`,
         });
       } else {
         toast({
-          title: "Sem novos produtos",
-          description: "Não foram encontrados produtos novos.",
+          title: "Sem produtos",
+          description: data?.error || "Não foram encontrados produtos.",
+          variant: "destructive",
         });
       }
     } catch (error) {
@@ -213,6 +221,7 @@ const Admin = () => {
       });
     } finally {
       setIsUpdating(false);
+      setTimeout(() => setUpdateProgress({ current: 0, total: 0, status: '' }), 2000);
     }
   };
 
@@ -248,6 +257,22 @@ const Admin = () => {
             </div>
           </div>
         </div>
+
+        {/* Progress Indicator */}
+        {isUpdating && updateProgress.total > 0 && (
+          <div className="rounded-xl bg-card p-4 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">{updateProgress.status}</span>
+              <span className="font-medium">{updateProgress.current}/{updateProgress.total}</span>
+            </div>
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-300"
+                style={{ width: `${(updateProgress.current / updateProgress.total) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex gap-3">
