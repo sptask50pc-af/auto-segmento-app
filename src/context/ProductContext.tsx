@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { Product } from "@/types/product";
 import { initialProducts } from "@/data/mockData";
+
+const STORAGE_KEY = "segmento_products";
 
 interface ProductContextType {
   products: Product[];
@@ -12,8 +14,33 @@ interface ProductContextType {
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
+function loadProductsFromStorage(): Product[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error("Failed to load products from storage:", e);
+  }
+  return initialProducts;
+}
+
+function saveProductsToStorage(products: Product[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  } catch (e) {
+    console.error("Failed to save products to storage:", e);
+  }
+}
+
 export function ProductProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>(loadProductsFromStorage);
+
+  // Persist products to localStorage whenever they change
+  useEffect(() => {
+    saveProductsToStorage(products);
+  }, [products]);
 
   const addProduct = (product: Omit<Product, "id">) => {
     const newProduct: Product = {
