@@ -56,37 +56,49 @@ function extractCategoryFromUrl(url: string): string {
   return 'Geral';
 }
 
-async function scrapeWithFirecrawl(url: string, apiKey: string): Promise<string> {
+async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 3): Promise<string> {
   console.log(`Scraping ${url} with Firecrawl...`);
   
-  const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      url,
-      formats: ['html'],
-      onlyMainContent: false,
-      waitFor: 2000,
-    }),
-  });
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url,
+        formats: ['html'],
+        onlyMainContent: false,
+        waitFor: 2000,
+      }),
+    });
 
-  if (response.status === 429) {
-    const errorText = await response.text();
-    console.error(`Firecrawl rate limit for ${url}:`, errorText);
-    throw new Error('RATE_LIMIT');
+    if (response.status === 429) {
+      const errorText = await response.text();
+      console.error(`Firecrawl rate limit (attempt ${attempt}/${maxRetries}) for ${url}:`, errorText);
+      
+      if (attempt < maxRetries) {
+        // Exponential backoff: 10s, 20s, 40s
+        const waitTime = 10000 * Math.pow(2, attempt - 1);
+        console.log(`Waiting ${waitTime/1000}s before retry...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+      throw new Error('RATE_LIMIT');
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Firecrawl error for ${url}:`, response.status, errorText);
+      throw new Error(`Firecrawl error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.data?.html || '';
   }
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error(`Firecrawl error for ${url}:`, response.status, errorText);
-    throw new Error(`Firecrawl error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.data?.html || '';
+  
+  throw new Error('RATE_LIMIT');
 }
 
 const KNOWN_BRANDS = ['Liqui Moly', 'Mannol', 'Motul', 'Castrol', 'Shell', 'Total', 'Wurth', 'WD-40', 'Sonax', 'Meguiars', 'Chemical Guys', 'K2', 'MA', 'Petronas', 'Febi', 'UFI', 'FAST', 'Valvoline'];
@@ -284,7 +296,7 @@ serve(async (req) => {
         console.log(`Category ${i + 1}/${totalCategories}: Found ${products.length} product URLs (total: ${allProductUrls.length})`);
         
         // Brief pause between category pages
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 5000));
       } catch (categoryError) {
         console.error(`Error scraping ${categoryPath}:`, categoryError);
         if (categoryError instanceof Error && categoryError.message === 'RATE_LIMIT') {
@@ -333,7 +345,7 @@ serve(async (req) => {
         }
         
         // Pause between product pages to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 6000));
         
       } catch (productError) {
         console.error(`Error scraping product ${productInfo.url}:`, productError);
