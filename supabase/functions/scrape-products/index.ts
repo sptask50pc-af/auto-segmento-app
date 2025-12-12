@@ -65,6 +65,12 @@ async function scrapeWithFirecrawl(url: string, apiKey: string): Promise<string>
     }),
   });
 
+  if (response.status === 429) {
+    const errorText = await response.text();
+    console.error(`Firecrawl rate limit for ${url}:`, errorText);
+    throw new Error('RATE_LIMIT');
+  }
+
   if (!response.ok) {
     const errorText = await response.text();
     console.error(`Firecrawl error for ${url}:`, response.status, errorText);
@@ -188,6 +194,7 @@ serve(async (req) => {
     const allProducts: ScrapedProduct[] = [];
     const seenUrls = new Set<string>();
     const totalCategories = CATEGORY_URLS.length;
+    let rateLimited = false;
     
     for (let i = 0; i < CATEGORY_URLS.length; i++) {
       const categoryPath = CATEGORY_URLS[i];
@@ -207,15 +214,31 @@ serve(async (req) => {
         
         console.log(`Category ${i + 1}/${totalCategories}: ${products.length} products (total: ${allProducts.length})`);
         
-        // Delay between requests
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Be gentle with the Firecrawl rate limit
+        await new Promise(resolve => setTimeout(resolve, 4000));
       } catch (categoryError) {
         console.error(`Error scraping ${categoryPath}:`, categoryError);
+        if (categoryError instanceof Error && categoryError.message === 'RATE_LIMIT') {
+          rateLimited = true;
+          break;
+        }
       }
     }
     
     console.log(`Scraping complete: ${allProducts.length} products`);
 
+    if (rateLimited && allProducts.length === 0) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Limite de pedidos do Firecrawl atingido. Por favor aguarde ~20 segundos e tente novamente.',
+          products: [],
+          progress: { current: 0, total: totalCategories },
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     return new Response(
       JSON.stringify({ 
         success: true, 
