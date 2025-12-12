@@ -11,23 +11,35 @@ import { Product } from "@/types/product";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-// Map scraped category names to app category names
+// Map scraped category names to app category names (case-insensitive matching)
 const CATEGORY_MAPPING: Record<string, string> = {
-  // Óleos
+  // Óleos de Motor
   "oleos de motor": "Óleos de Motor",
   "óleos de motor": "Óleos de Motor",
+  
+  // Óleos de Transmissão & Diferencial
   "oleos de transmissao diferencial": "Óleos de Transmissão & Diferencial",
   "óleos de transmissão & diferencial": "Óleos de Transmissão & Diferencial",
+  "oleos de transmissao & diferencial": "Óleos de Transmissão & Diferencial",
+  
+  // Óleos Hidráulicos & Direção Assistida
   "oleos hidraulicos direcao assistida": "Óleos Hidráulicos & Direção Assistida",
   "óleos hidráulicos & direção assistida": "Óleos Hidráulicos & Direção Assistida",
+  "oleos hidraulicos & direcao assistida": "Óleos Hidráulicos & Direção Assistida",
+  
+  // Óleos Especiais
   "oleos especiais outros": "Óleos Especiais",
   "óleos especiais": "Óleos Especiais",
+  "oleos especiais": "Óleos Especiais",
   
-  // Líquidos
+  // Líquidos de Travões
   "liquidos de travoes": "Líquidos de Travões",
   "líquidos de travões": "Líquidos de Travões",
+  
+  // Líquidos de Arrefecimento
   "liquidos de arrefecimento anticongelante": "Líquidos de Arrefecimento",
   "líquidos de arrefecimento": "Líquidos de Arrefecimento",
+  "liquidos de arrefecimento": "Líquidos de Arrefecimento",
   
   // Aditivos
   "aditivos de oleo": "Aditivos de Óleo",
@@ -42,6 +54,7 @@ const CATEGORY_MAPPING: Record<string, string> = {
   "ceras selantes": "Ceras & Selantes",
   "polimento & correção": "Polimento & Correção",
   "polimento correcao": "Polimento & Correção",
+  "polimento & correcao": "Polimento & Correção",
   "exterior": "Exterior",
   "exterior ": "Exterior",
   "interiores": "Interiores",
@@ -49,6 +62,7 @@ const CATEGORY_MAPPING: Record<string, string> = {
   "vidros espelhos": "Vidros & Espelhos",
   "panos & acessórios": "Panos & Acessórios",
   "panos acessorios": "Panos & Acessórios",
+  "panos & acessorios": "Panos & Acessórios",
   "odorizantes": "Odorizantes",
   "cuidado e detalhe": "Cuidado e Detalhe",
   
@@ -58,10 +72,12 @@ const CATEGORY_MAPPING: Record<string, string> = {
   "sprays": "Sprays & Manutenção",
   "sprays & manutenção": "Sprays & Manutenção",
   "sprays manutencao": "Sprays & Manutenção",
+  "sprays & manutencao": "Sprays & Manutenção",
   "baterias": "Baterias",
   "universal": "Universal",
   "iluminação & lâmpadas": "Iluminação & Lâmpadas",
   "iluminacao lampadas": "Iluminação & Lâmpadas",
+  "iluminacao & lampadas": "Iluminação & Lâmpadas",
 };
 
 function normalizeCategory(scrapedCategory: string): string {
