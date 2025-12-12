@@ -264,6 +264,16 @@ const Admin = () => {
             <RefreshCw className={`h-5 w-5 ${isUpdating ? 'animate-spin' : ''}`} />
             {isUpdating ? 'A atualizar...' : 'Update'}
           </Button>
+          <Button 
+            onClick={() => {
+              localStorage.removeItem('segmento_products');
+              window.location.reload();
+            }} 
+            variant="destructive"
+            className="gap-2"
+          >
+            Reset
+          </Button>
         </div>
 
         {/* Products Grid */}
