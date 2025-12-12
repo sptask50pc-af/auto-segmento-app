@@ -2,7 +2,31 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { mainCategories } from "@/data/mockData";
-import { ChevronRight, Sparkles, MapPin, Phone, Clock } from "lucide-react";
+import { 
+  ChevronRight, 
+  Sparkles, 
+  MapPin, 
+  Phone, 
+  Clock,
+  Wrench,
+  Droplets,
+  Car,
+  Gauge,
+  Zap,
+  Settings,
+  ShieldAlert
+} from "lucide-react";
+
+const iconMap: Record<string, React.ReactNode> = {
+  wrench: <Wrench className="w-7 h-7" />,
+  droplets: <Droplets className="w-7 h-7" />,
+  car: <Car className="w-7 h-7" />,
+  sparkles: <Sparkles className="w-7 h-7" />,
+  gauge: <Gauge className="w-7 h-7" />,
+  zap: <Zap className="w-7 h-7" />,
+  settings: <Settings className="w-7 h-7" />,
+  "shield-alert": <ShieldAlert className="w-7 h-7" />,
+};
 
 const Index = () => {
   const navigate = useNavigate();
@@ -62,11 +86,12 @@ const Index = () => {
                   className="group flex flex-col items-center gap-2 cursor-pointer animate-scale-in"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="relative w-20 h-20 rounded-xl bg-gradient-to-br from-card to-secondary border border-border flex items-center justify-center text-3xl transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-lg group-hover:shadow-primary/20 group-hover:scale-105 group-active:scale-95">
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <span className="relative z-10 transition-transform group-hover:scale-110">
-                      {category.icon}
-                    </span>
+                  <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-card via-secondary to-card border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="relative z-10 text-primary/80 group-hover:text-primary transition-colors duration-300 group-hover:scale-110 transform">
+                      {iconMap[category.icon] || category.icon}
+                    </div>
                   </div>
                   <span className="text-xs text-center text-muted-foreground leading-tight group-hover:text-foreground transition-colors font-medium">
                     {category.label}
