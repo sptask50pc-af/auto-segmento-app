@@ -5,7 +5,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { ProductForm } from "@/components/ProductForm";
 import { useProducts } from "@/context/ProductContext";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Plus, Package, RefreshCw } from "lucide-react";
 import { Product } from "@/types/product";
 import { toast } from "@/hooks/use-toast";
@@ -266,22 +267,6 @@ const Admin = () => {
           </div>
         </div>
 
-        {/* Progress Indicator */}
-        {isUpdating && updateProgress.total > 0 && (
-          <div className="rounded-xl bg-card p-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{updateProgress.status}</span>
-              <span className="font-medium">{updateProgress.current}/{updateProgress.total}</span>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-primary transition-all duration-300"
-                style={{ width: `${(updateProgress.current / updateProgress.total) * 100}%` }}
-              />
-            </div>
-          </div>
-        )}
-
         {/* Action Buttons */}
         <div className="flex gap-3">
           <Button onClick={handleAddNew} className="flex-1 gap-2">
@@ -297,19 +282,39 @@ const Admin = () => {
             <RefreshCw className={`h-5 w-5 ${isUpdating ? 'animate-spin' : ''}`} />
             {isUpdating ? 'A atualizar...' : 'Update'}
           </Button>
-          <Button 
-            onClick={async () => {
-              await deleteAllProducts();
-              toast({
-                title: "Reset concluído",
-                description: "Todos os produtos foram removidos.",
-              });
-            }} 
-            variant="destructive"
-            className="gap-2"
-          >
-            Reset
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="destructive"
+                className="gap-2"
+              >
+                Reset
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-card border-border">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Tem a certeza?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação irá remover permanentemente todos os {products.length} produtos da base de dados. Esta ação não pode ser desfeita.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async () => {
+                    await deleteAllProducts();
+                    toast({
+                      title: "Reset concluído",
+                      description: "Todos os produtos foram removidos.",
+                    });
+                  }}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Eliminar Tudo
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         {/* Products Grid */}
@@ -326,6 +331,33 @@ const Admin = () => {
           ))}
         </div>
       </main>
+
+      {/* Progress Dialog */}
+      <Dialog open={isUpdating} onOpenChange={() => {}}>
+        <DialogContent className="bg-card border-border sm:max-w-md [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="h-5 w-5 animate-spin text-primary" />
+              A atualizar produtos
+            </DialogTitle>
+            <DialogDescription>
+              Por favor aguarde enquanto os produtos são sincronizados...
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">{updateProgress.status}</span>
+              <span className="font-medium">{updateProgress.current}/{updateProgress.total}</span>
+            </div>
+            <div className="h-3 bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-300"
+                style={{ width: `${updateProgress.total > 0 ? (updateProgress.current / updateProgress.total) * 100 : 0}%` }}
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Product Form Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
