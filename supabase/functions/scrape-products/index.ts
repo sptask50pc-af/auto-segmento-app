@@ -70,7 +70,8 @@ function extractCategoryFromUrl(url: string): string {
     const segments = urlPath.split('/').filter(Boolean);
     
     if (segments.length > 0) {
-      const categorySlug = segments[0].toLowerCase();
+      // Handle numeric category format like /4528-oleos-de-motor
+      const categorySlug = segments[0].toLowerCase().replace(/^\d+-/, '');
       return CATEGORY_MAP[categorySlug] || categorySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
   } catch (e) {
@@ -125,12 +126,16 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
   
   console.log('Parsing HTML, length:', html.length);
   
-  // PrestaShop uses article.product-miniature for products
-  const productPattern = /<article[^>]*class="[^"]*product-miniature[^"]*"[^>]*>([\s\S]*?)<\/article>/gi;
+  // PrestaShop uses article.product-miniature for products - improved pattern
+  const productPattern = /<article[^>]*class="[^"]*product-miniature[^"]*"[^>]*>[\s\S]*?<\/article>/gi;
   const productMatches = html.match(productPattern);
   
   if (!productMatches) {
     console.log('No product-miniature articles found');
+    // Try alternative pattern for div-based products
+    const altPattern = /<div[^>]*class="[^"]*product-container[^"]*"[^>]*>[\s\S]*?<\/div>\s*<\/div>/gi;
+    const altMatches = html.match(altPattern);
+    console.log('Alternative pattern matches:', altMatches?.length || 0);
     return products;
   }
   
@@ -199,16 +204,14 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
   return products;
 }
 
-// Reduced category URLs to stay within rate limits
+// Actual category URLs from the website - limited to avoid rate limits
 const CATEGORY_URLS = [
-  '/lubrificantes/liquidos-de-arrefecimento',
-  '/lubrificantes/oleos-de-motor',
-  '/lubrificantes/oleos-de-transmissao',
-  '/lubrificantes/liquidos-de-travoes',
-  '/cuidado-detalhe',
-  '/pecas/filtros',
-  '/pecas/travagem',
-  '/eletrica',
+  '', // Homepage - has products in carousel  
+  '/4528-oleos-de-motor',
+  '/4529-oleos-de-transmissao',
+  '/4531-liquidos-de-arrefecimento',
+  '/4532-liquidos-de-travoes',
+  '/4534-aditivos-de-oleo',
 ];
 
 serve(async (req) => {
