@@ -1,16 +1,24 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductForm } from "@/components/ProductForm";
 import { useProducts } from "@/context/ProductContext";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Package, RefreshCw } from "lucide-react";
+import { Plus, Package, RefreshCw, Search, CheckCircle, AlertCircle, XCircle } from "lucide-react";
 import { Product } from "@/types/product";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+
+interface ScrapeSummary {
+  total: number;
+  inserted: number;
+  updated: number;
+  failed: number;
+}
 
 // Map scraped category names to app category names (case-insensitive matching)
 const CATEGORY_MAPPING: Record<string, string> = {
@@ -87,12 +95,26 @@ function normalizeCategory(scrapedCategory: string): string {
 }
 
 const Admin = () => {
-  const { products, loading, addProduct, updateProduct, deleteProduct, deleteAllProducts } = useProducts();
+  const { products, loading, addProduct, updateProduct, deleteProduct, deleteAllProducts, refetch } = useProducts();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateProgress, setUpdateProgress] = useState({ current: 0, total: 0, status: '' });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSummary, setShowSummary] = useState(false);
+  const [scrapeSummary, setScrapeSummary] = useState<ScrapeSummary>({ total: 0, inserted: 0, updated: 0, failed: 0 });
 
+  // Filter products by search query
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) return products;
+    const query = searchQuery.toLowerCase();
+    return products.filter(p => 
+      p.name.toLowerCase().includes(query) ||
+      p.brand?.toLowerCase().includes(query) ||
+      p.category.toLowerCase().includes(query) ||
+      p.reference?.toLowerCase().includes(query)
+    );
+  }, [products, searchQuery]);
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setIsDialogOpen(true);
@@ -137,6 +159,7 @@ const Admin = () => {
   const handleUpdateFromWebsite = async () => {
     setIsUpdating(true);
     setUpdateProgress({ current: 0, total: 5, status: 'A carregar categorias...' });
+    const summary: ScrapeSummary = { total: 0, inserted: 0, updated: 0, failed: 0 };
 
     try {
       const { data, error } = await supabase.functions.invoke('scrape-products');
@@ -148,9 +171,7 @@ const Admin = () => {
       setUpdateProgress({ current: 3, total: 5, status: 'A processar produtos...' });
 
       if (data?.success && data.products?.length > 0) {
-        let newCount = 0;
-        let updatedCount = 0;
-        const totalProducts = data.products.length;
+        summary.total = data.products.length;
 
         for (let i = 0; i < data.products.length; i++) {
           const scrapedProduct = data.products[i];
@@ -158,54 +179,56 @@ const Admin = () => {
           
           if (i % 10 === 0) {
             setUpdateProgress({ 
-              current: 3 + Math.floor((i / totalProducts) * 2), 
+              current: 3 + Math.floor((i / summary.total) * 2), 
               total: 5, 
-              status: `A processar ${i + 1}/${totalProducts} produtos...` 
+              status: `A processar ${i + 1}/${summary.total} produtos...` 
             });
           }
           
-          const existingProduct = products.find(
-            p => (p.sourceUrl && p.sourceUrl === scrapedProduct.sourceUrl) ||
-                 p.name.toLowerCase().trim() === scrapedProduct.name.toLowerCase().trim()
-          );
+          try {
+            const existingProduct = products.find(
+              p => (p.sourceUrl && p.sourceUrl === scrapedProduct.sourceUrl) ||
+                   p.name.toLowerCase().trim() === scrapedProduct.name.toLowerCase().trim()
+            );
 
-          if (existingProduct) {
-            const hasChanges = existingProduct.price !== scrapedProduct.price || 
-                existingProduct.name !== scrapedProduct.name ||
-                existingProduct.category !== normalizedCategory ||
-                existingProduct.image !== scrapedProduct.image;
-            
-            if (hasChanges) {
-              updateProduct(existingProduct.id, {
-                price: scrapedProduct.price,
+            if (existingProduct) {
+              const hasChanges = existingProduct.price !== scrapedProduct.price || 
+                  existingProduct.name !== scrapedProduct.name ||
+                  existingProduct.category !== normalizedCategory ||
+                  existingProduct.image !== scrapedProduct.image;
+              
+              if (hasChanges) {
+                await updateProduct(existingProduct.id, {
+                  price: scrapedProduct.price,
+                  name: scrapedProduct.name,
+                  category: normalizedCategory,
+                  image: scrapedProduct.image,
+                  inStock: scrapedProduct.inStock,
+                  sourceUrl: scrapedProduct.sourceUrl,
+                });
+                summary.updated++;
+              }
+            } else {
+              await addProduct({
                 name: scrapedProduct.name,
+                brand: scrapedProduct.brand,
                 category: normalizedCategory,
+                price: scrapedProduct.price,
                 image: scrapedProduct.image,
                 inStock: scrapedProduct.inStock,
                 sourceUrl: scrapedProduct.sourceUrl,
+                description: '',
               });
-              updatedCount++;
+              summary.inserted++;
             }
-          } else {
-            addProduct({
-              name: scrapedProduct.name,
-              brand: scrapedProduct.brand,
-              category: normalizedCategory,
-              price: scrapedProduct.price,
-              image: scrapedProduct.image,
-              inStock: scrapedProduct.inStock,
-              sourceUrl: scrapedProduct.sourceUrl,
-              description: '',
-            });
-            newCount++;
+          } catch (productError) {
+            console.error('Error processing product:', productError);
+            summary.failed++;
           }
         }
 
         setUpdateProgress({ current: 5, total: 5, status: 'Concluído!' });
-        toast({
-          title: "Atualização concluída",
-          description: `${newCount} novos produtos, ${updatedCount} atualizados de ${totalProducts} encontrados.`,
-        });
+        await refetch();
       } else {
         toast({
           title: "Sem produtos",
@@ -222,7 +245,11 @@ const Admin = () => {
       });
     } finally {
       setIsUpdating(false);
-      setTimeout(() => setUpdateProgress({ current: 0, total: 0, status: '' }), 2000);
+      setScrapeSummary(summary);
+      if (summary.total > 0) {
+        setShowSummary(true);
+      }
+      setUpdateProgress({ current: 0, total: 0, status: '' });
     }
   };
 
@@ -265,6 +292,17 @@ const Admin = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Pesquisar por nome, marca, categoria ou referência..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-card border-border"
+          />
         </div>
 
         {/* Action Buttons */}
@@ -318,8 +356,13 @@ const Admin = () => {
         </div>
 
         {/* Products Grid */}
+        {searchQuery && (
+          <p className="text-sm text-muted-foreground">
+            {filteredProducts.length} de {products.length} produtos
+          </p>
+        )}
         <div className="grid grid-cols-2 gap-4">
-          {products.map((product, i) => (
+          {filteredProducts.map((product, i) => (
             <ProductCard
               key={product.id}
               product={product}
@@ -372,6 +415,55 @@ const Admin = () => {
             onSubmit={handleSubmit}
             onCancel={handleCancel}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Scrape Summary Dialog */}
+      <Dialog open={showSummary} onOpenChange={setShowSummary}>
+        <DialogContent className="bg-card border-border sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              Atualização Concluída
+            </DialogTitle>
+            <DialogDescription>
+              Resumo da sincronização de produtos
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-lg bg-muted p-4 text-center">
+                <p className="text-2xl font-bold">{scrapeSummary.total}</p>
+                <p className="text-xs text-muted-foreground">Total Encontrados</p>
+              </div>
+              <div className="rounded-lg bg-green-500/10 p-4 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <p className="text-2xl font-bold text-green-500">{scrapeSummary.inserted}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">Novos</p>
+              </div>
+              <div className="rounded-lg bg-blue-500/10 p-4 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <RefreshCw className="h-4 w-4 text-blue-500" />
+                  <p className="text-2xl font-bold text-blue-500">{scrapeSummary.updated}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">Atualizados</p>
+              </div>
+              <div className="rounded-lg bg-red-500/10 p-4 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <XCircle className="h-4 w-4 text-red-500" />
+                  <p className="text-2xl font-bold text-red-500">{scrapeSummary.failed}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">Falhas</p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowSummary(false)} className="w-full">
+              Fechar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

@@ -2,6 +2,12 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Product } from "@/types/product";
 import { supabase } from "@/integrations/supabase/client";
 
+// Extract reference from product name (e.g., "R: 8972" or "Ref: 8972")
+function extractReference(name: string): string | undefined {
+  const match = name.match(/R[ef]*[:\s]+(\d+)/i);
+  return match ? match[1] : undefined;
+}
+
 interface ProductContextType {
   products: Product[];
   loading: boolean;
@@ -37,7 +43,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         category: p.category,
         brand: p.brand || undefined,
         inStock: p.stock === 'Em stock',
-        stock: p.stock || 'Em stock',
+        reference: (p as { reference?: string }).reference || extractReference(p.name),
       }));
 
       setProducts(mappedProducts);
@@ -84,6 +90,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         category: data.category,
         brand: data.brand || undefined,
         inStock: data.stock === 'Em stock',
+        reference: extractReference(data.name),
       };
 
       setProducts((prev) => [newProduct, ...prev]);
