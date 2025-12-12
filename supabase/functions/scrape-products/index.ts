@@ -32,6 +32,14 @@ interface ScrapedProduct {
   image: string;
   inStock: boolean;
   sourceUrl: string;
+  reference?: string;
+}
+
+interface ProductBasicInfo {
+  name: string;
+  url: string;
+  image: string;
+  category: string;
 }
 
 function extractCategoryFromUrl(url: string): string {
@@ -61,7 +69,7 @@ async function scrapeWithFirecrawl(url: string, apiKey: string): Promise<string>
       url,
       formats: ['html'],
       onlyMainContent: false,
-      waitFor: 3000,
+      waitFor: 2000,
     }),
   });
 
@@ -93,19 +101,17 @@ function extractBrandFromName(name: string): string {
   return 'Segmento Positivo';
 }
 
-function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduct[] {
-  const products: ScrapedProduct[] = [];
+// Extract basic product info (URL and name) from category page
+function parseProductUrlsFromHtml(html: string, categoryUrl: string): ProductBasicInfo[] {
+  const products: ProductBasicInfo[] = [];
   
-  // Match each product article
   const productPattern = /<article[^>]*class="[^"]*product-miniature[^"]*"[^>]*data-id-product="(\d+)"[^>]*>[\s\S]*?<\/article>/gi;
   let match;
   
   while ((match = productPattern.exec(html)) !== null) {
-    const productId = match[1];
     const productHtml = match[0];
     
     try {
-      // Extract product URL from the product-title link specifically
       const titleLinkMatch = productHtml.match(/<h5[^>]*class="[^"]*product-title[^"]*"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/i);
       
       if (!titleLinkMatch) continue;
@@ -115,7 +121,6 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
       
       if (!name || name.length < 3) continue;
 
-      // Extract image
       let image = '/placeholder.svg';
       const imgMatch = productHtml.match(/<img[^>]*class="[^"]*"[^>]*(?:data-src|src)="([^"]+\.(jpg|jpeg|png|webp)[^"]*)"/i);
       if (imgMatch) {
@@ -125,46 +130,107 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
         }
       }
 
-      // Extract price from itemprop content (most reliable)
-      let price = 0;
-      const priceContentMatch = productHtml.match(/itemprop="price"[^>]*content="([^"]+)"/i) ||
-                                productHtml.match(/content="([^"]+)"[^>]*itemprop="price"/i);
-      
-      if (priceContentMatch) {
-        price = parseFloat(priceContentMatch[1]) || 0;
-      }
-      
-      // Fallback: extract from visible price
-      if (price === 0) {
-        const visiblePriceMatch = productHtml.match(/class="price"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i) ||
-                                  productHtml.match(/([\d]+[.,]\d{2})\s*€/);
-        if (visiblePriceMatch) {
-          price = parseFloat(visiblePriceMatch[1].replace(',', '.')) || 0;
-        }
-      }
-
       const category = extractCategoryFromUrl(productUrl);
-      const brand = extractBrandFromName(name);
-      const inStock = !productHtml.toLowerCase().includes('esgotado');
 
-      if (price > 0) {
-        products.push({
-          name,
-          brand,
-          category,
-          price,
-          image,
-          inStock,
-          sourceUrl: productUrl,
-        });
-        console.log(`Product: ${name} | €${price} | ${category}`);
-      }
+      products.push({
+        name,
+        url: productUrl,
+        image,
+        category,
+      });
     } catch (e) {
-      console.error('Error parsing product:', e);
+      console.error('Error parsing product URL:', e);
     }
   }
 
   return products;
+}
+
+// Extract detailed product info from individual product page
+function parseProductDetailFromHtml(html: string, basicInfo: ProductBasicInfo): ScrapedProduct | null {
+  try {
+    // Extract reference number - look for patterns like "Ref: 1234", "R: 1234", "Referência: 1234"
+    let reference: string | undefined;
+    
+    // Try to find reference in product page - multiple patterns
+    const refPatterns = [
+      /R(?:ef)?(?:er[êe]ncia)?[:\s]+(\d+)/i,
+      /data-id-product[^>]*>[\s\S]*?(\d{4,})/i,
+      /<span[^>]*class="[^"]*reference[^"]*"[^>]*>[\s\S]*?(\d+)/i,
+      /product-reference[^>]*>[\s\S]*?(\d+)/i,
+    ];
+    
+    for (const pattern of refPatterns) {
+      const refMatch = html.match(pattern);
+      if (refMatch) {
+        reference = refMatch[1];
+        break;
+      }
+    }
+    
+    // Also try to extract from the name itself
+    if (!reference) {
+      const nameRefMatch = basicInfo.name.match(/R[:\s]+(\d+)/i);
+      if (nameRefMatch) {
+        reference = nameRefMatch[1];
+      }
+    }
+
+    // Extract price - try multiple methods for accuracy
+    let price = 0;
+    let originalPrice: number | undefined;
+    
+    // Method 1: itemprop="price" content attribute (most reliable)
+    const priceContentMatch = html.match(/itemprop="price"[^>]*content="([^"]+)"/i) ||
+                              html.match(/content="([^"]+)"[^>]*itemprop="price"/i);
+    if (priceContentMatch) {
+      price = parseFloat(priceContentMatch[1]) || 0;
+    }
+    
+    // Method 2: Look for current-price class
+    if (price === 0) {
+      const currentPriceMatch = html.match(/class="[^"]*current-price[^"]*"[^>]*>[\s\S]*?€?\s*([\d,]+[.,]\d{2})/i);
+      if (currentPriceMatch) {
+        price = parseFloat(currentPriceMatch[1].replace(',', '.')) || 0;
+      }
+    }
+    
+    // Method 3: Look for price span
+    if (price === 0) {
+      const priceSpanMatch = html.match(/<span[^>]*class="price"[^>]*>[\s\S]*?€?\s*([\d,]+[.,]\d{2})/i);
+      if (priceSpanMatch) {
+        price = parseFloat(priceSpanMatch[1].replace(',', '.')) || 0;
+      }
+    }
+    
+    // Try to find original price (if on sale)
+    const regularPriceMatch = html.match(/class="[^"]*regular-price[^"]*"[^>]*>[\s\S]*?€?\s*([\d,]+[.,]\d{2})/i);
+    if (regularPriceMatch) {
+      originalPrice = parseFloat(regularPriceMatch[1].replace(',', '.')) || undefined;
+    }
+
+    const brand = extractBrandFromName(basicInfo.name);
+    const inStock = !html.toLowerCase().includes('esgotado') && !html.toLowerCase().includes('out of stock');
+
+    if (price > 0) {
+      return {
+        name: basicInfo.name,
+        brand,
+        category: basicInfo.category,
+        price,
+        originalPrice,
+        image: basicInfo.image,
+        inStock,
+        sourceUrl: basicInfo.url,
+        reference,
+      };
+    }
+    
+    return null;
+  } catch (e) {
+    console.error('Error parsing product detail:', e);
+    return null;
+  }
 }
 
 const CATEGORY_URLS = [
@@ -196,26 +262,29 @@ serve(async (req) => {
     const totalCategories = CATEGORY_URLS.length;
     let rateLimited = false;
     
+    // First pass: collect all product URLs from category pages
+    const allProductUrls: ProductBasicInfo[] = [];
+    
     for (let i = 0; i < CATEGORY_URLS.length; i++) {
       const categoryPath = CATEGORY_URLS[i];
       try {
         const categoryUrl = BASE_URL + categoryPath;
-        console.log(`[${i + 1}/${totalCategories}] Scraping: ${categoryUrl}`);
+        console.log(`[${i + 1}/${totalCategories}] Getting product list from: ${categoryUrl}`);
         
         const html = await scrapeWithFirecrawl(categoryUrl, apiKey);
-        const products = parseProductsFromHtml(html, categoryUrl);
+        const products = parseProductUrlsFromHtml(html, categoryUrl);
         
         for (const product of products) {
-          if (!seenUrls.has(product.sourceUrl)) {
-            seenUrls.add(product.sourceUrl);
-            allProducts.push(product);
+          if (!seenUrls.has(product.url)) {
+            seenUrls.add(product.url);
+            allProductUrls.push(product);
           }
         }
         
-        console.log(`Category ${i + 1}/${totalCategories}: ${products.length} products (total: ${allProducts.length})`);
+        console.log(`Category ${i + 1}/${totalCategories}: Found ${products.length} product URLs (total: ${allProductUrls.length})`);
         
-        // Be gentle with the Firecrawl rate limit
-        await new Promise(resolve => setTimeout(resolve, 4000));
+        // Brief pause between category pages
+        await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (categoryError) {
         console.error(`Error scraping ${categoryPath}:`, categoryError);
         if (categoryError instanceof Error && categoryError.message === 'RATE_LIMIT') {
@@ -225,9 +294,7 @@ serve(async (req) => {
       }
     }
     
-    console.log(`Scraping complete: ${allProducts.length} products`);
-
-    if (rateLimited && allProducts.length === 0) {
+    if (rateLimited && allProductUrls.length === 0) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -239,11 +306,60 @@ serve(async (req) => {
       );
     }
     
+    console.log(`\nTotal unique products found: ${allProductUrls.length}`);
+    console.log('Now scraping individual product pages for accurate pricing and references...\n');
+    
+    // Second pass: visit each product page for accurate details
+    const totalProducts = allProductUrls.length;
+    let successCount = 0;
+    let failCount = 0;
+    
+    for (let i = 0; i < allProductUrls.length; i++) {
+      const productInfo = allProductUrls[i];
+      
+      try {
+        console.log(`[${i + 1}/${totalProducts}] Scraping: ${productInfo.name.substring(0, 50)}...`);
+        
+        const productHtml = await scrapeWithFirecrawl(productInfo.url, apiKey);
+        const productDetail = parseProductDetailFromHtml(productHtml, productInfo);
+        
+        if (productDetail) {
+          allProducts.push(productDetail);
+          successCount++;
+          console.log(`  ✓ Price: €${productDetail.price} | Ref: ${productDetail.reference || 'N/A'}`);
+        } else {
+          failCount++;
+          console.log(`  ✗ Failed to extract details`);
+        }
+        
+        // Pause between product pages to respect rate limits
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+      } catch (productError) {
+        console.error(`Error scraping product ${productInfo.url}:`, productError);
+        failCount++;
+        
+        if (productError instanceof Error && productError.message === 'RATE_LIMIT') {
+          console.log('Rate limited - stopping product scraping');
+          rateLimited = true;
+          break;
+        }
+      }
+    }
+    
+    console.log(`\nScraping complete: ${allProducts.length} products scraped successfully`);
+    console.log(`Success: ${successCount}, Failed: ${failCount}`);
+    
     return new Response(
       JSON.stringify({ 
         success: true, 
         products: allProducts,
-        progress: { current: totalCategories, total: totalCategories },
+        progress: { 
+          current: totalProducts, 
+          total: totalProducts,
+          success: successCount,
+          failed: failCount,
+        },
         timestamp: new Date().toISOString(),
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
