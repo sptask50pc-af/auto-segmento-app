@@ -9,6 +9,7 @@ export interface Product {
   inStock: boolean;
   description?: string;
   sourceUrl?: string;
+  reference?: string;
 }
 
 export interface Brand {

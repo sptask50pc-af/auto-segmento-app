@@ -58,7 +58,12 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
 
       <div className="space-y-2">
         <div>
-          <p className="text-xs text-muted-foreground">{product.brand}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">{product.brand}</p>
+            {product.reference && (
+              <p className="text-xs font-mono text-primary/70">R: {product.reference}</p>
+            )}
+          </div>
           <h3 className="font-semibold leading-tight line-clamp-2">{product.name}</h3>
         </div>
 
