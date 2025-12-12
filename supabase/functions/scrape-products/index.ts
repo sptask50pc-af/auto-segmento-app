@@ -150,25 +150,65 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
       
       const name = nameMatch ? nameMatch[1].trim().replace(/\.{3}$/, '') : '';
 
-      // Extract image - look for src in img tags
-      const imageMatch = productHtml.match(/<img[^>]*src="([^"]+)"[^>]*>/i);
+      // Extract image - try multiple patterns for PrestaShop
+      // Priority: data-full-size-image-url > data-src > src (avoid lazy-load placeholders)
       let image = '/placeholder.svg';
-      if (imageMatch) {
-        image = imageMatch[1];
-        if (!image.startsWith('http')) {
-          image = BASE_URL + image;
-        }
+      const fullSizeMatch = productHtml.match(/data-full-size-image-url="([^"]+)"/i);
+      const dataSrcMatch = productHtml.match(/<img[^>]*data-src="([^"]+)"[^>]*>/i);
+      const srcMatch = productHtml.match(/<img[^>]*src="(https?:\/\/[^"]+\.(jpg|jpeg|png|webp)[^"]*)"/i);
+      const anySrcMatch = productHtml.match(/<img[^>]*src="([^"]+)"[^>]*>/i);
+      
+      if (fullSizeMatch) {
+        image = fullSizeMatch[1];
+      } else if (dataSrcMatch) {
+        image = dataSrcMatch[1];
+      } else if (srcMatch) {
+        image = srcMatch[1];
+      } else if (anySrcMatch && !anySrcMatch[1].includes('data:image') && !anySrcMatch[1].includes('placeholder')) {
+        image = anySrcMatch[1];
+      }
+      
+      // Ensure full URL
+      if (image && !image.startsWith('http') && image !== '/placeholder.svg') {
+        image = BASE_URL + image;
       }
 
-      // Extract price - PrestaShop uses span.price with itemprop="price"
-      const priceMatch = productHtml.match(/class="price"[^>]*>([^<€]+)/i) ||
-                        productHtml.match(/itemprop="price"[^>]*class="price"[^>]*>([^<€]+)/i) ||
-                        productHtml.match(/(\d+[.,]\d{2})\s*[€&]/);
-      
+      // Extract price - multiple patterns for PrestaShop price formats
       let price = 0;
-      if (priceMatch) {
-        const priceStr = priceMatch[1].replace(/[^\d,.]/g, '').replace(',', '.');
-        price = parseFloat(priceStr) || 0;
+      let originalPrice: number | undefined;
+      
+      // Try to get price from content attribute first (most reliable)
+      const contentPriceMatch = productHtml.match(/itemprop="price"[^>]*content="([^"]+)"/i) ||
+                                productHtml.match(/content="([^"]+)"[^>]*itemprop="price"/i);
+      
+      if (contentPriceMatch) {
+        price = parseFloat(contentPriceMatch[1]) || 0;
+      } else {
+        // Try various price patterns
+        const pricePatterns = [
+          /class="price"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i,
+          /class="price"[^>]*>([\d,]+[.,]\d{2})\s*€/i,
+          /<span[^>]*class="[^"]*price[^"]*"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i,
+          /price[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i,
+          /([\d]+[.,]\d{2})\s*€/,
+        ];
+        
+        for (const pattern of pricePatterns) {
+          const match = productHtml.match(pattern);
+          if (match) {
+            const priceStr = match[1].replace(/\s/g, '').replace(',', '.');
+            price = parseFloat(priceStr) || 0;
+            if (price > 0) break;
+          }
+        }
+      }
+      
+      // Try to get original price (regular-price class)
+      const regularPriceMatch = productHtml.match(/class="regular-price"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i) ||
+                                productHtml.match(/class="[^"]*regular-price[^"]*"[^>]*>\s*€?\s*([\d,]+[.,]\d{2})/i);
+      if (regularPriceMatch) {
+        const origPriceStr = regularPriceMatch[1].replace(/\s/g, '').replace(',', '.');
+        originalPrice = parseFloat(origPriceStr) || undefined;
       }
 
       // Extract product URL and category from it
@@ -185,7 +225,7 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
                       !productHtml.toLowerCase().includes('out of stock'));
 
       if (name && name.length > 2) {
-        products.push({
+        const productData: ScrapedProduct = {
           name,
           brand,
           category,
@@ -193,8 +233,12 @@ function parseProductsFromHtml(html: string, categoryUrl: string): ScrapedProduc
           image,
           inStock,
           sourceUrl: productUrl,
-        });
-        console.log(`Parsed product: ${name} | Category: ${category} | Brand: ${brand}`);
+        };
+        if (originalPrice && originalPrice > price) {
+          productData.originalPrice = originalPrice;
+        }
+        products.push(productData);
+        console.log(`Parsed product: ${name} | Category: ${category} | Price: €${price} | Image: ${image.substring(0, 50)}...`);
       }
     } catch (e) {
       console.error('Error parsing product:', e);
