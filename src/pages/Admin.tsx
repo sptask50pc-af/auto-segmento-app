@@ -195,7 +195,8 @@ const Admin = () => {
               const hasChanges = existingProduct.price !== scrapedProduct.price || 
                   existingProduct.name !== scrapedProduct.name ||
                   existingProduct.category !== normalizedCategory ||
-                  existingProduct.image !== scrapedProduct.image;
+                  existingProduct.image !== scrapedProduct.image ||
+                  existingProduct.reference !== scrapedProduct.reference;
               
               if (hasChanges) {
                 await updateProduct(existingProduct.id, {
@@ -205,6 +206,7 @@ const Admin = () => {
                   image: scrapedProduct.image,
                   inStock: scrapedProduct.inStock,
                   sourceUrl: scrapedProduct.sourceUrl,
+                  reference: scrapedProduct.reference,
                 });
                 summary.updated++;
               }
@@ -217,6 +219,7 @@ const Admin = () => {
                 image: scrapedProduct.image,
                 inStock: scrapedProduct.inStock,
                 sourceUrl: scrapedProduct.sourceUrl,
+                reference: scrapedProduct.reference,
                 description: '',
               });
               summary.inserted++;
