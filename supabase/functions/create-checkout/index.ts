@@ -62,6 +62,16 @@ serve(async (req) => {
       shipping_address_collection: {
         allowed_countries: ["PT", "ES", "FR", "DE", "IT", "GB"],
       },
+      // Custom branding options
+      custom_text: {
+        submit: {
+          message: "Segmento Positivo - Peças Automotivas Premium",
+        },
+      },
+      locale: "pt",
+      payment_intent_data: {
+        description: "Compra - Segmento Positivo",
+      },
     });
 
     console.log("Checkout session created:", session.id);
