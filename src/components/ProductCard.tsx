@@ -1,9 +1,11 @@
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, ShoppingCart } from "lucide-react";
 import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "@/context/CartContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductCardProps {
   product: Product;
@@ -15,6 +17,8 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onEdit, onDelete, showActions = false, delay = 0 }: ProductCardProps) {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { toast } = useToast();
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercent = hasDiscount
     ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
@@ -24,6 +28,15 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
     if (!showActions) {
       navigate(`/product/${product.id}`);
     }
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addToCart(product, 1);
+    toast({
+      title: "Adicionado ao carrinho",
+      description: product.name,
+    });
   };
 
   return (
@@ -89,6 +102,18 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
         >
           {product.inStock ? "Em estoque" : "Indisponível"}
         </Badge>
+
+        {/* Quick Add to Cart */}
+        {!showActions && product.inStock && (
+          <Button
+            size="sm"
+            className="w-full mt-2"
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="mr-1 h-4 w-4" />
+            Adicionar
+          </Button>
+        )}
       </div>
 
       {showActions && (
