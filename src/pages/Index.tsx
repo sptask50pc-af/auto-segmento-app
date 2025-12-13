@@ -153,10 +153,9 @@ const Index = () => {
                   className="group flex flex-col items-center gap-2 cursor-pointer animate-scale-in"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-card via-secondary to-card border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="relative z-10 text-primary/80 group-hover:text-primary transition-colors duration-300 group-hover:scale-110 transform">
+                  <div className="relative w-20 h-20 rounded-2xl bg-white border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden">
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="relative z-10 text-primary group-hover:text-primary transition-colors duration-300 group-hover:scale-110 transform">
                       <CategoryIcon icon={category.icon} />
                     </div>
                   </div>
@@ -243,11 +242,28 @@ const Index = () => {
                 <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
                   <Clock className="w-5 h-5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">Horário</p>
-                  <p className="text-sm text-muted-foreground">
-                    <span className="text-primary font-medium">Fechado</span> · Abre às 9h Sábado
-                  </p>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground mb-2">Horário</p>
+                  <div className="space-y-1.5">
+                    <p 
+                      className="text-sm text-muted-foreground animate-fade-in"
+                      style={{ animationDelay: "0ms" }}
+                    >
+                      <span className="text-foreground font-medium">Segunda a Sexta:</span> 9h às 19h
+                    </p>
+                    <p 
+                      className="text-sm text-muted-foreground animate-fade-in"
+                      style={{ animationDelay: "200ms" }}
+                    >
+                      <span className="text-foreground font-medium">Sábado:</span> 9h às 13h
+                    </p>
+                    <p 
+                      className="text-sm text-muted-foreground animate-fade-in"
+                      style={{ animationDelay: "400ms" }}
+                    >
+                      <span className="text-foreground font-medium">Domingo:</span> <span className="text-primary">Fechado</span>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
