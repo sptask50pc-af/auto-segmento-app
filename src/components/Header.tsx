@@ -1,7 +1,8 @@
-import { Settings, ShoppingCart, Menu } from "lucide-react";
+import { Settings, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { CartButton } from "@/components/CartButton";
 import logo from "@/assets/logo.png";
 
 interface HeaderProps {
@@ -25,9 +26,7 @@ export function Header({ title = "Início" }: HeaderProps) {
               <Settings className="h-5 w-5" />
             </Button>
           </Link>
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-            <ShoppingCart className="h-5 w-5" />
-          </Button>
+          <CartButton />
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden text-muted-foreground hover:text-foreground">

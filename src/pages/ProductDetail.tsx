@@ -1,17 +1,22 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Package } from "lucide-react";
+import { ArrowLeft, Package, ShoppingCart, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useProducts } from "@/context/ProductContext";
+import { useCart } from "@/context/CartContext";
 import { ProductCard } from "@/components/ProductCard";
 import { cn } from "@/lib/utils";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { products } = useProducts();
+  const { addToCart } = useCart();
   const sliderRef = useRef<HTMLDivElement>(null);
+  const [quantity, setQuantity] = useState(1);
+  const { toast } = useToast();
 
   const product = products.find((p) => p.id === id);
 
@@ -39,6 +44,15 @@ export default function ProductDetail() {
   const similarProducts = products
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 10);
+
+  const handleAddToCart = () => {
+    addToCart(product, quantity);
+    toast({
+      title: "Adicionado ao carrinho",
+      description: `${quantity}x ${product.name}`,
+    });
+    setQuantity(1);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,6 +129,42 @@ export default function ProductDetail() {
         >
           {product.inStock ? "Em estoque" : "Indisponível"}
         </Badge>
+
+        {/* Add to Cart */}
+        {product.inStock && (
+          <div className="pt-4 border-t border-border space-y-4">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium">Quantidade:</span>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="h-9 w-9"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <span className="w-10 text-center font-medium">{quantity}</span>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="h-9 w-9"
+                  onClick={() => setQuantity(quantity + 1)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart className="mr-2 h-5 w-5" />
+              Adicionar ao Carrinho
+            </Button>
+          </div>
+        )}
 
         {/* Description */}
         {product.description && (
