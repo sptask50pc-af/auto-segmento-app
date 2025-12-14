@@ -1,4 +1,4 @@
-import { Settings, Menu, Lock } from "lucide-react";
+import { ShoppingBag, Menu, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -62,7 +62,7 @@ export function Header({ title = "Início" }: HeaderProps) {
             </Button>
             <Link to="/admin">
               <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                <Settings className="h-5 w-5" />
+                <ShoppingBag className="h-5 w-5" />
               </Button>
             </Link>
             <CartButton />
@@ -78,7 +78,7 @@ export function Header({ title = "Início" }: HeaderProps) {
                     Início
                   </Link>
                   <Link to="/admin" className="text-lg font-medium hover:text-primary transition-colors">
-                    Admin
+                    Loja
                   </Link>
                   <button 
                     onClick={() => setShowPasswordDialog(true)}
