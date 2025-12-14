@@ -1,4 +1,4 @@
-import { ShoppingBag, Menu, Lock } from "lucide-react";
+import { ShoppingBag, Menu, Lock, Search } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -60,6 +60,11 @@ export function Header({ title = "Início" }: HeaderProps) {
             >
               <Lock className="h-5 w-5" />
             </Button>
+            <Link to="/admin">
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <Search className="h-5 w-5" />
+              </Button>
+            </Link>
             <Link to="/admin">
               <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
                 <ShoppingBag className="h-5 w-5" />
