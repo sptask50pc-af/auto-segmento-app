@@ -7,6 +7,7 @@ import { ProductProvider } from "@/context/ProductContext";
 import { CartProvider } from "@/context/CartContext";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
+import ControlPanel from "./pages/ControlPanel";
 import SubCategories from "./pages/SubCategories";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
@@ -26,6 +27,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/control-panel" element={<ControlPanel />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout/success" element={<CheckoutSuccess />} />
