@@ -74,23 +74,14 @@ export function Header({ title = "Início" }: HeaderProps) {
             </Link>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-muted-foreground hover:text-foreground"
-              onClick={() => setShowPasswordDialog(true)}
-            >
-              <Lock className="h-5 w-5" />
-            </Button>
-            
+          <div className="flex items-center gap-1">
             {/* Search Popover */}
             <Popover open={showSearch} onOpenChange={setShowSearch}>
               <PopoverTrigger asChild>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="text-muted-foreground hover:text-foreground"
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50"
                 >
                   <Search className="h-5 w-5" />
                 </Button>
@@ -164,34 +155,21 @@ export function Header({ title = "Início" }: HeaderProps) {
             </Popover>
 
             <Link to="/admin">
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50">
                 <ShoppingBag className="h-5 w-5" />
               </Button>
             </Link>
+            
             <CartButton />
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden text-muted-foreground hover:text-foreground">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="bg-card border-border">
-                <nav className="flex flex-col gap-4 mt-8">
-                  <Link to="/" className="text-lg font-medium hover:text-primary transition-colors">
-                    Início
-                  </Link>
-                  <Link to="/admin" className="text-lg font-medium hover:text-primary transition-colors">
-                    Loja
-                  </Link>
-                  <button 
-                    onClick={() => setShowPasswordDialog(true)}
-                    className="text-lg font-medium hover:text-primary transition-colors text-left"
-                  >
-                    Painel de Controlo
-                  </button>
-                </nav>
-              </SheetContent>
-            </Sheet>
+            
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              onClick={() => setShowPasswordDialog(true)}
+            >
+              <Lock className="h-5 w-5" />
+            </Button>
           </div>
         </div>
       </header>
