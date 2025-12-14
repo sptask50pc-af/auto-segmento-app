@@ -366,6 +366,27 @@ const SubCategories = () => {
       <Header title={data.name} />
 
       <main className="container px-4 py-6 space-y-6">
+        {/* Hero Section with Logo */}
+        <section className="relative h-[100px] overflow-hidden rounded-2xl animate-fade-in">
+          <div className="h-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-card to-card p-4 border border-primary/20">
+            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/20 blur-3xl" />
+            <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-primary/10 blur-2xl" />
+            <div className="relative flex items-center justify-between h-full">
+              <div>
+                <h1 className="text-lg font-bold text-foreground mb-1">{data.name}</h1>
+                <p className="text-muted-foreground text-xs">
+                  Selecione uma subcategoria
+                </p>
+              </div>
+              <img 
+                src="/icon.png" 
+                alt="Segmento Positivo" 
+                className="w-14 h-14 rounded-xl shadow-lg shadow-primary/20"
+              />
+            </div>
+          </div>
+        </section>
+
         {/* Back button */}
         <button
           onClick={() => {
