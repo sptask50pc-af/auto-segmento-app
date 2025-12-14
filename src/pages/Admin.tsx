@@ -32,7 +32,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Header title="Admin" />
+      <Header title="Loja" />
 
       <main className="container px-4 py-6 space-y-6">
         {/* Hero Admin Banner */}
