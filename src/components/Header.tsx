@@ -1,7 +1,6 @@
-import { ShoppingBag, Menu, Lock, Search, X } from "lucide-react";
+import { ShoppingBag, Lock, Search, X, User, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { CartButton } from "@/components/CartButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -11,7 +10,8 @@ import { useState, useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useProducts } from "@/context/ProductContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
+import { useAuth } from "@/context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 interface HeaderProps {
   title?: string;
 }
@@ -21,10 +21,19 @@ const CONTROL_PANEL_PASSWORD = "SP0050PC";
 export function Header({ title = "Início" }: HeaderProps) {
   const navigate = useNavigate();
   const { products } = useProducts();
+  const { user, signOut } = useAuth();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [password, setPassword] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Sessão terminada",
+      description: "Até breve!",
+    });
+  };
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -161,6 +170,41 @@ export function Header({ title = "Início" }: HeaderProps) {
             </Link>
             
             <CartButton />
+
+            {/* User/Auth Button */}
+            {user ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 p-0">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.user_metadata?.avatar_url} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                        {user.email?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-56 p-2">
+                  <div className="px-2 py-1.5 mb-2 border-b border-border">
+                    <p className="text-sm font-medium truncate">{user.email}</p>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sair
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
             
             <Button 
               variant="ghost" 
