@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { mainCategories } from "@/data/mockData";
-import { CategoryIcon } from "@/components/CategoryIcon";
 import { 
   ChevronRight, 
   MapPin, 
@@ -11,7 +10,28 @@ import {
   Clock,
   Sparkles
 } from "lucide-react";
-import liquiMolyLogo from "@/assets/liqui-moly-logo.png";
+import liquiMolyBanner from "@/assets/liqui-moly-banner.png";
+
+// Category images
+import pecasImg from "@/assets/categories/pecas.png";
+import lubrificantesImg from "@/assets/categories/lubrificantes.png";
+import acessoriosImg from "@/assets/categories/acessorios.png";
+import cuidadoDetalheImg from "@/assets/categories/cuidado-detalhe.png";
+import desempenhoUpgradeImg from "@/assets/categories/desempenho-upgrade.png";
+import eletricaImg from "@/assets/categories/eletrica.png";
+import universalImg from "@/assets/categories/universal.png";
+import sinaleticaSegurancaImg from "@/assets/categories/sinaletica-seguranca.png";
+
+const categoryImages: Record<string, string> = {
+  "Peças": pecasImg,
+  "Lubrificantes": lubrificantesImg,
+  "Acessórios": acessoriosImg,
+  "Cuidado e Detalhe": cuidadoDetalheImg,
+  "Desempenho e Upgrade": desempenhoUpgradeImg,
+  "Elétrica": eletricaImg,
+  "Universal": universalImg,
+  "Sinalética e Segurança": sinaleticaSegurancaImg,
+};
 
 const Index = () => {
   const navigate = useNavigate();
@@ -90,42 +110,17 @@ const Index = () => {
                 : "opacity-0 translate-x-full"
             }`}
           >
-            <div className="h-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] p-6 border border-[#e31e24]/30 shadow-2xl shadow-[#e31e24]/10">
-              {/* Premium glow effects */}
-              <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#e31e24]/30 blur-3xl animate-pulse" />
-              <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-[#e31e24]/20 blur-2xl" />
-              <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-l from-[#e31e24]/5 to-transparent" />
-              
-              <div className="relative flex items-center justify-between h-full">
-                <div className="flex-1">
-                  {/* Liqui Moly Badge */}
-                  <div className="inline-flex items-center gap-2 mb-2 bg-[#e31e24] px-3 py-1 rounded-full">
-                    <span className="text-[10px] font-bold text-white tracking-wider uppercase">Distribuidor Oficial</span>
-                  </div>
-                  
-                  {/* Tagline */}
-                  <p className="text-white text-sm font-semibold mb-2">
-                    Tecnologia Alemã Premium
-                  </p>
-                  
-                  {/* Features */}
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-[10px] font-semibold text-[#e31e24] bg-[#e31e24]/10 px-2 py-1 rounded-md border border-[#e31e24]/20">
-                      🇩🇪 Made in Germany
-                    </span>
-                    <span className="text-[10px] font-semibold text-white/70 bg-white/5 px-2 py-1 rounded-md border border-white/10">
-                      Óleos Premium
-                    </span>
-                  </div>
-                </div>
-                
-                {/* Liqui Moly Logo */}
-                <div className="flex-shrink-0 ml-4">
-                  <img 
-                    src={liquiMolyLogo} 
-                    alt="Liqui Moly" 
-                    className="w-24 h-auto rounded-lg shadow-lg shadow-[#e31e24]/20"
-                  />
+            <div className="h-full relative overflow-hidden rounded-2xl">
+              <img 
+                src={liquiMolyBanner} 
+                alt="Liqui Moly - German Premium Motor Oil" 
+                className="w-full h-full object-cover"
+              />
+              {/* Overlay with badge */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-4">
+                <div className="inline-flex items-center gap-2 bg-[#e31e24] px-3 py-1.5 rounded-full shadow-lg">
+                  <span className="text-xs font-bold text-white tracking-wider uppercase">Distribuidor Oficial</span>
                 </div>
               </div>
             </div>
@@ -153,11 +148,12 @@ const Index = () => {
                   className="group flex flex-col items-center gap-2 cursor-pointer animate-scale-in"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="relative w-20 h-20 rounded-2xl bg-white border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden">
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="relative z-10 text-primary group-hover:text-primary transition-colors duration-300 group-hover:scale-110 transform">
-                      <CategoryIcon icon={category.icon} />
-                    </div>
+                  <div className="relative w-20 h-20 rounded-2xl bg-white border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
+                    <img 
+                      src={categoryImages[category.label]} 
+                      alt={category.label}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <span className="text-xs text-center text-muted-foreground leading-tight group-hover:text-foreground transition-colors font-medium">
                     {category.label}
