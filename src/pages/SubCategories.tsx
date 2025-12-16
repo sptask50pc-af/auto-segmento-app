@@ -3,7 +3,6 @@ import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductListView } from "@/components/ProductListView";
 import { useProducts } from "@/context/ProductContext";
-import { CategoryIcon } from "@/components/CategoryIcon";
 import { 
   pecasSubCategories, 
   lubrificantesSubCategories, 
@@ -32,6 +31,24 @@ import {
   iluminacaoLampadasSubSubCategories,
 } from "@/data/mockData";
 import { Home, ChevronLeft } from "lucide-react";
+import { CategoryIcon } from "@/components/CategoryIcon";
+
+// Subcategory images
+import carrocariaImg from "@/assets/subcategories/carrocaria.png";
+import travagemImg from "@/assets/subcategories/travagem.png";
+import filtrosImg from "@/assets/subcategories/filtros.png";
+import suspensaoDirecaoImg from "@/assets/subcategories/suspensao-direcao.png";
+import motorImg from "@/assets/subcategories/motor.png";
+import sistemaEscapeImg from "@/assets/subcategories/sistema-escape.png";
+
+const subcategoryImages: Record<string, string> = {
+  "Carroçaria": carrocariaImg,
+  "Travagem": travagemImg,
+  "Filtros": filtrosImg,
+  "Suspensão e Direção": suspensaoDirecaoImg,
+  "Motor": motorImg,
+  "Sistema de Escape": sistemaEscapeImg,
+};
 
 // Map of category slugs to their display names for product matching
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
@@ -420,11 +437,14 @@ const SubCategories = () => {
               className="group flex flex-col items-center gap-2 animate-fade-in cursor-pointer"
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className="relative w-20 h-20 rounded-2xl bg-white border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10 text-primary group-hover:text-primary transition-colors duration-300 group-hover:scale-110 transform">
-                  <CategoryIcon icon={item.icon} />
-                </div>
+              <div className="relative w-20 h-20 rounded-2xl bg-white border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
+                {subcategoryImages[item.label] ? (
+                  <img src={subcategoryImages[item.label]} alt={item.label} className="w-full h-full object-contain" />
+                ) : (
+                  <div className="text-primary">
+                    <CategoryIcon icon={item.icon} />
+                  </div>
+                )}
               </div>
               <span className="text-xs text-center text-muted-foreground leading-tight group-hover:text-foreground transition-colors font-medium">{item.label}</span>
             </div>
