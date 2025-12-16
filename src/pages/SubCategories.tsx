@@ -41,13 +41,39 @@ import suspensaoDirecaoImg from "@/assets/subcategories/suspensao-direcao.png";
 import motorImg from "@/assets/subcategories/motor.png";
 import sistemaEscapeImg from "@/assets/subcategories/sistema-escape.png";
 
+// Nested subcategory images (Carroçaria)
+import revestimentosInterioresImg from "@/assets/subcategories/revestimentos-interiores.png";
+import faroisFarolinsImg from "@/assets/subcategories/farois-farolins.png";
+import retrovisoresImg from "@/assets/subcategories/retrovisores.png";
+import fechosDobradicasImg from "@/assets/subcategories/fechos-dobradicas.png";
+import paraChoquesImg from "@/assets/subcategories/para-choques.png";
+import grelhasImg from "@/assets/subcategories/grelhas.png";
+import guardaLamasImg from "@/assets/subcategories/guarda-lamas.png";
+import caposTampasImg from "@/assets/subcategories/capos-tampas.png";
+import portasPaineisImg from "@/assets/subcategories/portas-paineis.png";
+import frisosMoldurasImg from "@/assets/subcategories/frisos-molduras.png";
+import suportesEstruturasImg from "@/assets/subcategories/suportes-estruturas.png";
+
 const subcategoryImages: Record<string, string> = {
+  // Peças subcategories
   "Carroçaria": carrocariaImg,
   "Travagem": travagemImg,
   "Filtros": filtrosImg,
   "Suspensão e Direção": suspensaoDirecaoImg,
   "Motor": motorImg,
   "Sistema de Escape": sistemaEscapeImg,
+  // Carroçaria nested
+  "Revestimentos Interiores": revestimentosInterioresImg,
+  "Faróis & Farolins": faroisFarolinsImg,
+  "Retrovisores": retrovisoresImg,
+  "Fechos & Dobradiças": fechosDobradicasImg,
+  "Para-choques": paraChoquesImg,
+  "Grelhas": grelhasImg,
+  "Guarda-lamas & Extensões": guardaLamasImg,
+  "Capôs & Tampas": caposTampasImg,
+  "Portas & Painéis Laterais": portasPaineisImg,
+  "Frisos & Molduras": frisosMoldurasImg,
+  "Suportes & Estruturas": suportesEstruturasImg,
 };
 
 // Map of category slugs to their display names for product matching
