@@ -139,27 +139,64 @@ function parseProductsFromCategoryHtml(html: string): ScrapedProduct[] {
       // Extract price - multiple methods
       let price = 0;
       
-      // Method 1: price attribute or content
-      const priceAttrMatch = productHtml.match(/(?:content|data-price)="([\d.]+)"/i);
-      if (priceAttrMatch) {
-        price = parseFloat(priceAttrMatch[1]) || 0;
+      // Method 1: itemprop price content attribute (most reliable)
+      const priceContentMatch = productHtml.match(/itemprop="price"[^>]*content="([\d.,]+)"/i);
+      if (priceContentMatch) {
+        price = parseFloat(priceContentMatch[1].replace(',', '.')) || 0;
       }
       
-      // Method 2: price span with € symbol
+      // Method 2: data-price attribute
       if (price === 0) {
-        const priceSpanMatch = productHtml.match(/class="[^"]*price[^"]*"[^>]*>[\s\S]*?€?\s*([\d,]+[.,]\d{2})/i);
+        const dataPriceMatch = productHtml.match(/data-price="([\d.,]+)"/i);
+        if (dataPriceMatch) {
+          price = parseFloat(dataPriceMatch[1].replace(',', '.')) || 0;
+        }
+      }
+      
+      // Method 3: price inside span with price class (format: "9,95 €" or "€ 9,95")
+      if (price === 0) {
+        const priceSpanMatch = productHtml.match(/<span[^>]*class="[^"]*price[^"]*"[^>]*>([^<]*)<\/span>/gi);
         if (priceSpanMatch) {
-          price = parseFloat(priceSpanMatch[1].replace(',', '.')) || 0;
+          for (const span of priceSpanMatch) {
+            const numMatch = span.match(/([\d]+[.,]\d{2})/);
+            if (numMatch) {
+              const parsed = parseFloat(numMatch[1].replace(/\s/g, '').replace(',', '.'));
+              if (parsed > 0) {
+                price = parsed;
+                break;
+              }
+            }
+          }
         }
       }
       
-      // Method 3: any price pattern
+      // Method 4: Look for price in product-price-and-shipping div
       if (price === 0) {
-        const anyPriceMatch = productHtml.match(/€\s*([\d,]+[.,]\d{2})/);
-        if (anyPriceMatch) {
-          price = parseFloat(anyPriceMatch[1].replace(',', '.')) || 0;
+        const priceDivMatch = productHtml.match(/class="[^"]*product-price[^"]*"[^>]*>([\s\S]*?)<\/(?:div|span)>/i);
+        if (priceDivMatch) {
+          const numMatch = priceDivMatch[1].match(/([\d]+[.,]\d{2})/);
+          if (numMatch) {
+            price = parseFloat(numMatch[1].replace(/\s/g, '').replace(',', '.')) || 0;
+          }
         }
       }
+      
+      // Method 5: any price pattern with € symbol
+      if (price === 0) {
+        const euroPatterns = [
+          /([\d]+[.,]\d{2})\s*€/,  // "9,95 €"
+          /€\s*([\d]+[.,]\d{2})/,  // "€ 9,95"
+        ];
+        for (const pattern of euroPatterns) {
+          const match = productHtml.match(pattern);
+          if (match) {
+            price = parseFloat(match[1].replace(/\s/g, '').replace(',', '.')) || 0;
+            if (price > 0) break;
+          }
+        }
+      }
+      
+      console.log(`  Product: ${name.substring(0, 40)}... Price: ${price}€`);
 
       // Extract reference from name
       let reference: string | undefined;
