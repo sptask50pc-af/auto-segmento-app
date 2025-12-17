@@ -33,15 +33,13 @@ import {
 import { Home, ChevronLeft } from "lucide-react";
 import { CategoryIcon } from "@/components/CategoryIcon";
 
-// Subcategory images
+// Subcategory images - Peças
 import carrocariaImg from "@/assets/subcategories/carrocaria.png";
 import travagemImg from "@/assets/subcategories/travagem.png";
 import filtrosImg from "@/assets/subcategories/filtros.png";
 import suspensaoDirecaoImg from "@/assets/subcategories/suspensao-direcao.png";
 import motorImg from "@/assets/subcategories/motor.png";
 import sistemaEscapeImg from "@/assets/subcategories/sistema-escape.png";
-
-// Nested subcategory images (Carroçaria)
 import revestimentosInterioresImg from "@/assets/subcategories/revestimentos-interiores.png";
 import faroisFarolinsImg from "@/assets/subcategories/farois-farolins.png";
 import retrovisoresImg from "@/assets/subcategories/retrovisores.png";
@@ -53,27 +51,71 @@ import caposTampasImg from "@/assets/subcategories/capos-tampas.png";
 import portasPaineisImg from "@/assets/subcategories/portas-paineis.png";
 import frisosMoldurasImg from "@/assets/subcategories/frisos-molduras.png";
 import suportesEstruturasImg from "@/assets/subcategories/suportes-estruturas.png";
+import oleosMotorImg from "@/assets/subcategories/oleos-motor.png";
+import oleosTransmissaoImg from "@/assets/subcategories/oleos-transmissao.png";
+import liquidosTravoesImg from "@/assets/subcategories/liquidos-travoes.png";
+import liquidosArrefecimentoImg from "@/assets/subcategories/liquidos-arrefecimento.png";
+import aditivosCombustivelImg from "@/assets/subcategories/aditivos-combustivel.png";
+import spraysManutencaoImg from "@/assets/subcategories/sprays-manutencao.png";
+import shampoosLimpezaImg from "@/assets/subcategories/shampoos-limpeza.png";
+import cerasSelantesImg from "@/assets/subcategories/ceras-selantes.png";
+import polimentoCorrecaoImg from "@/assets/subcategories/polimento-correcao.png";
+import interioresImg from "@/assets/subcategories/interiores.png";
+import vidrosEspelhosImg from "@/assets/subcategories/vidros-espelhos.png";
+import odorizantesImg from "@/assets/subcategories/odorizantes.png";
+import panosAcessoriosImg from "@/assets/subcategories/panos-acessorios.png";
+import exteriorImg from "@/assets/subcategories/exterior.png";
+import filtrosArDesportivosImg from "@/assets/subcategories/filtros-ar-desportivos.png";
+import escapesSilenciososImg from "@/assets/subcategories/escapes-silenciosos.png";
+import suspensoesMolasImg from "@/assets/subcategories/suspensoes-molas.png";
+import travagemPerformanceImg from "@/assets/subcategories/travagem-performance.png";
+import jantesAcessoriosImg from "@/assets/subcategories/jantes-acessorios.png";
+import iluminacaoUpgradeImg from "@/assets/subcategories/iluminacao-upgrade.png";
+import eletronicaChipTuningImg from "@/assets/subcategories/eletronica-chip-tuning.png";
+import acessoriosDesportivosImg from "@/assets/subcategories/acessorios-desportivos.png";
+import bateriasImg from "@/assets/subcategories/baterias.png";
+import iluminacaoLampadasImg from "@/assets/subcategories/iluminacao-lampadas.png";
+import interruptoresImg from "@/assets/subcategories/interruptores.png";
+import fusiveisRelesImg from "@/assets/subcategories/fusiveis-reles.png";
+import cablagensConectoresImg from "@/assets/subcategories/cablagens-conectores.png";
+import ferramentasImg from "@/assets/subcategories/ferramentas.png";
+import fixacoesImg from "@/assets/subcategories/fixacoes.png";
+import adesivosImg from "@/assets/subcategories/adesivos.png";
+import diversosImg from "@/assets/subcategories/diversos.png";
+import sinaleticaImg from "@/assets/subcategories/sinaletica.png";
+import kitsEmergenciaImg from "@/assets/subcategories/kits-emergencia.png";
+import coletesRefletoresImg from "@/assets/subcategories/coletes-refletores.png";
+import triangulosImg from "@/assets/subcategories/triangulos.png";
+import extintoresImg from "@/assets/subcategories/extintores.png";
+import interiorImg from "@/assets/subcategories/interior.png";
+import multimediaEletronicaImg from "@/assets/subcategories/multimedia-eletronica.png";
+import confortoUtilitariosImg from "@/assets/subcategories/conforto-utilitarios.png";
 
 const subcategoryImages: Record<string, string> = {
-  // Peças subcategories
-  "Carroçaria": carrocariaImg,
-  "Travagem": travagemImg,
-  "Filtros": filtrosImg,
-  "Suspensão e Direção": suspensaoDirecaoImg,
-  "Motor": motorImg,
-  "Sistema de Escape": sistemaEscapeImg,
-  // Carroçaria nested
-  "Revestimentos Interiores": revestimentosInterioresImg,
-  "Faróis & Farolins": faroisFarolinsImg,
-  "Retrovisores": retrovisoresImg,
-  "Fechos & Dobradiças": fechosDobradicasImg,
-  "Para-choques": paraChoquesImg,
-  "Grelhas": grelhasImg,
-  "Guarda-lamas & Extensões": guardaLamasImg,
-  "Capôs & Tampas": caposTampasImg,
-  "Portas & Painéis Laterais": portasPaineisImg,
-  "Frisos & Molduras": frisosMoldurasImg,
-  "Suportes & Estruturas": suportesEstruturasImg,
+  "Carroçaria": carrocariaImg, "Travagem": travagemImg, "Filtros": filtrosImg,
+  "Suspensão e Direção": suspensaoDirecaoImg, "Motor": motorImg, "Sistema de Escape": sistemaEscapeImg,
+  "Revestimentos Interiores": revestimentosInterioresImg, "Faróis & Farolins": faroisFarolinsImg,
+  "Retrovisores": retrovisoresImg, "Fechos & Dobradiças": fechosDobradicasImg,
+  "Para-choques": paraChoquesImg, "Grelhas": grelhasImg, "Guarda-lamas & Extensões": guardaLamasImg,
+  "Capôs & Tampas": caposTampasImg, "Portas & Painéis Laterais": portasPaineisImg,
+  "Frisos & Molduras": frisosMoldurasImg, "Suportes & Estruturas": suportesEstruturasImg,
+  "Óleos de Motor": oleosMotorImg, "Óleos de Transmissão & Diferencial": oleosTransmissaoImg,
+  "Óleos Hidráulicos & Direção Assistida": oleosTransmissaoImg, "Líquidos de Travões": liquidosTravoesImg,
+  "Líquidos de Arrefecimento": liquidosArrefecimentoImg, "Aditivos de Combustível": aditivosCombustivelImg,
+  "Aditivos de Óleo": aditivosCombustivelImg, "Sprays & Manutenção": spraysManutencaoImg, "Óleos Especiais": oleosMotorImg,
+  "Shampoos & Limpeza": shampoosLimpezaImg, "Ceras & Selantes": cerasSelantesImg, "Polimento & Correção": polimentoCorrecaoImg,
+  "Exterior": exteriorImg, "Interiores": interioresImg, "Vidros & Espelhos": vidrosEspelhosImg,
+  "Panos & Acessórios": panosAcessoriosImg, "Odorizantes": odorizantesImg,
+  "Filtros de Ar Desportivos": filtrosArDesportivosImg, "Escapes & Silenciosos": escapesSilenciososImg,
+  "Suspensões & Molas": suspensoesMolasImg, "Travagem Performance": travagemPerformanceImg,
+  "Jantes & Acessórios": jantesAcessoriosImg, "Iluminação Upgrade": iluminacaoUpgradeImg,
+  "Eletrónica & Chip Tuning": eletronicaChipTuningImg, "Acessórios Desportivos": acessoriosDesportivosImg,
+  "Baterias": bateriasImg, "Iluminação & Lâmpadas": iluminacaoLampadasImg, "Interruptores": interruptoresImg,
+  "Fusíveis & Relés": fusiveisRelesImg, "Cablagens & Conectores": cablagensConectoresImg,
+  "Ferramentas": ferramentasImg, "Fixações": fixacoesImg, "Adesivos": adesivosImg, "Diversos": diversosImg,
+  "Sinalética Interior & Exterior": sinaleticaImg, "Kits de Emergência": kitsEmergenciaImg,
+  "Coletes Refletores": coletesRefletoresImg, "Triângulos": triangulosImg, "Extintores": extintoresImg,
+  "Interior": interiorImg, "Multimédia & Eletrónica": multimediaEletronicaImg, "Conforto & Utilitários": confortoUtilitariosImg,
 };
 
 // Map of category slugs to their display names for product matching
