@@ -20,8 +20,9 @@ export default function Cart() {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: {
           items: items.map((item) => ({
+            product_id: item.product.id, // Required for server-side price validation
             name: item.product.name,
-            price: item.product.price,
+            price: item.product.price, // For display only, server validates from DB
             quantity: item.quantity,
             image: item.product.image,
           })),
