@@ -49,9 +49,15 @@ function extractCategoryFromUrl(url: string): string {
   return 'Geral';
 }
 
-async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 2): Promise<string> {
+async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 3): Promise<string> {
   console.log(`Scraping ${url}...`);
-  
+
+  const backoffMs = (attempt: number) => {
+    // Exponential backoff: 10s, 20s, 40s
+    const base = 10_000;
+    return base * Math.pow(2, attempt - 1);
+  };
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
@@ -62,19 +68,25 @@ async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 2):
         },
         body: JSON.stringify({
           url,
-          formats: ['html'],
+          // Prefer raw HTML to keep the original markup intact
+          formats: ['rawHtml', 'html'],
           onlyMainContent: false,
-          waitFor: 1000,
+          waitFor: 0,
         }),
       });
 
       if (response.status === 429) {
         console.error(`Rate limit (attempt ${attempt}/${maxRetries})`);
         if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          await new Promise((resolve) => setTimeout(resolve, backoffMs(attempt)));
           continue;
         }
         throw new Error('RATE_LIMIT');
+      }
+
+      if (response.status === 402) {
+        // Firecrawl credits exhausted
+        throw new Error('NO_CREDITS');
       }
 
       if (!response.ok) {
@@ -82,13 +94,20 @@ async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 2):
       }
 
       const data = await response.json();
-      return data.data?.html || '';
+      const html = data.data?.rawHtml || data.data?.html || '';
+
+      // Detect maintenance/blocked pages early
+      if (html.includes('page-maintenance') || html.toLowerCase().includes('maintenance')) {
+        throw new Error('MAINTENANCE');
+      }
+
+      return html;
     } catch (e) {
       if (attempt === maxRetries) throw e;
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
-  
+
   throw new Error('RATE_LIMIT');
 }
 
@@ -283,9 +302,33 @@ serve(async (req) => {
         }
       } catch (categoryError) {
         console.error(`Error scraping ${categoryPath}:`, categoryError);
-        if (categoryError instanceof Error && categoryError.message === 'RATE_LIMIT') {
-          rateLimited = true;
-          break;
+        if (categoryError instanceof Error) {
+          if (categoryError.message === 'RATE_LIMIT') {
+            rateLimited = true;
+            break;
+          }
+          if (categoryError.message === 'NO_CREDITS') {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Sem créditos disponíveis para atualização. Recarregue os créditos e tente novamente.',
+                products: [],
+                progress: { current: 0, total: totalCategories },
+              }),
+              { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          if (categoryError.message === 'MAINTENANCE') {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'O website está em manutenção ou bloqueou o acesso. Tente novamente mais tarde.',
+                products: [],
+                progress: { current: 0, total: totalCategories },
+              }),
+              { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
         }
       }
     }
