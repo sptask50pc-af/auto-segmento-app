@@ -74,6 +74,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
           image: product.image,
           category: product.category,
           brand: product.brand || null,
+          reference: product.reference || extractReference(product.name) || null,
           stock: product.inStock ? 'Em stock' : 'Sem stock',
         })
         .select()
@@ -108,6 +109,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       if (updatedFields.image !== undefined) updateData.image = updatedFields.image;
       if (updatedFields.category !== undefined) updateData.category = updatedFields.category;
       if (updatedFields.brand !== undefined) updateData.brand = updatedFields.brand;
+      if (updatedFields.reference !== undefined) updateData.reference = updatedFields.reference;
       if (updatedFields.inStock !== undefined) updateData.stock = updatedFields.inStock ? 'Em stock' : 'Sem stock';
 
       const { error } = await supabase

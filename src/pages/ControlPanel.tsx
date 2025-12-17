@@ -163,9 +163,11 @@ const ControlPanel = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('scrape-products');
-      
+
       if (error) {
-        throw error;
+        // Edge function returns useful JSON even on non-2xx; try to surface it.
+        const message = (data as any)?.error || error.message || 'Falha ao atualizar produtos.';
+        throw new Error(message);
       }
 
       setUpdateProgress({ current: 3, total: 5, status: 'A processar produtos...' });
@@ -241,9 +243,10 @@ const ControlPanel = () => {
       }
     } catch (error) {
       console.error('Error updating from website:', error);
+      const message = error instanceof Error ? error.message : 'Falha ao atualizar produtos do website.';
       toast({
         title: "Erro",
-        description: "Falha ao atualizar produtos do website.",
+        description: message,
         variant: "destructive",
       });
     } finally {
