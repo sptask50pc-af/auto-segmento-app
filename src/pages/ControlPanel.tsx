@@ -1,9 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductForm } from "@/components/ProductForm";
 import { useProducts } from "@/context/ProductContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -95,6 +97,8 @@ function normalizeCategory(scrapedCategory: string): string {
 }
 
 const ControlPanel = () => {
+  const navigate = useNavigate();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const { products, loading, addProduct, updateProduct, deleteProduct, deleteAllProducts, refetch } = useProducts();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -103,6 +107,27 @@ const ControlPanel = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSummary, setShowSummary] = useState(false);
   const [scrapeSummary, setScrapeSummary] = useState<ScrapeSummary>({ total: 0, inserted: 0, updated: 0, failed: 0 });
+
+  // Redirect if not authenticated or not admin
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        toast({
+          title: "Autenticação necessária",
+          description: "Por favor, inicie sessão para aceder ao Painel de Controlo.",
+          variant: "destructive",
+        });
+        navigate('/auth');
+      } else if (!isAdmin) {
+        toast({
+          title: "Acesso negado",
+          description: "Não tem permissão para aceder ao Painel de Controlo.",
+          variant: "destructive",
+        });
+        navigate('/');
+      }
+    }
+  }, [user, isAdmin, authLoading, navigate]);
 
   // Filter products by search query
   const filteredProducts = useMemo(() => {
@@ -259,7 +284,7 @@ const ControlPanel = () => {
     }
   };
 
-  if (loading) {
+  if (loading || authLoading || !user || !isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
