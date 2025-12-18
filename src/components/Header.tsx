@@ -1,25 +1,28 @@
-import { ShoppingBag, Lock, Search, X, LogOut } from "lucide-react";
+import { ShoppingBag, Lock, Search, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CartButton } from "@/components/CartButton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import logo from "@/assets/logo.png";
 import { useState, useMemo } from "react";
+import { toast } from "@/hooks/use-toast";
 import { useProducts } from "@/context/ProductContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "@/hooks/use-toast";
 
 interface HeaderProps {
   title?: string;
 }
 
+const CONTROL_PANEL_PASSWORD = "SP0050PC";
+
 export function Header({ title = "Início" }: HeaderProps) {
   const navigate = useNavigate();
   const { products } = useProducts();
-  const { user, isAdmin, signOut } = useAuth();
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [password, setPassword] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
   const searchResults = useMemo(() => {
@@ -33,21 +36,24 @@ export function Header({ title = "Início" }: HeaderProps) {
     ).slice(0, 10);
   }, [products, searchQuery]);
 
-  const handleAdminClick = () => {
-    if (user && isAdmin) {
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === CONTROL_PANEL_PASSWORD) {
+      setShowPasswordDialog(false);
+      setPassword("");
       navigate('/control-panel');
+      toast({
+        title: "Acesso concedido",
+        description: "Bem-vindo ao Painel de Controlo",
+      });
     } else {
-      navigate('/auth');
+      toast({
+        title: "Palavra-passe incorreta",
+        description: "Por favor, tente novamente",
+        variant: "destructive",
+      });
+      setPassword("");
     }
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    toast({
-      title: "Sessão terminada",
-      description: "Até breve!",
-    });
-    navigate('/');
   };
 
   const handleProductClick = (productId: string) => {
@@ -155,30 +161,49 @@ export function Header({ title = "Início" }: HeaderProps) {
             
             <CartButton />
 
-            {user ? (
-              <Button
-                variant="ghost" 
-                size="icon" 
-                className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                onClick={handleSignOut}
-                title="Terminar sessão"
-              >
-                <LogOut className="h-5 w-5" />
-              </Button>
-            ) : null}
-
             <Button
               variant="ghost" 
               size="icon" 
-              className={`h-9 w-9 hover:bg-accent/50 ${isAdmin ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-              onClick={handleAdminClick}
-              title={isAdmin ? "Painel de Controlo" : "Iniciar sessão"}
+              className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              onClick={() => setShowPasswordDialog(true)}
             >
               <Lock className="h-5 w-5" />
             </Button>
           </div>
         </div>
       </header>
+
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-primary" />
+              Painel de Controlo
+            </DialogTitle>
+            <DialogDescription>
+              Introduza a palavra-passe para aceder ao Painel de Controlo
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <Input
+              type="password"
+              placeholder="Palavra-passe"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full"
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowPasswordDialog(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">
+                Entrar
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

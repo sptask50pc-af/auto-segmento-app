@@ -1,11 +1,9 @@
-import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductForm } from "@/components/ProductForm";
 import { useProducts } from "@/context/ProductContext";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -97,8 +95,6 @@ function normalizeCategory(scrapedCategory: string): string {
 }
 
 const ControlPanel = () => {
-  const navigate = useNavigate();
-  const { user, isAdmin, loading: authLoading } = useAuth();
   const { products, loading, addProduct, updateProduct, deleteProduct, deleteAllProducts, refetch } = useProducts();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -107,27 +103,6 @@ const ControlPanel = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSummary, setShowSummary] = useState(false);
   const [scrapeSummary, setScrapeSummary] = useState<ScrapeSummary>({ total: 0, inserted: 0, updated: 0, failed: 0 });
-
-  // Redirect if not authenticated or not admin
-  useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        toast({
-          title: "Autenticação necessária",
-          description: "Por favor, inicie sessão para aceder ao Painel de Controlo.",
-          variant: "destructive",
-        });
-        navigate('/auth');
-      } else if (!isAdmin) {
-        toast({
-          title: "Acesso negado",
-          description: "Não tem permissão para aceder ao Painel de Controlo.",
-          variant: "destructive",
-        });
-        navigate('/');
-      }
-    }
-  }, [user, isAdmin, authLoading, navigate]);
 
   // Filter products by search query
   const filteredProducts = useMemo(() => {
@@ -140,6 +115,7 @@ const ControlPanel = () => {
       p.reference?.toLowerCase().includes(query)
     );
   }, [products, searchQuery]);
+
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setIsDialogOpen(true);
@@ -284,7 +260,7 @@ const ControlPanel = () => {
     }
   };
 
-  if (loading || authLoading || !user || !isAdmin) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -458,9 +434,9 @@ const ControlPanel = () => {
               <span className="text-muted-foreground">{updateProgress.status}</span>
               <span className="font-medium">{updateProgress.current}/{updateProgress.total}</span>
             </div>
-            <div className="h-3 bg-muted rounded-full overflow-hidden">
+            <div className="w-full bg-muted rounded-full h-2">
               <div 
-                className="h-full bg-primary transition-all duration-300"
+                className="bg-primary h-2 rounded-full transition-all duration-300" 
                 style={{ width: `${updateProgress.total > 0 ? (updateProgress.current / updateProgress.total) * 100 : 0}%` }}
               />
             </div>
@@ -468,23 +444,7 @@ const ControlPanel = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Product Form Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingProduct ? "Editar Produto" : "Novo Produto"}
-            </DialogTitle>
-          </DialogHeader>
-          <ProductForm
-            product={editingProduct}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* Scrape Summary Dialog */}
+      {/* Summary Dialog */}
       <Dialog open={showSummary} onOpenChange={setShowSummary}>
         <DialogContent className="bg-card border-border sm:max-w-md">
           <DialogHeader>
@@ -496,32 +456,33 @@ const ControlPanel = () => {
               Resumo da sincronização de produtos
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg bg-muted p-4 text-center">
-                <p className="text-2xl font-bold">{scrapeSummary.total}</p>
-                <p className="text-xs text-muted-foreground">Total Encontrados</p>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+              <Package className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-lg font-bold">{scrapeSummary.total}</p>
+                <p className="text-xs text-muted-foreground">Total encontrado</p>
               </div>
-              <div className="rounded-lg bg-green-500/10 p-4 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <p className="text-2xl font-bold text-green-500">{scrapeSummary.inserted}</p>
-                </div>
-                <p className="text-xs text-muted-foreground">Novos</p>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-green-500/10">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <div>
+                <p className="text-lg font-bold text-green-500">{scrapeSummary.inserted}</p>
+                <p className="text-xs text-muted-foreground">Inseridos</p>
               </div>
-              <div className="rounded-lg bg-blue-500/10 p-4 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <RefreshCw className="h-4 w-4 text-blue-500" />
-                  <p className="text-2xl font-bold text-blue-500">{scrapeSummary.updated}</p>
-                </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-500/10">
+              <AlertCircle className="h-5 w-5 text-blue-500" />
+              <div>
+                <p className="text-lg font-bold text-blue-500">{scrapeSummary.updated}</p>
                 <p className="text-xs text-muted-foreground">Atualizados</p>
               </div>
-              <div className="rounded-lg bg-red-500/10 p-4 text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <XCircle className="h-4 w-4 text-red-500" />
-                  <p className="text-2xl font-bold text-red-500">{scrapeSummary.failed}</p>
-                </div>
-                <p className="text-xs text-muted-foreground">Falhas</p>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-destructive/10">
+              <XCircle className="h-5 w-5 text-destructive" />
+              <div>
+                <p className="text-lg font-bold text-destructive">{scrapeSummary.failed}</p>
+                <p className="text-xs text-muted-foreground">Falhados</p>
               </div>
             </div>
           </div>
@@ -530,6 +491,22 @@ const ControlPanel = () => {
               Fechar
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Product Form Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingProduct ? "Editar Produto" : "Adicionar Produto"}
+            </DialogTitle>
+          </DialogHeader>
+          <ProductForm
+            product={editingProduct}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+          />
         </DialogContent>
       </Dialog>
 
