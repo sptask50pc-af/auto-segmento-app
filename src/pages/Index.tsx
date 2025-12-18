@@ -38,9 +38,6 @@ const Index = () => {
     }, 4000);
     return () => clearInterval(interval);
   }, []);
-  <span className="text-xs text-center text-muted-foreground leading-tight group-hover:text-foreground transition-colors font-medium">
-    {category.label}
-  </span>;
 
   const handleCategoryClick = (label: string) => {
     if (label === "Peças") navigate("/subcategories/pecas");
