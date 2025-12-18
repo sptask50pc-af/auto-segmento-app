@@ -97,8 +97,13 @@ async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 3):
       const data = await response.json();
       const html = data.data?.rawHtml || data.data?.html || '';
 
-      // Detect maintenance/blocked pages early
-      if (html.includes('page-maintenance') || html.toLowerCase().includes('maintenance')) {
+      // Detect actual maintenance/blocked pages (be specific to avoid false positives)
+      const isMaintenancePage = 
+        html.includes('class="page-maintenance"') || 
+        html.includes('id="maintenance"') ||
+        (html.includes('<title>') && html.toLowerCase().includes('manutenção') && html.length < 5000);
+      
+      if (isMaintenancePage) {
         throw new Error('MAINTENANCE');
       }
 
