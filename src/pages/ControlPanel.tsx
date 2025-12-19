@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Package, RefreshCw, Search, CheckCircle, AlertCircle, XCircle, Shield } from "lucide-react";
+import { Plus, Package, RefreshCw, Search, CheckCircle, AlertCircle, XCircle, Shield, DollarSign } from "lucide-react";
 import { Product } from "@/types/product";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -99,6 +99,7 @@ const ControlPanel = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isSyncingPrices, setIsSyncingPrices] = useState(false);
   const [updateProgress, setUpdateProgress] = useState({ current: 0, total: 0, status: '' });
   const [searchQuery, setSearchQuery] = useState('');
   const [showSummary, setShowSummary] = useState(false);
@@ -260,6 +261,47 @@ const ControlPanel = () => {
     }
   };
 
+  const handleSyncPrices = async () => {
+    setIsSyncingPrices(true);
+    setUpdateProgress({ current: 0, total: 5, status: 'A sincronizar preços...' });
+
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-prices');
+
+      if (error) {
+        const message = (data as any)?.error || error.message || 'Falha ao sincronizar preços.';
+        throw new Error(message);
+      }
+
+      if (data?.success) {
+        const { summary, updates } = data;
+        await refetch();
+        
+        toast({
+          title: "Preços sincronizados",
+          description: `${summary?.updated || 0} preços atualizados de ${summary?.total || 0} produtos.`,
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: data?.error || "Falha ao sincronizar preços.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error syncing prices:', error);
+      const message = error instanceof Error ? error.message : 'Falha ao sincronizar preços.';
+      toast({
+        title: "Erro",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncingPrices(false);
+      setUpdateProgress({ current: 0, total: 0, status: '' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -340,19 +382,28 @@ const ControlPanel = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 animate-slide-up" style={{ animationDelay: "200ms" }}>
-          <Button onClick={handleAddNew} className="flex-1 gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
+        <div className="flex flex-wrap gap-3 animate-slide-up" style={{ animationDelay: "200ms" }}>
+          <Button onClick={handleAddNew} className="flex-1 min-w-[100px] gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
             <Plus className="h-5 w-5" />
             Adicionar
           </Button>
           <Button 
             onClick={handleUpdateFromWebsite} 
             variant="secondary"
-            className="flex-1 gap-2 bg-card/80 backdrop-blur border border-border hover:border-primary/40"
-            disabled={isUpdating}
+            className="flex-1 min-w-[100px] gap-2 bg-card/80 backdrop-blur border border-border hover:border-primary/40"
+            disabled={isUpdating || isSyncingPrices}
           >
             <RefreshCw className={`h-5 w-5 ${isUpdating ? 'animate-spin' : ''}`} />
             {isUpdating ? 'A atualizar...' : 'Update'}
+          </Button>
+          <Button 
+            onClick={handleSyncPrices} 
+            variant="secondary"
+            className="flex-1 min-w-[100px] gap-2 bg-green-500/10 backdrop-blur border border-green-500/30 hover:border-green-500/60 text-green-400"
+            disabled={isUpdating || isSyncingPrices}
+          >
+            <DollarSign className={`h-5 w-5 ${isSyncingPrices ? 'animate-pulse' : ''}`} />
+            {isSyncingPrices ? 'A sincronizar...' : 'Preços'}
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
