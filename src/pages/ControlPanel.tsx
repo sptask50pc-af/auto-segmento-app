@@ -399,11 +399,12 @@ const ControlPanel = () => {
           <Button 
             onClick={handleSyncPrices} 
             variant="secondary"
-            className="flex-1 min-w-[100px] gap-2 bg-green-500/10 backdrop-blur border border-green-500/30 hover:border-green-500/60 text-green-400"
+            className="flex-1 min-w-[120px] gap-2 bg-green-500/10 backdrop-blur border border-green-500/30 hover:border-green-500/60 text-green-400"
             disabled={isUpdating || isSyncingPrices}
+            title="Atualizar preços de segmentopositivo.pt"
           >
             <DollarSign className={`h-5 w-5 ${isSyncingPrices ? 'animate-pulse' : ''}`} />
-            {isSyncingPrices ? 'A sincronizar...' : 'From Website'}
+            {isSyncingPrices ? 'A sincronizar...' : 'Scrap Price'}
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
