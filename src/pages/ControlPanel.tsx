@@ -403,7 +403,7 @@ const ControlPanel = () => {
             disabled={isUpdating || isSyncingPrices}
           >
             <DollarSign className={`h-5 w-5 ${isSyncingPrices ? 'animate-pulse' : ''}`} />
-            {isSyncingPrices ? 'A sincronizar...' : 'Preços'}
+            {isSyncingPrices ? 'A sincronizar...' : 'From Website'}
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
