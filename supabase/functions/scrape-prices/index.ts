@@ -270,35 +270,79 @@ serve(async (req) => {
       );
     }
 
+    // Normalize function for better matching
+    const normalize = (str: string): string => {
+      return str
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[^a-z0-9]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
+
+    // Build normalized price map for better matching
+    const normalizedPrices = new Map<string, { price: number; name: string }>();
+    allPrices.forEach((value, key) => {
+      if (typeof key === 'string' && !key.startsWith('http')) {
+        normalizedPrices.set(normalize(key), value);
+      }
+    });
+
     // Match and update prices
     const priceUpdates: PriceUpdate[] = [];
     let updatedCount = 0;
     let unchangedCount = 0;
+    let notFoundCount = 0;
     
     for (const product of existingProducts) {
-      // Try to find matching price by name
+      // Try exact match first
       const nameLower = product.name.toLowerCase().trim();
-      const priceData = allPrices.get(nameLower);
+      let priceData = allPrices.get(nameLower);
       
-      if (priceData && priceData.price !== product.price) {
-        console.log(`  Price update: "${product.name.substring(0, 40)}..." ${product.price}€ → ${priceData.price}€`);
-        
-        const { error: updateError } = await supabase
-          .from('products')
-          .update({ price: priceData.price })
-          .eq('id', product.id);
-        
-        if (!updateError) {
-          priceUpdates.push({
-            id: product.id,
-            name: product.name,
-            oldPrice: product.price,
-            newPrice: priceData.price,
-          });
-          updatedCount++;
+      // Try normalized match if exact match fails
+      if (!priceData) {
+        const normalizedName = normalize(product.name);
+        priceData = normalizedPrices.get(normalizedName);
+      }
+      
+      // Try partial match - find if product name contains or is contained in any scraped name
+      if (!priceData) {
+        const normalizedName = normalize(product.name);
+        for (const [key, value] of normalizedPrices.entries()) {
+          if (normalizedName.includes(key) || key.includes(normalizedName)) {
+            if (normalizedName.length > 10 && key.length > 10) { // Avoid false positives on short names
+              priceData = value;
+              break;
+            }
+          }
         }
-      } else if (priceData) {
-        unchangedCount++;
+      }
+      
+      if (priceData) {
+        if (priceData.price !== product.price) {
+          console.log(`  Price update: "${product.name.substring(0, 40)}..." ${product.price}€ → ${priceData.price}€`);
+          
+          const { error: updateError } = await supabase
+            .from('products')
+            .update({ price: priceData.price })
+            .eq('id', product.id);
+          
+          if (!updateError) {
+            priceUpdates.push({
+              id: product.id,
+              name: product.name,
+              oldPrice: product.price,
+              newPrice: priceData.price,
+            });
+            updatedCount++;
+          }
+        } else {
+          unchangedCount++;
+        }
+      } else {
+        notFoundCount++;
+        console.log(`  Not found on website: "${product.name.substring(0, 50)}..."`);
       }
     }
     
@@ -312,7 +356,7 @@ serve(async (req) => {
           total: existingProducts.length,
           updated: updatedCount,
           unchanged: unchangedCount,
-          notFound: existingProducts.length - updatedCount - unchangedCount,
+          notFound: notFoundCount,
         },
         timestamp: new Date().toISOString(),
       }),
