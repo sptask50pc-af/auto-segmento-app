@@ -458,7 +458,7 @@ const SubCategories = () => {
             <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-primary/10 blur-2xl" />
             <div className="relative flex items-center justify-between h-full">
               <div>
-                <h1 className="text-lg font-bold text-foreground mb-1">{data.name}</h1>
+                <h1 className="text-xl font-bold text-foreground mb-1">{data.name}</h1>
                 <p className="text-muted-foreground text-xs">
                   Selecione uma subcategoria
                 </p>
@@ -514,7 +514,7 @@ const SubCategories = () => {
                   </div>
                 )}
               </div>
-              <span className="text-xs text-center text-muted-foreground leading-tight group-hover:text-foreground transition-colors font-medium">{item.label}</span>
+              <span className="text-xs text-center text-foreground leading-tight group-hover:text-primary transition-colors font-bold">{item.label}</span>
             </div>
           ))}
         </div>
