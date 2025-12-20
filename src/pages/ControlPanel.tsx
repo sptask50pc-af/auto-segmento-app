@@ -383,15 +383,19 @@ const ControlPanel = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-3 animate-slide-up" style={{ animationDelay: "200ms" }}>
-          <Button onClick={handleAddNew} className="flex-1 min-w-[100px] gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
+          <Button 
+            onClick={handleAddNew} 
+            className="flex-1 min-w-[100px] gap-2 bg-primary/10 backdrop-blur border border-primary/30 hover:border-primary/60 text-primary shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all duration-300"
+          >
             <Plus className="h-5 w-5" />
             Adicionar
           </Button>
           <Button 
             onClick={handleUpdateFromWebsite} 
             variant="secondary"
-            className="flex-1 min-w-[100px] gap-2 bg-card/80 backdrop-blur border border-border hover:border-primary/40"
+            className="flex-1 min-w-[100px] gap-2 bg-blue-500/10 backdrop-blur border border-blue-500/30 hover:border-blue-500/60 text-blue-400 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition-all duration-300"
             disabled={isUpdating || isSyncingPrices}
+            title="Atualizar produtos do website"
           >
             <RefreshCw className={`h-5 w-5 ${isUpdating ? 'animate-spin' : ''}`} />
             {isUpdating ? 'A atualizar...' : 'Update'}
@@ -399,7 +403,7 @@ const ControlPanel = () => {
           <Button 
             onClick={handleSyncPrices} 
             variant="secondary"
-            className="flex-1 min-w-[120px] gap-2 bg-green-500/10 backdrop-blur border border-green-500/30 hover:border-green-500/60 text-green-400"
+            className="flex-1 min-w-[120px] gap-2 bg-green-500/10 backdrop-blur border border-green-500/30 hover:border-green-500/60 text-green-400 shadow-lg shadow-green-500/10 hover:shadow-green-500/20 transition-all duration-300"
             disabled={isUpdating || isSyncingPrices}
             title="Atualizar preços de segmentopositivo.pt"
           >
@@ -410,7 +414,7 @@ const ControlPanel = () => {
             <AlertDialogTrigger asChild>
               <Button 
                 variant="destructive"
-                className="gap-2 shadow-lg shadow-destructive/20"
+                className="gap-2 bg-destructive/10 backdrop-blur border border-destructive/30 hover:border-destructive/60 text-destructive shadow-lg shadow-destructive/10 hover:shadow-destructive/20 transition-all duration-300"
               >
                 Reset
               </Button>
