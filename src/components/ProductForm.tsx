@@ -166,10 +166,18 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
       </div>
 
       <div className="flex gap-3 pt-2">
-        <Button type="button" variant="secondary" className="flex-1" onClick={onCancel}>
+        <Button 
+          type="button" 
+          variant="secondary" 
+          className="flex-1 bg-muted/50 backdrop-blur border border-border hover:border-muted-foreground/40 text-muted-foreground shadow-lg shadow-muted/10 hover:shadow-muted/20 transition-all duration-300" 
+          onClick={onCancel}
+        >
           Cancelar
         </Button>
-        <Button type="submit" className="flex-1">
+        <Button 
+          type="submit" 
+          className="flex-1 bg-primary/10 backdrop-blur border border-primary/30 hover:border-primary/60 text-primary shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all duration-300"
+        >
           {product ? "Atualizar" : "Adicionar"}
         </Button>
       </div>

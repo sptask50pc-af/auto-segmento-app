@@ -427,7 +427,9 @@ const ControlPanel = () => {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel className="bg-muted/50 backdrop-blur border border-border hover:border-muted-foreground/40 text-muted-foreground shadow-lg shadow-muted/10 hover:shadow-muted/20 transition-all duration-300">
+                  Cancelar
+                </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={async () => {
                     await deleteAllProducts();
@@ -436,7 +438,7 @@ const ControlPanel = () => {
                       description: "Todos os produtos foram removidos.",
                     });
                   }}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  className="bg-destructive/10 backdrop-blur border border-destructive/30 hover:border-destructive/60 text-destructive shadow-lg shadow-destructive/10 hover:shadow-destructive/20 transition-all duration-300"
                 >
                   Eliminar Tudo
                 </AlertDialogAction>
@@ -543,7 +545,10 @@ const ControlPanel = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => setShowSummary(false)} className="w-full">
+            <Button 
+              onClick={() => setShowSummary(false)} 
+              className="w-full bg-primary/10 backdrop-blur border border-primary/30 hover:border-primary/60 text-primary shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all duration-300"
+            >
               Fechar
             </Button>
           </DialogFooter>
