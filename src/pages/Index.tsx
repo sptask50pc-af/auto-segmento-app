@@ -134,14 +134,14 @@ const Index = () => {
                   className="group flex flex-col items-center gap-2 cursor-pointer animate-scale-in"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="relative w-20 h-20 rounded-2xl bg-white border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
+                  <div className="relative w-20 h-20 rounded-2xl bg-card/80 backdrop-blur border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
                     <img
                       src={categoryImages[category.label]}
                       alt={category.label}
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <span className="text-xs text-center text-muted-foreground leading-tight group-hover:text-foreground transition-colors font-medium">
+                  <span className="text-xs text-center text-foreground leading-tight group-hover:text-primary transition-colors font-bold">
                     {category.label}
                   </span>
                   {hasSubCategories && (
