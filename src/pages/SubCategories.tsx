@@ -505,7 +505,7 @@ const SubCategories = () => {
               className="group flex flex-col items-center gap-2 animate-fade-in cursor-pointer"
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className="relative w-20 h-20 rounded-2xl bg-card/80 backdrop-blur border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
+              <div className="relative w-20 h-20 rounded-2xl bg-card backdrop-blur border-2 border-border/60 shadow-lg shadow-background/50 flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
                 {subcategoryImages[item.label] ? (
                   <img src={subcategoryImages[item.label]} alt={item.label} className="w-full h-full object-contain" />
                 ) : (
