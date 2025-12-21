@@ -481,17 +481,17 @@ const SubCategories = () => {
               navigate("/");
             }
           }}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl bg-muted/50 backdrop-blur border border-border hover:border-primary/40 text-muted-foreground hover:text-foreground shadow-lg shadow-muted/10 hover:shadow-primary/10 transition-all duration-300"
         >
           {isThirdLevel ? (
             <>
               <ChevronLeft className="w-4 h-4" />
-              <span>Voltar</span>
+              <span className="font-medium">Voltar</span>
             </>
           ) : (
             <>
               <Home className="w-4 h-4" />
-              <span>Voltar às categorias</span>
+              <span className="font-medium">Voltar às categorias</span>
             </>
           )}
         </button>
@@ -505,7 +505,7 @@ const SubCategories = () => {
               className="group flex flex-col items-center gap-2 animate-fade-in cursor-pointer"
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className="relative w-20 h-20 rounded-2xl bg-white border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
+              <div className="relative w-20 h-20 rounded-2xl bg-card/80 backdrop-blur border border-border flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
                 {subcategoryImages[item.label] ? (
                   <img src={subcategoryImages[item.label]} alt={item.label} className="w-full h-full object-contain" />
                 ) : (
