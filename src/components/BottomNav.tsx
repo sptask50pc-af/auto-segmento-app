@@ -1,16 +1,29 @@
 import * as React from "react";
-import { Home, Settings } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Home, Settings, User, LogOut } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { icon: Home, label: "Início", path: "/" },
-  { icon: Settings, label: "Admin", path: "/admin" },
-];
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const BottomNav = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
   ({ className, ...props }, ref) => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { user, signOut } = useAuth();
+    const { toast } = useToast();
+
+    const handleSignOut = async () => {
+      await signOut();
+      toast({
+        title: "Sessão terminada",
+        description: "Até breve!",
+      });
+    };
+
+    const navItems = [
+      { icon: Home, label: "Início", path: "/" },
+      { icon: Settings, label: "Admin", path: "/admin" },
+    ];
 
     return (
       <nav
@@ -38,6 +51,28 @@ const BottomNav = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement
               </Link>
             );
           })}
+          
+          {/* Auth button */}
+          {user ? (
+            <button
+              onClick={handleSignOut}
+              className="flex flex-col items-center justify-center gap-1 px-3 py-2 transition-colors text-primary"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="text-xs font-medium">Sair</span>
+            </button>
+          ) : (
+            <Link
+              to="/auth"
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 px-3 py-2 transition-colors",
+                location.pathname === "/auth" ? "text-primary" : "text-muted-foreground"
+              )}
+            >
+              <User className={cn("h-5 w-5", location.pathname === "/auth" && "drop-shadow-[0_0_8px_hsl(var(--primary))]")} />
+              <span className="text-xs font-medium">Conta</span>
+            </Link>
+          )}
         </div>
       </nav>
     );
