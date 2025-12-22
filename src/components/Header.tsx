@@ -1,4 +1,4 @@
-import { ShoppingBag, Lock, Search, X } from "lucide-react";
+import { ShoppingBag, Lock, Search, X, User, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CartButton } from "@/components/CartButton";
@@ -9,6 +9,7 @@ import logo from "@/assets/logo.png";
 import { useState, useMemo } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useProducts } from "@/context/ProductContext";
+import { useAuth } from "@/context/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface HeaderProps {
@@ -20,10 +21,19 @@ const CONTROL_PANEL_PASSWORD = "SP0050PC";
 export function Header({ title = "Início" }: HeaderProps) {
   const navigate = useNavigate();
   const { products } = useProducts();
+  const { user, signOut } = useAuth();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [password, setPassword] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Sessão terminada",
+      description: "Até breve!",
+    });
+  };
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -160,6 +170,30 @@ export function Header({ title = "Início" }: HeaderProps) {
             </Link>
             
             <CartButton />
+
+            {/* User Account Button */}
+            {user ? (
+              <Button
+                variant="ghost" 
+                size="icon" 
+                className="h-9 w-9 text-primary hover:text-primary hover:bg-primary/10"
+                onClick={handleSignOut}
+                title="Sair"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            ) : (
+              <Link to="/auth">
+                <Button
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                  title="Entrar"
+                >
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
 
             <Button
               variant="ghost" 
