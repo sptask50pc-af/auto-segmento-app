@@ -20,6 +20,13 @@ interface ScrapeSummary {
   failed: number;
 }
 
+interface PriceSyncSummary {
+  total: number;
+  updated: number;
+  unchanged: number;
+  notFound: number;
+}
+
 // Map scraped category names to app category names (case-insensitive matching)
 const CATEGORY_MAPPING: Record<string, string> = {
   // Óleos de Motor
@@ -104,6 +111,8 @@ const ControlPanel = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSummary, setShowSummary] = useState(false);
   const [scrapeSummary, setScrapeSummary] = useState<ScrapeSummary>({ total: 0, inserted: 0, updated: 0, failed: 0 });
+  const [showPriceSummary, setShowPriceSummary] = useState(false);
+  const [priceSyncSummary, setPriceSyncSummary] = useState<PriceSyncSummary>({ total: 0, updated: 0, unchanged: 0, notFound: 0 });
 
   // Filter products by search query
   const filteredProducts = useMemo(() => {
@@ -125,8 +134,8 @@ const ControlPanel = () => {
   const handleDelete = async (id: string) => {
     await deleteProduct(id);
     toast({
-      title: "Produto removido",
-      description: "O produto foi removido com sucesso.",
+      title: "Product Removed",
+      description: "The product was successfully removed.",
     });
   };
 
@@ -134,14 +143,14 @@ const ControlPanel = () => {
     if (editingProduct) {
       await updateProduct(editingProduct.id, productData);
       toast({
-        title: "Produto atualizado",
-        description: "As alterações foram salvas.",
+        title: "Product Updated",
+        description: "Changes have been saved.",
       });
     } else {
       await addProduct(productData);
       toast({
-        title: "Produto adicionado",
-        description: "O novo produto foi adicionado ao catálogo.",
+        title: "Product Added",
+        description: "The new product has been added to the catalog.",
       });
     }
     setIsDialogOpen(false);
@@ -160,7 +169,7 @@ const ControlPanel = () => {
 
   const handleUpdateFromWebsite = async () => {
     setIsUpdating(true);
-    setUpdateProgress({ current: 0, total: 5, status: 'A carregar categorias...' });
+    setUpdateProgress({ current: 0, total: 5, status: 'Loading categories...' });
     const summary: ScrapeSummary = { total: 0, inserted: 0, updated: 0, failed: 0 };
 
     try {
@@ -172,7 +181,7 @@ const ControlPanel = () => {
         throw new Error(message);
       }
 
-      setUpdateProgress({ current: 3, total: 5, status: 'A processar produtos...' });
+      setUpdateProgress({ current: 3, total: 5, status: 'Processing products...' });
 
       if (data?.success && data.products?.length > 0) {
         summary.total = data.products.length;
@@ -185,7 +194,7 @@ const ControlPanel = () => {
             setUpdateProgress({ 
               current: 3 + Math.floor((i / summary.total) * 2), 
               total: 5, 
-              status: `A processar ${i + 1}/${summary.total} produtos...` 
+              status: `Processing ${i + 1}/${summary.total} products...` 
             });
           }
           
@@ -234,20 +243,20 @@ const ControlPanel = () => {
           }
         }
 
-        setUpdateProgress({ current: 5, total: 5, status: 'Concluído!' });
+        setUpdateProgress({ current: 5, total: 5, status: 'Complete!' });
         await refetch();
       } else {
         toast({
-          title: "Sem produtos",
-          description: data?.error || "Não foram encontrados produtos.",
+          title: "No Products",
+          description: data?.error || "No products found.",
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Error updating from website:', error);
-      const message = error instanceof Error ? error.message : 'Falha ao atualizar produtos do website.';
+      const message = error instanceof Error ? error.message : 'Failed to update products from website.';
       toast({
-        title: "Erro",
+        title: "Error",
         description: message,
         variant: "destructive",
       });
@@ -263,36 +272,44 @@ const ControlPanel = () => {
 
   const handleSyncPrices = async () => {
     setIsSyncingPrices(true);
-    setUpdateProgress({ current: 0, total: 5, status: 'A sincronizar preços...' });
+    setUpdateProgress({ current: 0, total: 5, status: 'Syncing prices...' });
 
     try {
       const { data, error } = await supabase.functions.invoke('scrape-prices');
 
       if (error) {
-        const message = (data as any)?.error || error.message || 'Falha ao sincronizar preços.';
+        const message = (data as any)?.error || error.message || 'Failed to sync prices.';
         throw new Error(message);
       }
 
       if (data?.success) {
-        const { summary, updates } = data;
+        const { summary } = data;
         await refetch();
         
+        setPriceSyncSummary({
+          total: summary?.total || 0,
+          updated: summary?.updated || 0,
+          unchanged: summary?.unchanged || 0,
+          notFound: summary?.notFound || 0,
+        });
+        setShowPriceSummary(true);
+        
         toast({
-          title: "Preços sincronizados",
-          description: `${summary?.updated || 0} preços atualizados de ${summary?.total || 0} produtos.`,
+          title: "Prices Synced",
+          description: `${summary?.updated || 0} prices updated out of ${summary?.total || 0} products.`,
         });
       } else {
         toast({
-          title: "Erro",
-          description: data?.error || "Falha ao sincronizar preços.",
+          title: "Error",
+          description: data?.error || "Failed to sync prices.",
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Error syncing prices:', error);
-      const message = error instanceof Error ? error.message : 'Falha ao sincronizar preços.';
+      const message = error instanceof Error ? error.message : 'Failed to sync prices.';
       toast({
-        title: "Erro",
+        title: "Error",
         description: message,
         variant: "destructive",
       });
@@ -312,7 +329,7 @@ const ControlPanel = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Header title="Painel de Controlo" />
+      <Header title="Control Panel" />
 
       <main className="container px-4 py-6 space-y-6">
         {/* Hero Admin Banner */}
@@ -324,13 +341,13 @@ const ControlPanel = () => {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Shield className="w-5 h-5 text-primary animate-pulse" />
-                  <span className="text-sm font-medium text-primary">Painel de Controlo</span>
+                  <span className="text-sm font-medium text-primary">Control Panel</span>
                 </div>
                 <h1 className="text-xl font-bold text-foreground mb-1">
-                  Gestão de Produtos
+                  Product Management
                 </h1>
                 <p className="text-muted-foreground text-sm">
-                  Adicione, edite e sincronize produtos
+                  Add, edit and sync products
                 </p>
               </div>
               <img 
@@ -351,7 +368,7 @@ const ControlPanel = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-primary">{products.length}</p>
-                <p className="text-xs text-muted-foreground">Produtos</p>
+                <p className="text-xs text-muted-foreground">Products</p>
               </div>
             </div>
           </div>
@@ -364,7 +381,7 @@ const ControlPanel = () => {
                 <p className="text-2xl font-bold text-green-400">
                   {products.filter((p) => p.inStock).length}
                 </p>
-                <p className="text-xs text-muted-foreground">Em estoque</p>
+                <p className="text-xs text-muted-foreground">In Stock</p>
               </div>
             </div>
           </div>
@@ -374,7 +391,7 @@ const ControlPanel = () => {
         <div className="relative animate-slide-up" style={{ animationDelay: "150ms" }}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Pesquisar por nome, marca, categoria ou referência..." 
+            placeholder="Search by name, brand, category or reference..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 bg-card/80 backdrop-blur border-border focus:border-primary/50 transition-colors"
@@ -388,27 +405,27 @@ const ControlPanel = () => {
             className="flex-1 min-w-[100px] gap-2 bg-primary/10 backdrop-blur border border-primary/30 hover:border-primary/60 text-primary shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all duration-300"
           >
             <Plus className="h-5 w-5" />
-            Adicionar
+            Add
           </Button>
           <Button 
             onClick={handleUpdateFromWebsite} 
             variant="secondary"
             className="flex-1 min-w-[100px] gap-2 bg-blue-500/10 backdrop-blur border border-blue-500/30 hover:border-blue-500/60 text-blue-400 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition-all duration-300"
             disabled={isUpdating || isSyncingPrices}
-            title="Atualizar produtos do website"
+            title="Update products from website"
           >
             <RefreshCw className={`h-5 w-5 ${isUpdating ? 'animate-spin' : ''}`} />
-            {isUpdating ? 'A atualizar...' : 'Update'}
+            {isUpdating ? 'Updating...' : 'Update'}
           </Button>
           <Button 
             onClick={handleSyncPrices} 
             variant="secondary"
             className="flex-1 min-w-[120px] gap-2 bg-green-500/10 backdrop-blur border border-green-500/30 hover:border-green-500/60 text-green-400 shadow-lg shadow-green-500/10 hover:shadow-green-500/20 transition-all duration-300"
             disabled={isUpdating || isSyncingPrices}
-            title="Atualizar preços de segmentopositivo.pt"
+            title="Sync prices from segmentopositivo.pt"
           >
             <DollarSign className={`h-5 w-5 ${isSyncingPrices ? 'animate-pulse' : ''}`} />
-            {isSyncingPrices ? 'A sincronizar...' : 'Scrap Price'}
+            {isSyncingPrices ? 'Syncing...' : 'Sync Prices'}
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -421,26 +438,26 @@ const ControlPanel = () => {
             </AlertDialogTrigger>
             <AlertDialogContent className="bg-card border-border">
               <AlertDialogHeader>
-                <AlertDialogTitle>Tem a certeza?</AlertDialogTitle>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Esta ação irá remover permanentemente todos os {products.length} produtos da base de dados. Esta ação não pode ser desfeita.
+                  This action will permanently remove all {products.length} products from the database. This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel className="bg-muted/50 backdrop-blur border border-border hover:border-muted-foreground/40 text-muted-foreground shadow-lg shadow-muted/10 hover:shadow-muted/20 transition-all duration-300">
-                  Cancelar
+                  Cancel
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={async () => {
                     await deleteAllProducts();
                     toast({
-                      title: "Reset concluído",
-                      description: "Todos os produtos foram removidos.",
+                      title: "Reset Complete",
+                      description: "All products have been removed.",
                     });
                   }}
                   className="bg-destructive/10 backdrop-blur border border-destructive/30 hover:border-destructive/60 text-destructive shadow-lg shadow-destructive/10 hover:shadow-destructive/20 transition-all duration-300"
                 >
-                  Eliminar Tudo
+                  Delete All
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -451,11 +468,11 @@ const ControlPanel = () => {
         <div className="flex items-center justify-between animate-slide-up" style={{ animationDelay: "250ms" }}>
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
             <span className="w-1 h-6 bg-primary rounded-full" />
-            Catálogo
+            Catalog
           </h2>
           {searchQuery && (
             <p className="text-sm text-muted-foreground">
-              {filteredProducts.length} de {products.length}
+              {filteredProducts.length} of {products.length}
             </p>
           )}
         </div>
@@ -476,15 +493,15 @@ const ControlPanel = () => {
       </main>
 
       {/* Progress Dialog */}
-      <Dialog open={isUpdating} onOpenChange={() => {}}>
+      <Dialog open={isUpdating || isSyncingPrices} onOpenChange={() => {}}>
         <DialogContent className="bg-card border-border sm:max-w-md [&>button]:hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <RefreshCw className="h-5 w-5 animate-spin text-primary" />
-              A atualizar produtos
+              {isSyncingPrices ? 'Syncing Prices' : 'Updating Products'}
             </DialogTitle>
             <DialogDescription>
-              Por favor aguarde enquanto os produtos são sincronizados...
+              Please wait while the data is being synchronized...
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -502,16 +519,16 @@ const ControlPanel = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Summary Dialog */}
+      {/* Product Update Summary Dialog */}
       <Dialog open={showSummary} onOpenChange={setShowSummary}>
         <DialogContent className="bg-card border-border sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-500" />
-              Atualização Concluída
+              Update Complete
             </DialogTitle>
             <DialogDescription>
-              Resumo da sincronização de produtos
+              Product synchronization summary
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
@@ -519,28 +536,28 @@ const ControlPanel = () => {
               <Package className="h-5 w-5 text-primary" />
               <div>
                 <p className="text-lg font-bold">{scrapeSummary.total}</p>
-                <p className="text-xs text-muted-foreground">Total encontrado</p>
+                <p className="text-xs text-muted-foreground">Total Found</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 rounded-lg bg-green-500/10">
               <CheckCircle className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-lg font-bold text-green-500">{scrapeSummary.inserted}</p>
-                <p className="text-xs text-muted-foreground">Inseridos</p>
+                <p className="text-xs text-muted-foreground">Inserted</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-500/10">
               <AlertCircle className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-lg font-bold text-blue-500">{scrapeSummary.updated}</p>
-                <p className="text-xs text-muted-foreground">Atualizados</p>
+                <p className="text-xs text-muted-foreground">Updated</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 rounded-lg bg-destructive/10">
               <XCircle className="h-5 w-5 text-destructive" />
               <div>
                 <p className="text-lg font-bold text-destructive">{scrapeSummary.failed}</p>
-                <p className="text-xs text-muted-foreground">Falhados</p>
+                <p className="text-xs text-muted-foreground">Failed</p>
               </div>
             </div>
           </div>
@@ -549,7 +566,60 @@ const ControlPanel = () => {
               onClick={() => setShowSummary(false)} 
               className="w-full bg-primary/10 backdrop-blur border border-primary/30 hover:border-primary/60 text-primary shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all duration-300"
             >
-              Fechar
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Price Sync Summary Dialog */}
+      <Dialog open={showPriceSummary} onOpenChange={setShowPriceSummary}>
+        <DialogContent className="bg-card border-border sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-green-500" />
+              Price Sync Complete
+            </DialogTitle>
+            <DialogDescription>
+              Price synchronization results
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+              <Package className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-lg font-bold">{priceSyncSummary.total}</p>
+                <p className="text-xs text-muted-foreground">Products Checked</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-green-500/10">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <div>
+                <p className="text-lg font-bold text-green-500">{priceSyncSummary.updated}</p>
+                <p className="text-xs text-muted-foreground">Prices Updated</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-500/10">
+              <AlertCircle className="h-5 w-5 text-blue-500" />
+              <div>
+                <p className="text-lg font-bold text-blue-500">{priceSyncSummary.unchanged}</p>
+                <p className="text-xs text-muted-foreground">Unchanged</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-500/10">
+              <XCircle className="h-5 w-5 text-yellow-500" />
+              <div>
+                <p className="text-lg font-bold text-yellow-500">{priceSyncSummary.notFound}</p>
+                <p className="text-xs text-muted-foreground">Not Found</p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={() => setShowPriceSummary(false)} 
+              className="w-full bg-primary/10 backdrop-blur border border-primary/30 hover:border-primary/60 text-primary shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all duration-300"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -560,7 +630,7 @@ const ControlPanel = () => {
         <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingProduct ? "Editar Produto" : "Adicionar Produto"}
+              {editingProduct ? "Edit Product" : "Add Product"}
             </DialogTitle>
           </DialogHeader>
           <ProductForm
