@@ -498,25 +498,32 @@ const SubCategories = () => {
 
         {/* Sub-categories grid */}
         <div className="grid grid-cols-3 gap-4">
-          {data.items.map((item, i) => (
-            <div
-              key={item.id}
-              onClick={() => handleItemClick(item.label)}
-              className="group flex flex-col items-center gap-2 animate-fade-in cursor-pointer"
-              style={{ animationDelay: `${i * 50}ms` }}
-            >
-              <div className="relative w-20 h-20 rounded-2xl bg-muted backdrop-blur border-2 border-border/60 shadow-lg shadow-background/50 flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
-                {subcategoryImages[item.label] ? (
-                  <img src={subcategoryImages[item.label]} alt={item.label} className="w-full h-full object-contain" />
-                ) : (
-                  <div className="text-primary">
-                    <CategoryIcon icon={item.icon} />
-                  </div>
-                )}
+          {data.items.map((item, i) => {
+            const isPecasCategory = category === "pecas";
+            return (
+              <div
+                key={item.id}
+                onClick={() => handleItemClick(item.label)}
+                className="group flex flex-col items-center gap-2 animate-fade-in cursor-pointer"
+                style={{ animationDelay: `${i * 50}ms` }}
+              >
+                <div className={`relative w-20 h-20 rounded-2xl backdrop-blur border-2 shadow-lg flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2 ${
+                  isPecasCategory 
+                    ? "bg-black border-black/60 shadow-black/50 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25" 
+                    : "bg-muted border-border/60 shadow-background/50 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25"
+                }`}>
+                  {subcategoryImages[item.label] ? (
+                    <img src={subcategoryImages[item.label]} alt={item.label} className="w-full h-full object-contain" />
+                  ) : (
+                    <div className="text-primary">
+                      <CategoryIcon icon={item.icon} />
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs text-center text-foreground leading-tight group-hover:text-primary transition-colors font-bold">{item.label}</span>
               </div>
-              <span className="text-xs text-center text-foreground leading-tight group-hover:text-primary transition-colors font-bold">{item.label}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </main>
 
