@@ -445,28 +445,29 @@ const SubCategories = () => {
   }
 
   const isThirdLevel = !!subcategory;
+  const isPecasCategory = category === "pecas";
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className={`min-h-screen pb-20 ${isPecasCategory ? 'bg-black' : 'bg-background'}`}>
       <Header title={data.name} />
 
       <main className="container px-4 py-6 space-y-6">
         {/* Hero Section with Logo */}
         <section className="relative h-[100px] overflow-hidden rounded-2xl animate-fade-in">
-          <div className="h-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-card to-card p-4 border border-primary/20">
-            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/20 blur-3xl" />
-            <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-primary/10 blur-2xl" />
+          <div className={`h-full relative overflow-hidden rounded-2xl p-4 border ${isPecasCategory ? 'bg-gradient-to-br from-zinc-900 via-black to-zinc-900 border-transparent' : 'bg-gradient-to-br from-primary/20 via-card to-card border-primary/20'}`}>
+            <div className={`absolute -right-8 -top-8 h-24 w-24 rounded-full blur-3xl ${isPecasCategory ? 'bg-zinc-700/30' : 'bg-primary/20'}`} />
+            <div className={`absolute -bottom-4 -left-4 h-20 w-20 rounded-full blur-2xl ${isPecasCategory ? 'bg-zinc-700/20' : 'bg-primary/10'}`} />
             <div className="relative flex items-center justify-between h-full">
               <div>
-                <h1 className="text-xl font-bold text-foreground mb-1">{data.name}</h1>
-                <p className="text-muted-foreground text-xs">
+                <h1 className={`text-xl font-bold mb-1 ${isPecasCategory ? 'text-white' : 'text-foreground'}`}>{data.name}</h1>
+                <p className={`text-xs ${isPecasCategory ? 'text-zinc-400' : 'text-muted-foreground'}`}>
                   Selecione uma subcategoria
                 </p>
               </div>
               <img 
                 src="/icon.png" 
                 alt="Segmento Positivo" 
-                className="w-14 h-14 rounded-xl shadow-lg shadow-primary/20"
+                className={`w-14 h-14 rounded-xl shadow-lg ${isPecasCategory ? 'shadow-zinc-800/50 brightness-0 invert' : 'shadow-primary/20'}`}
               />
             </div>
           </div>
@@ -481,7 +482,11 @@ const SubCategories = () => {
               navigate("/");
             }
           }}
-          className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl bg-muted/50 backdrop-blur border border-border hover:border-primary/40 text-muted-foreground hover:text-foreground shadow-lg shadow-muted/10 hover:shadow-primary/10 transition-all duration-300"
+          className={`flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl backdrop-blur border shadow-lg transition-all duration-300 ${
+            isPecasCategory 
+              ? 'bg-zinc-900/80 border-transparent text-zinc-300 hover:text-white hover:bg-zinc-800 shadow-black/20' 
+              : 'bg-muted/50 border-border hover:border-primary/40 text-muted-foreground hover:text-foreground shadow-muted/10 hover:shadow-primary/10'
+          }`}
         >
           {isThirdLevel ? (
             <>
@@ -505,16 +510,28 @@ const SubCategories = () => {
               className="group flex flex-col items-center gap-2 animate-fade-in cursor-pointer"
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className="relative w-20 h-20 rounded-2xl bg-muted backdrop-blur border-2 border-border/60 shadow-lg shadow-background/50 flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
+              <div className={`relative w-20 h-20 rounded-2xl backdrop-blur border-2 shadow-lg flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2 ${
+                isPecasCategory 
+                  ? 'bg-zinc-900 border-transparent shadow-black/30 group-hover:border-zinc-600 group-hover:shadow-xl group-hover:shadow-zinc-800/50' 
+                  : 'bg-muted border-border/60 shadow-background/50 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25'
+              }`}>
                 {subcategoryImages[item.label] ? (
-                  <img src={subcategoryImages[item.label]} alt={item.label} className="w-full h-full object-contain" />
+                  <img 
+                    src={subcategoryImages[item.label]} 
+                    alt={item.label} 
+                    className={`w-full h-full object-contain ${isPecasCategory ? 'brightness-0 invert' : ''}`}
+                  />
                 ) : (
-                  <div className="text-primary">
+                  <div className={isPecasCategory ? 'text-white' : 'text-primary'}>
                     <CategoryIcon icon={item.icon} />
                   </div>
                 )}
               </div>
-              <span className="text-xs text-center text-foreground leading-tight group-hover:text-primary transition-colors font-bold">{item.label}</span>
+              <span className={`text-xs text-center leading-tight font-bold transition-colors ${
+                isPecasCategory 
+                  ? 'text-zinc-300 group-hover:text-white' 
+                  : 'text-foreground group-hover:text-primary'
+              }`}>{item.label}</span>
             </div>
           ))}
         </div>
