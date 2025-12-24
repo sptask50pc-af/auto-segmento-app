@@ -467,7 +467,7 @@ const SubCategories = () => {
               <img 
                 src="/icon.png" 
                 alt="Segmento Positivo" 
-                className={`w-14 h-14 rounded-xl shadow-lg ${isPecasCategory ? 'shadow-zinc-800/50 brightness-0 invert' : 'shadow-primary/20'}`}
+                className="w-14 h-14 rounded-xl shadow-lg shadow-primary/20"
               />
             </div>
           </div>
@@ -512,14 +512,14 @@ const SubCategories = () => {
             >
               <div className={`relative w-20 h-20 rounded-2xl backdrop-blur border-2 shadow-lg flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2 ${
                 isPecasCategory 
-                  ? 'bg-zinc-900 border-transparent shadow-black/30 group-hover:border-zinc-600 group-hover:shadow-xl group-hover:shadow-zinc-800/50' 
+                  ? 'bg-zinc-800 border-zinc-700/50 shadow-black/30 group-hover:border-primary group-hover:shadow-xl group-hover:shadow-primary/40' 
                   : 'bg-muted border-border/60 shadow-background/50 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25'
               }`}>
                 {subcategoryImages[item.label] ? (
                   <img 
                     src={subcategoryImages[item.label]} 
                     alt={item.label} 
-                    className={`w-full h-full object-contain ${isPecasCategory ? 'brightness-0 invert' : ''}`}
+                    className="w-full h-full object-contain"
                   />
                 ) : (
                   <div className={isPecasCategory ? 'text-white' : 'text-primary'}>
