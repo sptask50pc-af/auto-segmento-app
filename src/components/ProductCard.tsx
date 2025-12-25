@@ -42,24 +42,27 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
   return (
     <div
       className={cn(
-        "animate-slide-up group relative overflow-hidden rounded-xl bg-card p-4 transition-all hover:bg-secondary/50",
+        "animate-slide-up group relative overflow-hidden rounded-xl bg-card border border-border/50 p-4 transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1",
         !showActions && "cursor-pointer"
       )}
       style={{ animationDelay: `${delay}ms` }}
       onClick={handleClick}
     >
+      {/* Glow effect on hover */}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      
       {hasDiscount && (
-        <Badge className="absolute right-3 top-3 bg-primary text-primary-foreground">
+        <Badge className="absolute right-3 top-3 bg-primary text-primary-foreground z-10 shadow-lg shadow-primary/30 animate-pulse-glow">
           -{discountPercent}%
         </Badge>
       )}
 
-      <div className="mb-3 flex h-20 w-full items-center justify-center rounded-lg bg-secondary overflow-hidden">
+      <div className="relative mb-3 flex h-24 w-full items-center justify-center rounded-xl bg-gradient-to-br from-secondary to-muted/50 overflow-hidden border border-border/30 group-hover:border-primary/20 transition-colors">
         {product.image && product.image !== '/placeholder.svg' ? (
           <img 
             src={product.image} 
             alt={product.name} 
-            className="h-full w-full object-contain"
+            className="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-110"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/placeholder.svg';
             }}
