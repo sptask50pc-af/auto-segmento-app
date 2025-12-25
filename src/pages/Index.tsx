@@ -56,15 +56,15 @@ const Index = () => {
 
       <main className="container px-4 py-6 space-y-8">
         {/* Hero Carousel Section */}
-        <section className="relative h-[180px] overflow-hidden rounded-2xl">
+        <section className="relative h-[200px] overflow-hidden rounded-2xl shadow-2xl shadow-primary/10">
           {/* Slide Indicators */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
             {[0, 1].map((index) => (
               <button
                 key={index}
                 onClick={() => setActiveSlide(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  activeSlide === index ? "w-6 bg-primary" : "w-2 bg-white/40"
+                className={`h-2.5 rounded-full transition-all duration-300 ${
+                  activeSlide === index ? "w-8 bg-primary shadow-lg shadow-primary/50" : "w-2.5 bg-white/40 hover:bg-white/60"
                 }`}
               />
             ))}
@@ -76,15 +76,18 @@ const Index = () => {
               activeSlide === 0 ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-full"
             }`}
           >
-            <div className="h-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-card to-card p-6 border border-primary/20">
-              <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
-              <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-primary/10 blur-2xl" />
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-                  <span className="text-sm font-medium text-primary">Peças Premium</span>
+            <div className="h-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-card to-card p-6 border border-primary/30">
+              <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/25 blur-3xl animate-pulse" />
+              <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-primary/15 blur-2xl" />
+              <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-primary/10 blur-xl floating" />
+              <div className="relative flex flex-col justify-center h-full">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 rounded-lg bg-primary/20">
+                    <Sparkles className="w-5 h-5 text-primary icon-glow" />
+                  </div>
+                  <span className="text-sm font-semibold text-primary tracking-wide uppercase">Peças Premium</span>
                 </div>
-                <h1 className="text-xl font-bold text-foreground mb-1">Bem-vindo ao Segmento Positivo</h1>
+                <h1 className="text-2xl font-bold text-foreground mb-2">Bem-vindo ao Segmento Positivo</h1>
                 <p className="text-muted-foreground text-sm">Explore as melhores peças automotivas</p>
               </div>
             </div>
@@ -103,9 +106,9 @@ const Index = () => {
                 className="w-full h-full object-cover"
               />
               {/* Overlay with badge */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
               <div className="absolute bottom-4 left-4">
-                <div className="inline-flex items-center gap-2 bg-[#e31e24] px-3 py-1.5 rounded-full shadow-lg">
+                <div className="inline-flex items-center gap-2 bg-[#e31e24] px-4 py-2 rounded-full shadow-xl shadow-red-500/30">
                   <span className="text-xs font-bold text-white tracking-wider uppercase">Distribuidor Oficial</span>
                 </div>
               </div>
@@ -115,9 +118,9 @@ const Index = () => {
 
         {/* Principais categorias */}
         <section className="animate-slide-up" style={{ animationDelay: "100ms" }}>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <span className="w-1 h-6 bg-primary rounded-full" />
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-3">
+              <span className="w-1.5 h-7 bg-gradient-to-b from-primary to-primary/50 rounded-full shadow-lg shadow-primary/30" />
               Principais categorias
             </h2>
           </div>
@@ -131,21 +134,23 @@ const Index = () => {
                 <div
                   key={category.id}
                   onClick={() => hasSubCategories && handleCategoryClick(category.label)}
-                  className="group flex flex-col items-center gap-2 cursor-pointer animate-scale-in"
+                  className="group flex flex-col items-center gap-2.5 cursor-pointer animate-scale-in"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="relative w-20 h-20 rounded-2xl bg-muted backdrop-blur border-2 border-border/60 shadow-lg shadow-background/50 flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
+                  <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-muted to-secondary backdrop-blur border-2 border-border/60 shadow-lg shadow-background/50 flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
+                    {/* Hover glow effect */}
+                    <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <img
                       src={categoryImages[category.label]}
                       alt={category.label}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain relative z-10 transition-transform duration-300 group-hover:scale-110"
                     />
                   </div>
                   <span className="text-xs text-center text-foreground leading-tight group-hover:text-primary transition-colors font-bold">
                     {category.label}
                   </span>
                   {hasSubCategories && (
-                    <ChevronRight className="w-4 h-4 text-muted-foreground -mt-1 group-hover:text-primary transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-muted-foreground -mt-1 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                   )}
                 </div>
               );
@@ -155,43 +160,50 @@ const Index = () => {
 
         {/* Quick Stats */}
         <section className="animate-slide-up grid grid-cols-3 gap-3" style={{ animationDelay: "200ms" }}>
-          <div className="bg-card/80 backdrop-blur rounded-xl p-4 border border-border text-center">
-            <p className="text-2xl font-bold text-primary">500+</p>
-            <p className="text-xs text-muted-foreground">Produtos</p>
+          <div className="relative bg-card/90 backdrop-blur rounded-2xl p-4 border border-border/50 text-center overflow-hidden group hover:border-primary/30 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <p className="text-2xl font-bold text-primary relative">500+</p>
+            <p className="text-xs text-muted-foreground relative">Produtos</p>
           </div>
-          <div className="bg-card/80 backdrop-blur rounded-xl p-4 border border-border text-center">
-            <p className="text-2xl font-bold text-foreground">24h</p>
-            <p className="text-xs text-muted-foreground">Entrega</p>
+          <div className="relative bg-card/90 backdrop-blur rounded-2xl p-4 border border-border/50 text-center overflow-hidden group hover:border-primary/30 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <p className="text-2xl font-bold text-foreground relative">24h</p>
+            <p className="text-xs text-muted-foreground relative">Entrega</p>
           </div>
-          <div className="bg-card/80 backdrop-blur rounded-xl p-4 border border-border text-center">
-            <p className="text-2xl font-bold text-foreground">100%</p>
-            <p className="text-xs text-muted-foreground">Original</p>
+          <div className="relative bg-card/90 backdrop-blur rounded-2xl p-4 border border-border/50 text-center overflow-hidden group hover:border-primary/30 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <p className="text-2xl font-bold text-foreground relative">100%</p>
+            <p className="text-xs text-muted-foreground relative">Original</p>
           </div>
         </section>
 
         {/* Store Details Section */}
         <section className="animate-slide-up" style={{ animationDelay: "300ms" }}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <span className="w-1 h-6 bg-primary rounded-full" />
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-3">
+              <span className="w-1.5 h-7 bg-gradient-to-b from-primary to-primary/50 rounded-full shadow-lg shadow-primary/30" />
               Visite-nos
             </h2>
           </div>
 
-          <div className="bg-card/80 backdrop-blur rounded-2xl border border-border overflow-hidden">
-            <div className="p-5 space-y-4">
+          <div className="relative bg-card/90 backdrop-blur rounded-2xl border border-border/50 overflow-hidden group hover:border-primary/30 transition-all duration-300">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-full blur-xl" />
+            
+            <div className="relative p-6 space-y-5">
               {/* Address */}
               <a
                 href="https://maps.google.com/?q=Rotunda Armindo Lousada n-º4C, 3400-076 Oliveira do Hospital"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start gap-3 group"
+                className="flex items-start gap-4 group/item"
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/30 transition-colors">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover/item:from-primary/30 group-hover/item:to-primary/20 group-hover/item:shadow-lg group-hover/item:shadow-primary/20">
                   <MapPin className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                  <p className="text-sm font-semibold text-foreground group-hover/item:text-primary transition-colors">
                     Morada
                   </p>
                   <p className="text-sm text-muted-foreground leading-relaxed">
@@ -203,15 +215,15 @@ const Index = () => {
               </a>
 
               {/* Divider */}
-              <div className="h-px bg-border" />
+              <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
               {/* Phone */}
-              <a href="tel:238094280" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/30 transition-colors">
+              <a href="tel:238094280" className="flex items-center gap-4 group/item">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover/item:from-primary/30 group-hover/item:to-primary/20 group-hover/item:shadow-lg group-hover/item:shadow-primary/20">
                   <Phone className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                  <p className="text-sm font-semibold text-foreground group-hover/item:text-primary transition-colors">
                     Telefone
                   </p>
                   <p className="text-sm text-muted-foreground">238 094 280</p>
@@ -219,15 +231,15 @@ const Index = () => {
               </a>
 
               {/* Divider */}
-              <div className="h-px bg-border" />
+              <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
               {/* Hours */}
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <div className="flex items-start gap-4">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
                   <Clock className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground mb-2">Horário</p>
+                  <p className="text-sm font-semibold text-foreground mb-2">Horário</p>
                   <div className="space-y-1.5">
                     <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "0ms" }}>
                       <span className="text-foreground font-medium">Segunda a Sexta:</span> 9h às 19h
@@ -237,7 +249,7 @@ const Index = () => {
                     </p>
                     <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "400ms" }}>
                       <span className="text-foreground font-medium">Domingo:</span>{" "}
-                      <span className="text-primary">Fechado</span>
+                      <span className="text-primary font-medium">Fechado</span>
                     </p>
                   </div>
                 </div>

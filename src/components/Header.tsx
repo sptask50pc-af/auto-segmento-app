@@ -74,12 +74,18 @@ export function Header({ title = "Início" }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-primary bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <header className="sticky top-0 z-50 w-full border-b border-primary/50 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 shadow-lg shadow-primary/5">
+        {/* Decorative gradient line */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2">
-              <img src={logo} alt="Segmento Positivo" className="h-10 w-10 rounded-lg object-contain" />
-              <span className="text-xl font-bold tracking-tight">{title}</span>
+            <Link to="/" className="group flex items-center gap-2">
+              <div className="relative">
+                <img src={logo} alt="Segmento Positivo" className="h-10 w-10 rounded-xl object-contain transition-transform duration-300 group-hover:scale-105" />
+                <div className="absolute inset-0 rounded-xl bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity blur-md" />
+              </div>
+              <span className="text-xl font-bold tracking-tight group-hover:text-primary transition-colors">{title}</span>
             </Link>
           </div>
 
