@@ -79,90 +79,150 @@ async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 3):
   throw new Error('RATE_LIMIT');
 }
 
-// Extract prices from category page HTML
-function extractPricesFromHtml(html: string): Map<string, { price: number; name: string }> {
-  const priceMap = new Map<string, { price: number; name: string }>();
-  
-  const productPattern = /<article[^>]*class="[^"]*product-miniature[^"]*"[^>]*data-id-product="(\d+)"[^>]*>([\s\S]*?)<\/article>/gi;
-  let match;
-  
-  while ((match = productPattern.exec(html)) !== null) {
-    const productHtml = match[2];
-    
-    try {
-      // Extract product link and name
-      const titleLinkMatch = productHtml.match(/<h5[^>]*class="[^"]*product-title[^"]*"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/i);
-      if (!titleLinkMatch) continue;
-      
-      const productUrl = titleLinkMatch[1];
-      const name = titleLinkMatch[2].trim();
-      
-      if (!name || name.length < 3) continue;
+// Extract price from product detail page HTML
+function extractPriceFromDetailPage(html: string): number | null {
+  // Try itemprop price content first
+  const priceContentMatch = html.match(/itemprop="price"[^>]*content="([\d.,]+)"/i);
+  if (priceContentMatch) {
+    const price = parseFloat(priceContentMatch[1].replace(',', '.'));
+    if (price > 0) return price;
+  }
 
-      // Extract price
-      let price = 0;
-      
-      const priceContentMatch = productHtml.match(/itemprop="price"[^>]*content="([\d.,]+)"/i);
-      if (priceContentMatch) {
-        price = parseFloat(priceContentMatch[1].replace(',', '.')) || 0;
+  // Try data-price attribute
+  const dataPriceMatch = html.match(/data-price="([\d.,]+)"/i);
+  if (dataPriceMatch) {
+    const price = parseFloat(dataPriceMatch[1].replace(',', '.'));
+    if (price > 0) return price;
+  }
+
+  // Try current-price span
+  const currentPriceMatch = html.match(/<span[^>]*class="[^"]*current-price[^"]*"[^>]*>[^<]*?([\d]+[.,]\d{2})/i);
+  if (currentPriceMatch) {
+    const price = parseFloat(currentPriceMatch[1].replace(',', '.'));
+    if (price > 0) return price;
+  }
+
+  // Try price span
+  const priceSpanMatch = html.match(/<span[^>]*class="[^"]*price[^"]*"[^>]*>([^<]*)<\/span>/gi);
+  if (priceSpanMatch) {
+    for (const span of priceSpanMatch) {
+      const numMatch = span.match(/([\d]+[.,]\d{2})/);
+      if (numMatch) {
+        const price = parseFloat(numMatch[1].replace(/\s/g, '').replace(',', '.'));
+        if (price > 0) return price;
       }
-      
-      if (price === 0) {
-        const dataPriceMatch = productHtml.match(/data-price="([\d.,]+)"/i);
-        if (dataPriceMatch) {
-          price = parseFloat(dataPriceMatch[1].replace(',', '.')) || 0;
-        }
-      }
-      
-      if (price === 0) {
-        const priceSpanMatch = productHtml.match(/<span[^>]*class="[^"]*price[^"]*"[^>]*>([^<]*)<\/span>/gi);
-        if (priceSpanMatch) {
-          for (const span of priceSpanMatch) {
-            const numMatch = span.match(/([\d]+[.,]\d{2})/);
-            if (numMatch) {
-              const parsed = parseFloat(numMatch[1].replace(/\s/g, '').replace(',', '.'));
-              if (parsed > 0) {
-                price = parsed;
-                break;
-              }
-            }
-          }
-        }
-      }
-      
-      if (price === 0) {
-        const euroPatterns = [
-          /([\d]+[.,]\d{2})\s*€/,
-          /€\s*([\d]+[.,]\d{2})/,
-        ];
-        for (const pattern of euroPatterns) {
-          const match = productHtml.match(pattern);
-          if (match) {
-            price = parseFloat(match[1].replace(/\s/g, '').replace(',', '.')) || 0;
-            if (price > 0) break;
-          }
-        }
-      }
-      
-      if (price > 0) {
-        priceMap.set(productUrl, { price, name });
-        priceMap.set(name.toLowerCase().trim(), { price, name });
-      }
-    } catch (e) {
-      console.error('Error parsing product price:', e);
     }
   }
 
-  return priceMap;
+  // Try euro patterns
+  const euroPatterns = [
+    /([\d]+[.,]\d{2})\s*€/,
+    /€\s*([\d]+[.,]\d{2})/,
+  ];
+  for (const pattern of euroPatterns) {
+    const match = html.match(pattern);
+    if (match) {
+      const price = parseFloat(match[1].replace(/\s/g, '').replace(',', '.'));
+      if (price > 0) return price;
+    }
+  }
+
+  return null;
 }
 
-const CATEGORY_URLS = [
-  '/4528-oleos-de-motor',
-  '/4529-oleos-de-transmissao', 
-  '/4531-liquidos-de-arrefecimento',
-  '/4532-liquidos-de-travoes',
-  '/4534-aditivos-de-oleo',
-];
+// Search for product by reference using website search
+async function searchProductByReference(reference: string, apiKey: string): Promise<{ url: string; price: number } | null> {
+  try {
+    // Search on the website using the search functionality
+    const searchUrl = `${BASE_URL}/pesquisa?controller=search&s=${encodeURIComponent(reference)}`;
+    console.log(`Searching for reference "${reference}" at: ${searchUrl}`);
+    
+    const html = await scrapeWithFirecrawl(searchUrl, apiKey);
+    
+    // Look for product link in search results that contains the reference
+    const productPattern = /<article[^>]*class="[^"]*product-miniature[^"]*"[^>]*>([\s\S]*?)<\/article>/gi;
+    let match;
+    
+    while ((match = productPattern.exec(html)) !== null) {
+      const productHtml = match[1];
+      
+      // Check if this product contains the reference
+      const refMatch = productHtml.match(/R:\s*(\d+)|Ref[:\.]?\s*(\d+)/i);
+      const foundRef = refMatch ? (refMatch[1] || refMatch[2]) : null;
+      
+      // Also check in the product name/title
+      const titleMatch = productHtml.match(/<a[^>]*href="([^"]+)"[^>]*class="[^"]*product-title[^"]*"[^>]*>([^<]+)<\/a>/i) ||
+                         productHtml.match(/<h5[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/i);
+      
+      if (titleMatch) {
+        const productUrl = titleMatch[1];
+        const productName = titleMatch[2];
+        
+        // Check if the reference matches in the found ref or product name
+        if ((foundRef && foundRef === reference) || 
+            productName.includes(`R: ${reference}`) || 
+            productName.includes(`R:${reference}`) ||
+            productName.includes(`Ref: ${reference}`) ||
+            productName.toLowerCase().includes(reference.toLowerCase())) {
+          
+          // Extract price from the search result
+          let price = 0;
+          const priceContentMatch = productHtml.match(/itemprop="price"[^>]*content="([\d.,]+)"/i);
+          if (priceContentMatch) {
+            price = parseFloat(priceContentMatch[1].replace(',', '.')) || 0;
+          }
+          
+          if (price === 0) {
+            const dataPriceMatch = productHtml.match(/data-price="([\d.,]+)"/i);
+            if (dataPriceMatch) {
+              price = parseFloat(dataPriceMatch[1].replace(',', '.')) || 0;
+            }
+          }
+          
+          if (price === 0) {
+            const euroMatch = productHtml.match(/([\d]+[.,]\d{2})\s*€/);
+            if (euroMatch) {
+              price = parseFloat(euroMatch[1].replace(',', '.')) || 0;
+            }
+          }
+          
+          if (price > 0) {
+            console.log(`Found product in search: ${productName} - ${price}€`);
+            return { url: productUrl, price };
+          }
+        }
+      }
+    }
+    
+    // If not found in search results, try to go to product detail page
+    // First, look for any product link in search results
+    const firstProductMatch = html.match(/<a[^>]*href="([^"]+segmentopositivo\.pt[^"]+\.html[^"]*)"/i);
+    if (firstProductMatch) {
+      console.log(`Checking product detail page: ${firstProductMatch[1]}`);
+      const detailHtml = await scrapeWithFirecrawl(firstProductMatch[1], apiKey);
+      
+      // Verify this product has the reference we're looking for
+      if (detailHtml.includes(`R: ${reference}`) || 
+          detailHtml.includes(`R:${reference}`) || 
+          detailHtml.includes(`Ref: ${reference}`) ||
+          detailHtml.includes(`>80LM${reference}<`) ||
+          detailHtml.includes(`>${reference}<`)) {
+        
+        const price = extractPriceFromDetailPage(detailHtml);
+        if (price) {
+          console.log(`Found price on detail page: ${price}€`);
+          return { url: firstProductMatch[1], price };
+        }
+      }
+    }
+    
+    console.log(`Product with reference "${reference}" not found in search results`);
+    return null;
+  } catch (error) {
+    console.error(`Error searching for reference "${reference}":`, error);
+    throw error;
+  }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -182,190 +242,146 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch existing products from database
-    const { data: existingProducts, error: fetchError } = await supabase
-      .from('products')
-      .select('id, name, price, image');
-    
-    if (fetchError) {
-      console.error('Error fetching products:', fetchError);
-      return new Response(
-        JSON.stringify({ success: false, error: 'Failed to fetch existing products', updates: [] }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Parse request body for reference parameter
+    let reference: string | null = null;
+    try {
+      const body = await req.json();
+      reference = body?.reference || null;
+    } catch {
+      // No body or invalid JSON, proceed without reference
     }
 
-    if (!existingProducts || existingProducts.length === 0) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'No products in database to update', updates: [] }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    if (reference) {
+      // Single product price sync by reference
+      console.log(`Looking up price for reference: ${reference}`);
+      
+      // First, find the product in database
+      const { data: products, error: fetchError } = await supabase
+        .from('products')
+        .select('id, name, price, reference')
+        .or(`reference.eq.${reference},name.ilike.%R: ${reference}%,name.ilike.%${reference}%`);
+      
+      if (fetchError) {
+        console.error('Error fetching product:', fetchError);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to find product in database', updates: [] }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
 
-    console.log(`Found ${existingProducts.length} products in database`);
-    console.log('Starting price scrape from segmentopositivo.pt');
-    
-    // Collect all prices from website
-    const allPrices = new Map<string, { price: number; name: string }>();
-    const totalCategories = CATEGORY_URLS.length;
-    let rateLimited = false;
-    
-    for (let i = 0; i < CATEGORY_URLS.length; i++) {
-      const categoryPath = CATEGORY_URLS[i];
-      try {
-        const categoryUrl = BASE_URL + categoryPath;
-        console.log(`[${i + 1}/${totalCategories}] Scraping prices from: ${categoryUrl}`);
+      if (!products || products.length === 0) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: `Product with reference "${reference}" not found in database`, 
+            updates: [] 
+          }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const product = products[0];
+      console.log(`Found product in database: ${product.name}`);
+
+      // Search for product on website
+      const searchResult = await searchProductByReference(reference, apiKey);
+      
+      if (!searchResult) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: `Product with reference "${reference}" not found on website`, 
+            updates: [] 
+          }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const priceUpdates: PriceUpdate[] = [];
+      
+      if (searchResult.price !== product.price) {
+        console.log(`Price update: ${product.price}€ → ${searchResult.price}€`);
         
-        const html = await scrapeWithFirecrawl(categoryUrl, apiKey);
-        const prices = extractPricesFromHtml(html);
+        const { error: updateError } = await supabase
+          .from('products')
+          .update({ price: searchResult.price })
+          .eq('id', product.id);
         
-        prices.forEach((value, key) => {
-          allPrices.set(key, value);
+        if (updateError) {
+          console.error('Error updating price:', updateError);
+          return new Response(
+            JSON.stringify({ success: false, error: 'Failed to update price in database', updates: [] }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        priceUpdates.push({
+          id: product.id,
+          name: product.name,
+          oldPrice: product.price,
+          newPrice: searchResult.price,
+          sourceUrl: searchResult.url,
         });
-        
-        console.log(`  ✓ Found ${prices.size / 2} product prices (total unique: ${allPrices.size / 2})`);
-        
-        if (i < CATEGORY_URLS.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        }
-      } catch (categoryError) {
-        console.error(`Error scraping ${categoryPath}:`, categoryError);
-        if (categoryError instanceof Error) {
-          if (categoryError.message === 'RATE_LIMIT') {
-            rateLimited = true;
-            break;
-          }
-          if (categoryError.message === 'NO_CREDITS') {
-            return new Response(
-              JSON.stringify({
-                success: false,
-                error: 'Sem créditos disponíveis para atualização de preços.',
-                updates: [],
-              }),
-              { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-          }
-          if (categoryError.message === 'MAINTENANCE') {
-            return new Response(
-              JSON.stringify({
-                success: false,
-                error: 'O website está em manutenção. Tente novamente mais tarde.',
-                updates: [],
-              }),
-              { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-          }
-        }
       }
-    }
-    
-    if (rateLimited && allPrices.size === 0) {
+      
       return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'Limite de pedidos atingido. Aguarde e tente novamente.',
-          updates: [],
+        JSON.stringify({ 
+          success: true, 
+          updates: priceUpdates,
+          summary: {
+            total: 1,
+            updated: priceUpdates.length,
+            unchanged: priceUpdates.length === 0 ? 1 : 0,
+            notFound: 0,
+          },
+          product: {
+            name: product.name,
+            oldPrice: product.price,
+            newPrice: searchResult.price,
+            priceChanged: searchResult.price !== product.price,
+          },
+          timestamp: new Date().toISOString(),
         }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Normalize function for better matching
-    const normalize = (str: string): string => {
-      return str
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // Remove accents
-        .replace(/[^a-z0-9]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    };
-
-    // Build normalized price map for better matching
-    const normalizedPrices = new Map<string, { price: number; name: string }>();
-    allPrices.forEach((value, key) => {
-      if (typeof key === 'string' && !key.startsWith('http')) {
-        normalizedPrices.set(normalize(key), value);
-      }
-    });
-
-    // Match and update prices
-    const priceUpdates: PriceUpdate[] = [];
-    let updatedCount = 0;
-    let unchangedCount = 0;
-    let notFoundCount = 0;
-    
-    for (const product of existingProducts) {
-      // Try exact match first
-      const nameLower = product.name.toLowerCase().trim();
-      let priceData = allPrices.get(nameLower);
-      
-      // Try normalized match if exact match fails
-      if (!priceData) {
-        const normalizedName = normalize(product.name);
-        priceData = normalizedPrices.get(normalizedName);
-      }
-      
-      // Try partial match - find if product name contains or is contained in any scraped name
-      if (!priceData) {
-        const normalizedName = normalize(product.name);
-        for (const [key, value] of normalizedPrices.entries()) {
-          if (normalizedName.includes(key) || key.includes(normalizedName)) {
-            if (normalizedName.length > 10 && key.length > 10) { // Avoid false positives on short names
-              priceData = value;
-              break;
-            }
-          }
-        }
-      }
-      
-      if (priceData) {
-        if (priceData.price !== product.price) {
-          console.log(`  Price update: "${product.name.substring(0, 40)}..." ${product.price}€ → ${priceData.price}€`);
-          
-          const { error: updateError } = await supabase
-            .from('products')
-            .update({ price: priceData.price })
-            .eq('id', product.id);
-          
-          if (!updateError) {
-            priceUpdates.push({
-              id: product.id,
-              name: product.name,
-              oldPrice: product.price,
-              newPrice: priceData.price,
-            });
-            updatedCount++;
-          }
-        } else {
-          unchangedCount++;
-        }
-      } else {
-        notFoundCount++;
-        console.log(`  Not found on website: "${product.name.substring(0, 50)}..."`);
-      }
-    }
-    
-    console.log(`\nPrice sync complete: ${updatedCount} updated, ${unchangedCount} unchanged`);
-    
+    // Original bulk price sync logic (when no reference provided)
+    // This should not be reached now since we require a reference
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        updates: priceUpdates,
-        summary: {
-          total: existingProducts.length,
-          updated: updatedCount,
-          unchanged: unchangedCount,
-          notFound: notFoundCount,
-        },
-        timestamp: new Date().toISOString(),
+        success: false, 
+        error: 'Please provide a product reference to sync price', 
+        updates: [] 
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    if (errorMessage === 'RATE_LIMIT') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Rate limit reached. Please try again later.', updates: [] }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (errorMessage === 'NO_CREDITS') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'No credits available for price sync.', updates: [] }),
+        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (errorMessage === 'MAINTENANCE') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Website is under maintenance. Try again later.', updates: [] }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     return new Response(
       JSON.stringify({ success: false, error: errorMessage, updates: [] }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

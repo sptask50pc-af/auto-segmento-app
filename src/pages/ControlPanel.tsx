@@ -113,6 +113,8 @@ const ControlPanel = () => {
   const [scrapeSummary, setScrapeSummary] = useState<ScrapeSummary>({ total: 0, inserted: 0, updated: 0, failed: 0 });
   const [showPriceSummary, setShowPriceSummary] = useState(false);
   const [priceSyncSummary, setPriceSyncSummary] = useState<PriceSyncSummary>({ total: 0, updated: 0, unchanged: 0, notFound: 0 });
+  const [showReferenceDialog, setShowReferenceDialog] = useState(false);
+  const [priceReference, setPriceReference] = useState('');
 
   // Filter products by search query
   const filteredProducts = useMemo(() => {
@@ -270,12 +272,29 @@ const ControlPanel = () => {
     }
   };
 
-  const handleSyncPrices = async () => {
+  const handleOpenPriceDialog = () => {
+    setPriceReference('');
+    setShowReferenceDialog(true);
+  };
+
+  const handleSyncPriceByReference = async () => {
+    if (!priceReference.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a reference number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setShowReferenceDialog(false);
     setIsSyncingPrices(true);
-    setUpdateProgress({ current: 0, total: 5, status: 'Syncing prices...' });
+    setUpdateProgress({ current: 0, total: 3, status: `Searching for reference ${priceReference}...` });
 
     try {
-      const { data, error } = await supabase.functions.invoke('scrape-prices');
+      const { data, error } = await supabase.functions.invoke('scrape-prices', {
+        body: { reference: priceReference.trim() }
+      });
 
       if (error) {
         const message = (data as any)?.error || error.message || 'Failed to sync prices.';
@@ -418,14 +437,14 @@ const ControlPanel = () => {
             {isUpdating ? 'Updating...' : 'Update'}
           </Button>
           <Button 
-            onClick={handleSyncPrices} 
+            onClick={handleOpenPriceDialog} 
             variant="secondary"
             className="flex-1 min-w-[120px] gap-2 bg-green-500/10 backdrop-blur border border-green-500/30 hover:border-green-500/60 text-green-400 shadow-lg shadow-green-500/10 hover:shadow-green-500/20 transition-all duration-300"
             disabled={isUpdating || isSyncingPrices}
-            title="Sync prices from segmentopositivo.pt"
+            title="Sync price by reference from segmentopositivo.pt"
           >
             <DollarSign className={`h-5 w-5 ${isSyncingPrices ? 'animate-pulse' : ''}`} />
-            {isSyncingPrices ? 'Syncing...' : 'Sync Prices'}
+            {isSyncingPrices ? 'Syncing...' : 'Sync Price'}
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -620,6 +639,49 @@ const ControlPanel = () => {
               className="w-full bg-primary/10 backdrop-blur border border-primary/30 hover:border-primary/60 text-primary shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all duration-300"
             >
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reference Input Dialog for Price Sync */}
+      <Dialog open={showReferenceDialog} onOpenChange={setShowReferenceDialog}>
+        <DialogContent className="bg-card border-border sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-green-400" />
+              Sync Price by Reference
+            </DialogTitle>
+            <DialogDescription>
+              Enter the product reference number to sync its price from the website.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Enter reference (e.g., 9511)"
+              value={priceReference}
+              onChange={(e) => setPriceReference(e.target.value)}
+              className="bg-background border-border"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSyncPriceByReference();
+                }
+              }}
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button 
+              variant="outline"
+              onClick={() => setShowReferenceDialog(false)}
+              className="bg-muted/50 backdrop-blur border border-border hover:border-muted-foreground/40 text-muted-foreground"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSyncPriceByReference}
+              className="bg-green-500/10 backdrop-blur border border-green-500/30 hover:border-green-500/60 text-green-400"
+            >
+              Sync Price
             </Button>
           </DialogFooter>
         </DialogContent>
