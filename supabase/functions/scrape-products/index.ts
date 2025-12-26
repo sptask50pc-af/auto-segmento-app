@@ -381,16 +381,16 @@ serve(async (req) => {
       );
     }
     
-    // Second pass: scrape individual product pages to get references (only for products without references)
-    const productsWithoutRef = allProducts.filter(p => !p.reference);
-    console.log(`\nFetching references for ${productsWithoutRef.length} products...`);
+    // Second pass: scrape individual product pages to get references for ALL products
+    console.log(`\nFetching references for ALL ${allProducts.length} products...`);
     
     let refsFetched = 0;
-    for (const product of productsWithoutRef) {
+    for (let i = 0; i < allProducts.length; i++) {
+      const product = allProducts[i];
       if (rateLimited) break;
       
       try {
-        console.log(`  Fetching reference for: ${product.name.substring(0, 40)}...`);
+        console.log(`  [${i + 1}/${allProducts.length}] Fetching reference for: ${product.name.substring(0, 40)}...`);
         const detailHtml = await scrapeWithFirecrawl(product.sourceUrl, apiKey);
         const reference = extractReferenceFromDetailPage(detailHtml);
         
@@ -403,7 +403,7 @@ serve(async (req) => {
         }
         
         // Brief pause between requests
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       } catch (error) {
         console.error(`  Error fetching reference:`, error);
         if (error instanceof Error && error.message === 'RATE_LIMIT') {
