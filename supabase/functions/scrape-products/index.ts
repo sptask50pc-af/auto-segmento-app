@@ -129,9 +129,34 @@ function extractBrandFromName(name: string): string {
   return 'Segmento Positivo';
 }
 
+// Extract reference from product detail page HTML
+function extractReferenceFromDetailPage(html: string): string | undefined {
+  // Look for "Referência:" pattern
+  const refPatterns = [
+    /Refer[êe]ncia[:\s]*<[^>]*>([^<]+)</i,
+    /Refer[êe]ncia[:\s]*([A-Z0-9]+)/i,
+    /<span[^>]*class="[^"]*product-reference[^"]*"[^>]*>[\s\S]*?([A-Z0-9]+)[\s\S]*?<\/span>/i,
+    /data-reference="([^"]+)"/i,
+    /<td[^>]*>Refer[êe]ncia<\/td>[\s\S]*?<td[^>]*>([^<]+)<\/td>/i,
+  ];
+  
+  for (const pattern of refPatterns) {
+    const match = html.match(pattern);
+    if (match && match[1]) {
+      const ref = match[1].trim();
+      if (ref && ref.length >= 3) {
+        return ref;
+      }
+    }
+  }
+  
+  return undefined;
+}
+
 // Extract products directly from category page with prices
-function parseProductsFromCategoryHtml(html: string): ScrapedProduct[] {
+function parseProductsFromCategoryHtml(html: string): { products: ScrapedProduct[], productUrls: string[] } {
   const products: ScrapedProduct[] = [];
+  const productUrls: string[] = [];
   
   // Match product articles
   const productPattern = /<article[^>]*class="[^"]*product-miniature[^"]*"[^>]*data-id-product="(\d+)"[^>]*>([\s\S]*?)<\/article>/gi;
@@ -223,7 +248,7 @@ function parseProductsFromCategoryHtml(html: string): ScrapedProduct[] {
       
       console.log(`  Product: ${name.substring(0, 40)}... Price: ${price}€`);
 
-      // Extract reference from name
+      // Extract reference from name (fallback)
       let reference: string | undefined;
       const refMatch = name.match(/R[:\s]+(\d+)/i);
       if (refMatch) {
@@ -245,13 +270,14 @@ function parseProductsFromCategoryHtml(html: string): ScrapedProduct[] {
           sourceUrl: productUrl,
           reference,
         });
+        productUrls.push(productUrl);
       }
     } catch (e) {
       console.error('Error parsing product:', e);
     }
   }
 
-  return products;
+  return { products, productUrls };
 }
 
 const CATEGORY_URLS = [
@@ -283,7 +309,9 @@ serve(async (req) => {
     const totalCategories = CATEGORY_URLS.length;
     let rateLimited = false;
     
-    // Single pass: extract products with prices directly from category pages
+    // First pass: extract products with prices directly from category pages
+    const productUrlsToScrape: Map<string, number> = new Map(); // url -> index in allProducts
+    
     for (let i = 0; i < CATEGORY_URLS.length; i++) {
       const categoryPath = CATEGORY_URLS[i];
       try {
@@ -291,11 +319,13 @@ serve(async (req) => {
         console.log(`[${i + 1}/${totalCategories}] Scraping category: ${categoryUrl}`);
         
         const html = await scrapeWithFirecrawl(categoryUrl, apiKey);
-        const products = parseProductsFromCategoryHtml(html);
+        const { products, productUrls } = parseProductsFromCategoryHtml(html);
         
-        for (const product of products) {
+        for (let j = 0; j < products.length; j++) {
+          const product = products[j];
           if (!seenUrls.has(product.sourceUrl)) {
             seenUrls.add(product.sourceUrl);
+            productUrlsToScrape.set(product.sourceUrl, allProducts.length);
             allProducts.push(product);
           }
         }
@@ -351,7 +381,39 @@ serve(async (req) => {
       );
     }
     
-    console.log(`\nScraping complete: ${allProducts.length} products found`);
+    // Second pass: scrape individual product pages to get references (only for products without references)
+    const productsWithoutRef = allProducts.filter(p => !p.reference);
+    console.log(`\nFetching references for ${productsWithoutRef.length} products...`);
+    
+    let refsFetched = 0;
+    for (const product of productsWithoutRef) {
+      if (rateLimited) break;
+      
+      try {
+        console.log(`  Fetching reference for: ${product.name.substring(0, 40)}...`);
+        const detailHtml = await scrapeWithFirecrawl(product.sourceUrl, apiKey);
+        const reference = extractReferenceFromDetailPage(detailHtml);
+        
+        if (reference) {
+          product.reference = reference;
+          refsFetched++;
+          console.log(`    ✓ Reference: ${reference}`);
+        } else {
+          console.log(`    ✗ No reference found`);
+        }
+        
+        // Brief pause between requests
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      } catch (error) {
+        console.error(`  Error fetching reference:`, error);
+        if (error instanceof Error && error.message === 'RATE_LIMIT') {
+          rateLimited = true;
+          break;
+        }
+      }
+    }
+    
+    console.log(`\nScraping complete: ${allProducts.length} products found, ${refsFetched} references fetched`);
     
     return new Response(
       JSON.stringify({ 
