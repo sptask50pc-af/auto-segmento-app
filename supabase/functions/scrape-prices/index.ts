@@ -194,25 +194,50 @@ async function searchProductByReference(reference: string, apiKey: string): Prom
       }
     }
     
-    // If not found in search results, try to go to product detail page
-    // First, look for any product link in search results
-    const firstProductMatch = html.match(/<a[^>]*href="([^"]+segmentopositivo\.pt[^"]+\.html[^"]*)"/i);
-    if (firstProductMatch) {
-      console.log(`Checking product detail page: ${firstProductMatch[1]}`);
-      const detailHtml = await scrapeWithFirecrawl(firstProductMatch[1], apiKey);
-      
-      // Verify this product has the reference we're looking for
-      if (detailHtml.includes(`R: ${reference}`) || 
-          detailHtml.includes(`R:${reference}`) || 
-          detailHtml.includes(`Ref: ${reference}`) ||
-          detailHtml.includes(`>80LM${reference}<`) ||
-          detailHtml.includes(`>${reference}<`)) {
+    // If not found in search results, try direct search on the supplier's product pages
+    // Look for product links that are actual product pages (not blog, etc.)
+    const productLinkPattern = /<a[^>]*href="(https:\/\/www\.segmentopositivo\.pt\/[^"]*-[^"]*\.html)"/gi;
+    let productLink;
+    const productUrls: string[] = [];
+    
+    while ((productLink = productLinkPattern.exec(html)) !== null) {
+      const url = productLink[1];
+      // Filter out non-product pages like blog, contact, etc.
+      if (!url.includes('/blogue') && 
+          !url.includes('/blog') && 
+          !url.includes('/contact') && 
+          !url.includes('/sobre') &&
+          !url.includes('/about') &&
+          !url.includes('/termos') &&
+          !url.includes('/politica') &&
+          !url.includes('/content/')) {
+        productUrls.push(url);
+      }
+    }
+    
+    // Try each product URL to find the one with our reference
+    for (const productUrl of productUrls.slice(0, 3)) { // Limit to first 3 to avoid too many requests
+      console.log(`Checking product detail page: ${productUrl}`);
+      try {
+        const detailHtml = await scrapeWithFirecrawl(productUrl, apiKey);
         
-        const price = extractPriceFromDetailPage(detailHtml);
-        if (price) {
-          console.log(`Found price on detail page: ${price}€`);
-          return { url: firstProductMatch[1], price };
+        // Verify this product has the reference we're looking for
+        if (detailHtml.includes(`R: ${reference}`) || 
+            detailHtml.includes(`R:${reference}`) || 
+            detailHtml.includes(`Ref: ${reference}`) ||
+            detailHtml.includes(`80LM${reference}`) ||
+            detailHtml.includes(`>${reference}<`) ||
+            detailHtml.match(new RegExp(`[>\\s]${reference}[<\\s]`, 'i'))) {
+          
+          const price = extractPriceFromDetailPage(detailHtml);
+          if (price) {
+            console.log(`Found price on detail page: ${price}€`);
+            return { url: productUrl, price };
+          }
         }
+      } catch (e) {
+        console.error(`Error checking ${productUrl}:`, e);
+        continue;
       }
     }
     
