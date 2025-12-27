@@ -99,10 +99,17 @@ export default function ProductDetail() {
           {product.category}
         </Badge>
 
-        {/* Name and Brand */}
+        {/* Name, Brand & Reference */}
         <div>
           <p className="text-sm text-muted-foreground mb-1">{product.brand}</p>
           <h2 className="text-2xl font-bold leading-tight">{product.name}</h2>
+
+          {product.reference && (
+            <div className="mt-3 flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Referência:</span>
+              <span className="font-medium text-foreground">{product.reference}</span>
+            </div>
+          )}
         </div>
 
         {/* Price */}
