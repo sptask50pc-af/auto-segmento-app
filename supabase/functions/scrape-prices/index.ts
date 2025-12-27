@@ -132,103 +132,98 @@ function extractPriceFromDetailPage(html: string): number | null {
 
 // Search for product by reference using website search
 async function searchProductByReference(reference: string, apiKey: string): Promise<{ url: string; price: number } | null> {
+  const normalizeUrl = (href: string) => {
+    const trimmed = href.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+    if (trimmed.startsWith('/')) return `${BASE_URL}${trimmed}`;
+    return `${BASE_URL}/${trimmed}`;
+  };
+
   try {
-    // Search on the website using the search functionality
     const searchUrl = `${BASE_URL}/pesquisa?controller=search&s=${encodeURIComponent(reference)}`;
     console.log(`Searching for reference "${reference}" at: ${searchUrl}`);
-    
+
     const html = await scrapeWithFirecrawl(searchUrl, apiKey);
-    
-    // Look for product link in search results that contains the reference
+
+    // Look for product cards in search results
     const productPattern = /<article[^>]*class="[^"]*product-miniature[^"]*"[^>]*>([\s\S]*?)<\/article>/gi;
     let match;
-    
+
     while ((match = productPattern.exec(html)) !== null) {
       const productHtml = match[1];
-      
-      // Check if this product contains the reference
-      const refMatch = productHtml.match(/R:\s*(\d+)|Ref[:\.]?\s*(\d+)/i);
-      const foundRef = refMatch ? (refMatch[1] || refMatch[2]) : null;
-      
-      // Also check in the product name/title
-      const titleMatch = productHtml.match(/<a[^>]*href="([^"]+)"[^>]*class="[^"]*product-title[^"]*"[^>]*>([^<]+)<\/a>/i) ||
-                         productHtml.match(/<h5[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/i);
-      
-      if (titleMatch) {
-        const productUrl = titleMatch[1];
-        const productName = titleMatch[2];
-        
-        // Check if the reference matches in the found ref or product name
-        if ((foundRef && foundRef === reference) || 
-            productName.includes(`R: ${reference}`) || 
-            productName.includes(`R:${reference}`) ||
-            productName.includes(`Ref: ${reference}`) ||
-            productName.toLowerCase().includes(reference.toLowerCase())) {
-          
-          // Extract price from the search result
-          let price = 0;
-          const priceContentMatch = productHtml.match(/itemprop="price"[^>]*content="([\d.,]+)"/i);
-          if (priceContentMatch) {
-            price = parseFloat(priceContentMatch[1].replace(',', '.')) || 0;
-          }
-          
-          if (price === 0) {
-            const dataPriceMatch = productHtml.match(/data-price="([\d.,]+)"/i);
-            if (dataPriceMatch) {
-              price = parseFloat(dataPriceMatch[1].replace(',', '.')) || 0;
-            }
-          }
-          
-          if (price === 0) {
-            const euroMatch = productHtml.match(/([\d]+[.,]\d{2})\s*€/);
-            if (euroMatch) {
-              price = parseFloat(euroMatch[1].replace(',', '.')) || 0;
-            }
-          }
-          
-          if (price > 0) {
-            console.log(`Found product in search: ${productName} - ${price}€`);
-            return { url: productUrl, price };
-          }
-        }
+
+      // Try to find the product link + title
+      const titleMatch =
+        productHtml.match(/<a[^>]*href="([^"]+)"[^>]*class="[^"]*product-title[^"]*"[^>]*>([^<]+)<\/a>/i) ||
+        productHtml.match(/<h5[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/i);
+
+      if (!titleMatch) continue;
+
+      const productUrl = normalizeUrl(titleMatch[1]);
+      const productName = (titleMatch[2] || '').trim();
+
+      // If the search term appears in the name, accept this card
+      const matchesRef = productName.toLowerCase().includes(reference.toLowerCase());
+      if (!matchesRef) continue;
+
+      // Extract price from the search result card
+      let price = 0;
+      const priceContentMatch = productHtml.match(/itemprop="price"[^>]*content="([\d.,]+)"/i);
+      if (priceContentMatch) price = parseFloat(priceContentMatch[1].replace(',', '.')) || 0;
+
+      if (price === 0) {
+        const dataPriceMatch = productHtml.match(/data-price="([\d.,]+)"/i);
+        if (dataPriceMatch) price = parseFloat(dataPriceMatch[1].replace(',', '.')) || 0;
+      }
+
+      if (price === 0) {
+        const euroMatch = productHtml.match(/([\d]+[.,]\d{2})\s*€/);
+        if (euroMatch) price = parseFloat(euroMatch[1].replace(',', '.')) || 0;
+      }
+
+      if (price > 0) {
+        console.log(`Found product in search: ${productName} - ${price}€ (${productUrl})`);
+        return { url: productUrl, price };
+      }
+
+      // If price wasn't on the card, try the detail page
+      console.log(`Price not found on card; checking detail page: ${productUrl}`);
+      const detailHtml = await scrapeWithFirecrawl(productUrl, apiKey);
+      const detailPrice = extractPriceFromDetailPage(detailHtml);
+      if (detailPrice) {
+        console.log(`Found price on detail page: ${detailPrice}€`);
+        return { url: productUrl, price: detailPrice };
       }
     }
-    
-    // If not found in search results, try direct search on the supplier's product pages
-    // Look for product links that are actual product pages (not blog, etc.)
-    const productLinkPattern = /<a[^>]*href="(https:\/\/www\.segmentopositivo\.pt\/[^"]*-[^"]*\.html)"/gi;
-    let productLink;
+
+    // Fallback: collect a few product-page links (often relative URLs)
+    const hrefPattern = /<a[^>]*href="([^"]+\.html[^"]*)"/gi;
     const productUrls: string[] = [];
-    
-    while ((productLink = productLinkPattern.exec(html)) !== null) {
-      const url = productLink[1];
-      // Filter out non-product pages like blog, contact, etc.
-      if (!url.includes('/blogue') && 
-          !url.includes('/blog') && 
-          !url.includes('/contact') && 
+    let hrefMatch;
+
+    while ((hrefMatch = hrefPattern.exec(html)) !== null) {
+      const url = normalizeUrl(hrefMatch[1]);
+      if (!url.includes('/blogue') &&
+          !url.includes('/blog') &&
+          !url.includes('/contact') &&
           !url.includes('/sobre') &&
           !url.includes('/about') &&
           !url.includes('/termos') &&
           !url.includes('/politica') &&
           !url.includes('/content/')) {
-        productUrls.push(url);
+        if (!productUrls.includes(url)) productUrls.push(url);
       }
     }
-    
-    // Try each product URL to find the one with our reference
-    for (const productUrl of productUrls.slice(0, 3)) { // Limit to first 3 to avoid too many requests
+
+    console.log(`Fallback: found ${productUrls.length} candidate .html links`);
+
+    for (const productUrl of productUrls.slice(0, 5)) {
       console.log(`Checking product detail page: ${productUrl}`);
       try {
         const detailHtml = await scrapeWithFirecrawl(productUrl, apiKey);
-        
-        // Verify this product has the reference we're looking for
-        if (detailHtml.includes(`R: ${reference}`) || 
-            detailHtml.includes(`R:${reference}`) || 
-            detailHtml.includes(`Ref: ${reference}`) ||
-            detailHtml.includes(`80LM${reference}`) ||
-            detailHtml.includes(`>${reference}<`) ||
-            detailHtml.match(new RegExp(`[>\\s]${reference}[<\\s]`, 'i'))) {
-          
+
+        // Verify this page matches the reference (loose check)
+        if (detailHtml.toLowerCase().includes(reference.toLowerCase())) {
           const price = extractPriceFromDetailPage(detailHtml);
           if (price) {
             console.log(`Found price on detail page: ${price}€`);
@@ -237,10 +232,9 @@ async function searchProductByReference(reference: string, apiKey: string): Prom
         }
       } catch (e) {
         console.error(`Error checking ${productUrl}:`, e);
-        continue;
       }
     }
-    
+
     console.log(`Product with reference "${reference}" not found in search results`);
     return null;
   } catch (error) {
