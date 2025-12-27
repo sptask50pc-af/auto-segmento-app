@@ -78,9 +78,10 @@ export function ProductProvider({ children }: { children: ReactNode }) {
           stock: product.inStock ? 'Em stock' : 'Sem stock',
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('No product returned from database');
 
       const newProduct: Product = {
         id: data.id,
@@ -91,7 +92,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         category: data.category,
         brand: data.brand || undefined,
         inStock: data.stock === 'Em stock',
-        reference: extractReference(data.name),
+        reference: (data as { reference?: string | null }).reference || extractReference(data.name),
       };
 
       setProducts((prev) => [newProduct, ...prev]);

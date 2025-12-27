@@ -16,6 +16,7 @@ interface ProductFormProps {
 export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
   const [formData, setFormData] = useState({
     name: "",
+    reference: "",
     brand: "",
     category: "",
     price: "",
@@ -29,6 +30,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
     if (product) {
       setFormData({
         name: product.name,
+        reference: product.reference || "",
         brand: product.brand,
         category: product.category,
         price: product.price.toString(),
@@ -44,6 +46,7 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
     e.preventDefault();
     onSubmit({
       name: formData.name,
+      reference: formData.reference.trim() || undefined,
       brand: formData.brand,
       category: formData.category,
       price: parseFloat(formData.price),
@@ -66,6 +69,16 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           placeholder="Ex: Filtro de Óleo Premium"
           required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="reference">Referência</Label>
+        <Input
+          id="reference"
+          value={formData.reference}
+          onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
+          placeholder="Ex: 8354"
         />
       </div>
 
