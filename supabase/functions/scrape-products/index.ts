@@ -131,11 +131,37 @@ function extractBrandFromName(name: string): string {
 
 // Extract reference from product detail page HTML
 function extractReferenceFromDetailPage(html: string): string | undefined {
-  // Look for "Referência:" pattern
+  // Pattern 1: itemprop="sku" - most reliable (e.g., <span itemprop="sku">80LM2448</span>)
+  const skuMatch = html.match(/itemprop="sku"[^>]*>([^<]+)</i);
+  if (skuMatch && skuMatch[1]) {
+    const sku = skuMatch[1].trim();
+    // Extract just the numeric part if it starts with 80LM
+    const numericMatch = sku.match(/80LM(\d+)/i) || sku.match(/(\d{4,})/);
+    if (numericMatch) {
+      return numericMatch[1];
+    }
+    if (sku.length >= 3) {
+      return sku;
+    }
+  }
+
+  // Pattern 2: product-reference div with label
+  const refDivMatch = html.match(/<div[^>]*class="[^"]*product-reference[^"]*"[^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/i);
+  if (refDivMatch && refDivMatch[1]) {
+    const ref = refDivMatch[1].trim();
+    const numericMatch = ref.match(/80LM(\d+)/i) || ref.match(/(\d{4,})/);
+    if (numericMatch) {
+      return numericMatch[1];
+    }
+    if (ref.length >= 3) {
+      return ref;
+    }
+  }
+
+  // Pattern 3: Look for "Referência:" pattern in text
   const refPatterns = [
     /Refer[êe]ncia[:\s]*<[^>]*>([^<]+)</i,
     /Refer[êe]ncia[:\s]*([A-Z0-9]+)/i,
-    /<span[^>]*class="[^"]*product-reference[^"]*"[^>]*>[\s\S]*?([A-Z0-9]+)[\s\S]*?<\/span>/i,
     /data-reference="([^"]+)"/i,
     /<td[^>]*>Refer[êe]ncia<\/td>[\s\S]*?<td[^>]*>([^<]+)<\/td>/i,
   ];
@@ -144,7 +170,11 @@ function extractReferenceFromDetailPage(html: string): string | undefined {
     const match = html.match(pattern);
     if (match && match[1]) {
       const ref = match[1].trim();
-      if (ref && ref.length >= 3) {
+      const numericMatch = ref.match(/80LM(\d+)/i) || ref.match(/(\d{4,})/);
+      if (numericMatch) {
+        return numericMatch[1];
+      }
+      if (ref.length >= 3) {
         return ref;
       }
     }
