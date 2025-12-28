@@ -1,14 +1,14 @@
 import * as React from "react";
+import { motion } from "framer-motion";
 import { Home, Settings, User, LogOut } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-const BottomNav = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+const BottomNav = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => {
     const location = useLocation();
-    const navigate = useNavigate();
     const { user, signOut } = useAuth();
     const { toast } = useToast();
 
@@ -26,55 +26,86 @@ const BottomNav = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement
     ];
 
     return (
-      <nav
+      <motion.div
         ref={ref}
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
         className={cn(
           "fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/85 md:hidden shadow-xl shadow-black/20",
           className
         )}
-        {...props}
+        role="navigation"
+        {...(props as any)}
       >
         {/* Decorative top gradient line */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
         
         <div className="flex items-center justify-around h-16">
-          {navItems.map((item) => {
+          {navItems.map((item, index) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 px-4 py-2 transition-all duration-300 rounded-xl",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  "flex flex-col items-center justify-center gap-1 px-4 py-2 transition-colors rounded-xl relative",
+                  isActive ? "text-primary" : "text-muted-foreground"
                 )}
               >
-                <div className={cn(
-                  "p-1.5 rounded-lg transition-all duration-300",
-                  isActive && "bg-primary/20"
-                )}>
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: index * 0.1, type: "spring", stiffness: 400 }}
+                  whileTap={{ scale: 0.9 }}
+                  className={cn(
+                    "p-1.5 rounded-lg relative",
+                    isActive && "bg-primary/20"
+                  )}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-indicator"
+                      className="absolute inset-0 bg-primary/20 rounded-lg"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
                   <item.icon className={cn(
-                    "h-5 w-5 transition-all duration-300",
+                    "h-5 w-5 relative z-10",
                     isActive && "icon-glow"
                   )} />
-                </div>
-                <span className={cn(
-                  "text-xs transition-all duration-300",
-                  isActive ? "font-semibold" : "font-medium"
-                )}>{item.label}</span>
+                </motion.div>
+                <motion.span 
+                  className={cn(
+                    "text-xs",
+                    isActive ? "font-semibold" : "font-medium"
+                  )}
+                  animate={{ 
+                    scale: isActive ? 1.05 : 1,
+                  }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  {item.label}
+                </motion.span>
               </Link>
             );
           })}
           
           {/* Auth button */}
           {user ? (
-            <button
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={handleSignOut}
               className="flex flex-col items-center justify-center gap-1 px-3 py-2 transition-colors text-primary"
             >
-              <LogOut className="h-5 w-5" />
+              <motion.div
+                whileHover={{ rotate: 10 }}
+                className="p-1.5"
+              >
+                <LogOut className="h-5 w-5" />
+              </motion.div>
               <span className="text-xs font-medium">Sair</span>
-            </button>
+            </motion.button>
           ) : (
             <Link
               to="/auth"
@@ -83,12 +114,17 @@ const BottomNav = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement
                 location.pathname === "/auth" ? "text-primary" : "text-muted-foreground"
               )}
             >
-              <User className={cn("h-5 w-5", location.pathname === "/auth" && "drop-shadow-[0_0_8px_hsl(var(--primary))]")} />
+              <motion.div 
+                whileTap={{ scale: 0.9 }}
+                className="p-1.5"
+              >
+                <User className={cn("h-5 w-5", location.pathname === "/auth" && "drop-shadow-[0_0_8px_hsl(var(--primary))]")} />
+              </motion.div>
               <span className="text-xs font-medium">Conta</span>
             </Link>
           )}
         </div>
-      </nav>
+      </motion.div>
     );
   }
 );
