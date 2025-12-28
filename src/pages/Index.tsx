@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { mainCategories } from "@/data/mockData";
@@ -25,6 +26,31 @@ const categoryImages: Record<string, string> = {
   Elétrica: eletricaImg,
   Universal: universalImg,
   "Sinalética e Segurança": sinaleticaSegurancaImg,
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.06,
+      delayChildren: 0.1,
+    },
+  },
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring" as const,
+      damping: 25,
+      stiffness: 300,
+    },
+  },
 };
 
 const Index = () => {
@@ -54,15 +80,26 @@ const Index = () => {
     <div className="min-h-screen bg-background pb-20">
       <Header title="Início" />
 
-      <main className="container px-4 py-6 space-y-8">
+      <motion.main 
+        className="container px-4 py-6 space-y-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         {/* Hero Carousel Section */}
-        <section className="relative h-[200px] overflow-hidden rounded-2xl shadow-2xl shadow-primary/10">
+        <motion.section 
+          className="relative h-[200px] overflow-hidden rounded-2xl shadow-2xl shadow-primary/10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        >
           {/* Slide Indicators */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
             {[0, 1].map((index) => (
-              <button
+              <motion.button
                 key={index}
                 onClick={() => setActiveSlide(index)}
+                whileTap={{ scale: 0.9 }}
                 className={`h-2.5 rounded-full transition-all duration-300 ${
                   activeSlide === index ? "w-8 bg-primary shadow-lg shadow-primary/50" : "w-2.5 bg-white/40 hover:bg-white/60"
                 }`}
@@ -70,54 +107,91 @@ const Index = () => {
             ))}
           </div>
 
-          {/* Slide 1: Welcome */}
-          <div
-            className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-              activeSlide === 0 ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-full"
-            }`}
-          >
-            <div className="h-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-card to-card p-6 border border-primary/30">
-              <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/25 blur-3xl animate-pulse" />
-              <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-primary/15 blur-2xl" />
-              <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-primary/10 blur-xl floating" />
-              <div className="relative flex flex-col justify-center h-full">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 rounded-lg bg-primary/20">
-                    <Sparkles className="w-5 h-5 text-primary icon-glow" />
+          <AnimatePresence mode="wait">
+            {activeSlide === 0 && (
+              <motion.div
+                key="slide-0"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 50 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="absolute inset-0"
+              >
+                <div className="h-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-card to-card p-6 border border-primary/30">
+                  <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/25 blur-3xl animate-pulse" />
+                  <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-primary/15 blur-2xl" />
+                  <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-primary/10 blur-xl floating" />
+                  <div className="relative flex flex-col justify-center h-full">
+                    <motion.div 
+                      className="flex items-center gap-2 mb-3"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <div className="p-1.5 rounded-lg bg-primary/20">
+                        <Sparkles className="w-5 h-5 text-primary icon-glow" />
+                      </div>
+                      <span className="text-sm font-semibold text-primary tracking-wide uppercase">Peças Premium</span>
+                    </motion.div>
+                    <motion.h1 
+                      className="text-2xl font-bold text-foreground mb-2"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      Bem-vindo ao Segmento Positivo
+                    </motion.h1>
+                    <motion.p 
+                      className="text-muted-foreground text-sm"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      Explore as melhores peças automotivas
+                    </motion.p>
                   </div>
-                  <span className="text-sm font-semibold text-primary tracking-wide uppercase">Peças Premium</span>
                 </div>
-                <h1 className="text-2xl font-bold text-foreground mb-2">Bem-vindo ao Segmento Positivo</h1>
-                <p className="text-muted-foreground text-sm">Explore as melhores peças automotivas</p>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            )}
 
-          {/* Slide 2: Liqui Moly Advertisement */}
-          <div
-            className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-              activeSlide === 1 ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full"
-            }`}
-          >
-            <div className="h-full relative overflow-hidden rounded-2xl">
-              <img
-                src={liquiMolyBanner}
-                alt="Liqui Moly - German Premium Motor Oil"
-                className="w-full h-full object-cover"
-              />
-              {/* Overlay with badge */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
-              <div className="absolute bottom-4 left-4">
-                <div className="inline-flex items-center gap-2 bg-[#e31e24] px-4 py-2 rounded-full shadow-xl shadow-red-500/30">
-                  <span className="text-xs font-bold text-white tracking-wider uppercase">Distribuidor Oficial</span>
+            {activeSlide === 1 && (
+              <motion.div
+                key="slide-1"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="absolute inset-0"
+              >
+                <div className="h-full relative overflow-hidden rounded-2xl">
+                  <img
+                    src={liquiMolyBanner}
+                    alt="Liqui Moly - German Premium Motor Oil"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
+                  <motion.div 
+                    className="absolute bottom-4 left-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <div className="inline-flex items-center gap-2 bg-[#e31e24] px-4 py-2 rounded-full shadow-xl shadow-red-500/30">
+                      <span className="text-xs font-bold text-white tracking-wider uppercase">Distribuidor Oficial</span>
+                    </div>
+                  </motion.div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.section>
 
         {/* Principais categorias */}
-        <section className="animate-slide-up" style={{ animationDelay: "100ms" }}>
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, type: "spring", damping: 25 }}
+        >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-3">
               <span className="w-1.5 h-7 bg-gradient-to-b from-primary to-primary/50 rounded-full shadow-lg shadow-primary/30" />
@@ -125,60 +199,75 @@ const Index = () => {
             </h2>
           </div>
 
-          {/* Grid of main categories */}
-          <div className="grid grid-cols-4 gap-4">
-            {mainCategories.map((category, index) => {
-              const hasSubCategories = true;
-
-              return (
-                <div
-                  key={category.id}
-                  onClick={() => hasSubCategories && handleCategoryClick(category.label)}
-                  className="group flex flex-col items-center gap-2.5 cursor-pointer animate-scale-in"
-                  style={{ animationDelay: `${index * 50}ms` }}
+          <motion.div 
+            className="grid grid-cols-4 gap-4"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {mainCategories.map((category, index) => (
+              <motion.div
+                key={category.id}
+                variants={itemVariants}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleCategoryClick(category.label)}
+                className="group flex flex-col items-center gap-2.5 cursor-pointer"
+              >
+                <motion.div 
+                  className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-muted to-secondary backdrop-blur border-2 border-border/60 shadow-lg shadow-background/50 flex items-center justify-center overflow-hidden p-2"
+                  whileHover={{ scale: 1.05, borderColor: "hsl(var(--primary) / 0.6)" }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-muted to-secondary backdrop-blur border-2 border-border/60 shadow-lg shadow-background/50 flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2">
-                    {/* Hover glow effect */}
-                    <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <img
-                      src={categoryImages[category.label]}
-                      alt={category.label}
-                      className="w-full h-full object-contain relative z-10 transition-transform duration-300 group-hover:scale-110"
-                    />
-                  </div>
-                  <span className="text-xs text-center text-foreground leading-tight group-hover:text-primary transition-colors font-bold">
-                    {category.label}
-                  </span>
-                  {hasSubCategories && (
-                    <ChevronRight className="w-4 h-4 text-muted-foreground -mt-1 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
+                  <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <motion.img
+                    src={categoryImages[category.label]}
+                    alt={category.label}
+                    className="w-full h-full object-contain relative z-10"
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  />
+                </motion.div>
+                <span className="text-xs text-center text-foreground leading-tight group-hover:text-primary transition-colors font-bold">
+                  {category.label}
+                </span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground -mt-1 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.section>
 
         {/* Quick Stats */}
-        <section className="animate-slide-up grid grid-cols-3 gap-3" style={{ animationDelay: "200ms" }}>
-          <div className="relative bg-card/90 backdrop-blur rounded-2xl p-4 border border-border/50 text-center overflow-hidden group hover:border-primary/30 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <p className="text-2xl font-bold text-primary relative">500+</p>
-            <p className="text-xs text-muted-foreground relative">Produtos</p>
-          </div>
-          <div className="relative bg-card/90 backdrop-blur rounded-2xl p-4 border border-border/50 text-center overflow-hidden group hover:border-primary/30 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <p className="text-2xl font-bold text-foreground relative">24h</p>
-            <p className="text-xs text-muted-foreground relative">Entrega</p>
-          </div>
-          <div className="relative bg-card/90 backdrop-blur rounded-2xl p-4 border border-border/50 text-center overflow-hidden group hover:border-primary/30 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <p className="text-2xl font-bold text-foreground relative">100%</p>
-            <p className="text-xs text-muted-foreground relative">Original</p>
-          </div>
-        </section>
+        <motion.section 
+          className="grid grid-cols-3 gap-3"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {[
+            { value: "500+", label: "Produtos", highlight: true },
+            { value: "24h", label: "Entrega", highlight: false },
+            { value: "100%", label: "Original", highlight: false },
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              variants={itemVariants}
+              whileTap={{ scale: 0.97 }}
+              className="relative bg-card/90 backdrop-blur rounded-2xl p-4 border border-border/50 text-center overflow-hidden group hover:border-primary/30 transition-all duration-300"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <p className={`text-2xl font-bold relative ${stat.highlight ? "text-primary" : "text-foreground"}`}>{stat.value}</p>
+              <p className="text-xs text-muted-foreground relative">{stat.label}</p>
+            </motion.div>
+          ))}
+        </motion.section>
 
         {/* Store Details Section */}
-        <section className="animate-slide-up" style={{ animationDelay: "300ms" }}>
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, type: "spring", damping: 25 }}
+        >
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-3">
               <span className="w-1.5 h-7 bg-gradient-to-b from-primary to-primary/50 rounded-full shadow-lg shadow-primary/30" />
@@ -186,22 +275,30 @@ const Index = () => {
             </h2>
           </div>
 
-          <div className="relative bg-card/90 backdrop-blur rounded-2xl border border-border/50 overflow-hidden group hover:border-primary/30 transition-all duration-300">
-            {/* Decorative elements */}
+          <motion.div 
+            className="relative bg-card/90 backdrop-blur rounded-2xl border border-border/50 overflow-hidden"
+            whileTap={{ scale: 0.99 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-full blur-xl" />
             
             <div className="relative p-6 space-y-5">
               {/* Address */}
-              <a
+              <motion.a
                 href="https://maps.google.com/?q=Rotunda Armindo Lousada n-º4C, 3400-076 Oliveira do Hospital"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start gap-4 group/item"
+                whileTap={{ scale: 0.98 }}
               >
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover/item:from-primary/30 group-hover/item:to-primary/20 group-hover/item:shadow-lg group-hover/item:shadow-primary/20">
+                <motion.div 
+                  className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
                   <MapPin className="w-5 h-5 text-primary" />
-                </div>
+                </motion.div>
                 <div>
                   <p className="text-sm font-semibold text-foreground group-hover/item:text-primary transition-colors">
                     Morada
@@ -212,25 +309,31 @@ const Index = () => {
                     3400-076 Oliveira do Hospital
                   </p>
                 </div>
-              </a>
+              </motion.a>
 
-              {/* Divider */}
               <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
               {/* Phone */}
-              <a href="tel:238094280" className="flex items-center gap-4 group/item">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover/item:from-primary/30 group-hover/item:to-primary/20 group-hover/item:shadow-lg group-hover/item:shadow-primary/20">
+              <motion.a 
+                href="tel:238094280" 
+                className="flex items-center gap-4 group/item"
+                whileTap={{ scale: 0.98 }}
+              >
+                <motion.div 
+                  className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
                   <Phone className="w-5 h-5 text-primary" />
-                </div>
+                </motion.div>
                 <div>
                   <p className="text-sm font-semibold text-foreground group-hover/item:text-primary transition-colors">
                     Telefone
                   </p>
                   <p className="text-sm text-muted-foreground">238 094 280</p>
                 </div>
-              </a>
+              </motion.a>
 
-              {/* Divider */}
               <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
               {/* Hours */}
@@ -240,24 +343,33 @@ const Index = () => {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-foreground mb-2">Horário</p>
-                  <div className="space-y-1.5">
-                    <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "0ms" }}>
-                      <span className="text-foreground font-medium">Segunda a Sexta:</span> 9h às 19h
-                    </p>
-                    <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "200ms" }}>
-                      <span className="text-foreground font-medium">Sábado:</span> 9h às 13h
-                    </p>
-                    <p className="text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "400ms" }}>
-                      <span className="text-foreground font-medium">Domingo:</span>{" "}
-                      <span className="text-primary font-medium">Fechado</span>
-                    </p>
-                  </div>
+                  <motion.div 
+                    className="space-y-1.5"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    {[
+                      { day: "Segunda a Sexta:", time: "9h às 19h" },
+                      { day: "Sábado:", time: "9h às 13h" },
+                      { day: "Domingo:", time: "Fechado", closed: true },
+                    ].map((schedule, index) => (
+                      <motion.p 
+                        key={schedule.day}
+                        variants={itemVariants}
+                        className="text-sm text-muted-foreground"
+                      >
+                        <span className="text-foreground font-medium">{schedule.day}</span>{" "}
+                        <span className={schedule.closed ? "text-primary font-medium" : ""}>{schedule.time}</span>
+                      </motion.p>
+                    ))}
+                  </motion.div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-      </main>
+          </motion.div>
+        </motion.section>
+      </motion.main>
 
       <BottomNav />
     </div>
