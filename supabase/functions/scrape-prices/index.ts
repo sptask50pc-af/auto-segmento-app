@@ -130,8 +130,46 @@ function extractPriceFromDetailPage(html: string): number | null {
   return null;
 }
 
+// Extract reference from product detail page HTML
+function extractReferenceFromDetailPage(html: string): string | null {
+  // Pattern 1: "Referência: XXXX" or "Referência : XXXX"
+  const refPatterns = [
+    /Refer[êe]ncia\s*:\s*([A-Z0-9]+)/i,
+    /Ref\.?\s*:\s*([A-Z0-9]+)/i,
+    /SKU\s*:\s*([A-Z0-9]+)/i,
+    /Código\s*:\s*([A-Z0-9]+)/i,
+  ];
+  
+  for (const pattern of refPatterns) {
+    const match = html.match(pattern);
+    if (match && match[1]) {
+      console.log(`Found reference via pattern: ${match[1]}`);
+      return match[1].trim();
+    }
+  }
+
+  // Pattern 2: Look in product-reference span/div
+  const refSpanMatch = html.match(/<(?:span|div)[^>]*class="[^"]*product-reference[^"]*"[^>]*>([^<]+)</i);
+  if (refSpanMatch && refSpanMatch[1]) {
+    const ref = refSpanMatch[1].replace(/Refer[êe]ncia\s*:\s*/i, '').trim();
+    if (ref) {
+      console.log(`Found reference in product-reference element: ${ref}`);
+      return ref;
+    }
+  }
+
+  // Pattern 3: data-id-product attribute
+  const dataIdMatch = html.match(/data-id-product="([^"]+)"/i);
+  if (dataIdMatch && dataIdMatch[1]) {
+    console.log(`Found reference in data-id-product: ${dataIdMatch[1]}`);
+    return dataIdMatch[1];
+  }
+
+  return null;
+}
+
 // Search for product by reference using website search
-async function searchProductByReference(reference: string, apiKey: string): Promise<{ url: string; price: number } | null> {
+async function searchProductByReference(reference: string, apiKey: string): Promise<{ url: string; price: number; scrapedReference: string | null } | null> {
   const normalizeUrl = (href: string) => {
     const trimmed = href.trim();
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
@@ -181,18 +219,21 @@ async function searchProductByReference(reference: string, apiKey: string): Prom
         if (euroMatch) price = parseFloat(euroMatch[1].replace(',', '.')) || 0;
       }
 
+      // Always fetch detail page to get reference
+      console.log(`Fetching detail page for reference: ${productUrl}`);
+      const detailHtml = await scrapeWithFirecrawl(productUrl, apiKey);
+      const scrapedReference = extractReferenceFromDetailPage(detailHtml);
+      
       if (price > 0) {
-        console.log(`Found product in search: ${productName} - ${price}€ (${productUrl})`);
-        return { url: productUrl, price };
+        console.log(`Found product in search: ${productName} - ${price}€, ref: ${scrapedReference} (${productUrl})`);
+        return { url: productUrl, price, scrapedReference };
       }
 
       // If price wasn't on the card, try the detail page
-      console.log(`Price not found on card; checking detail page: ${productUrl}`);
-      const detailHtml = await scrapeWithFirecrawl(productUrl, apiKey);
       const detailPrice = extractPriceFromDetailPage(detailHtml);
       if (detailPrice) {
-        console.log(`Found price on detail page: ${detailPrice}€`);
-        return { url: productUrl, price: detailPrice };
+        console.log(`Found price on detail page: ${detailPrice}€, ref: ${scrapedReference}`);
+        return { url: productUrl, price: detailPrice, scrapedReference };
       }
     }
 
@@ -225,9 +266,10 @@ async function searchProductByReference(reference: string, apiKey: string): Prom
         // Verify this page matches the reference (loose check)
         if (detailHtml.toLowerCase().includes(reference.toLowerCase())) {
           const price = extractPriceFromDetailPage(detailHtml);
+          const scrapedReference = extractReferenceFromDetailPage(detailHtml);
           if (price) {
-            console.log(`Found price on detail page: ${price}€`);
-            return { url: productUrl, price };
+            console.log(`Found price on detail page: ${price}€, ref: ${scrapedReference}`);
+            return { url: productUrl, price, scrapedReference };
           }
         }
       } catch (e) {
@@ -317,30 +359,43 @@ serve(async (req) => {
       }
 
       const priceUpdates: PriceUpdate[] = [];
+      const priceChanged = searchResult.price !== product.price;
+      const referenceChanged = searchResult.scrapedReference && searchResult.scrapedReference !== product.reference;
       
-      if (searchResult.price !== product.price) {
+      // Build update object
+      const updateData: { price?: number; reference?: string } = {};
+      if (priceChanged) {
+        updateData.price = searchResult.price;
         console.log(`Price update: ${product.price}€ → ${searchResult.price}€`);
-        
+      }
+      if (referenceChanged && searchResult.scrapedReference) {
+        updateData.reference = searchResult.scrapedReference;
+        console.log(`Reference update: ${product.reference || 'none'} → ${searchResult.scrapedReference}`);
+      }
+      
+      if (Object.keys(updateData).length > 0) {
         const { error: updateError } = await supabase
           .from('products')
-          .update({ price: searchResult.price })
+          .update(updateData)
           .eq('id', product.id);
         
         if (updateError) {
-          console.error('Error updating price:', updateError);
+          console.error('Error updating product:', updateError);
           return new Response(
-            JSON.stringify({ success: false, error: 'Failed to update price in database', updates: [] }),
+            JSON.stringify({ success: false, error: 'Failed to update product in database', updates: [] }),
             { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
         
-        priceUpdates.push({
-          id: product.id,
-          name: product.name,
-          oldPrice: product.price,
-          newPrice: searchResult.price,
-          sourceUrl: searchResult.url,
-        });
+        if (priceChanged) {
+          priceUpdates.push({
+            id: product.id,
+            name: product.name,
+            oldPrice: product.price,
+            newPrice: searchResult.price,
+            sourceUrl: searchResult.url,
+          });
+        }
       }
       
       return new Response(
@@ -357,7 +412,10 @@ serve(async (req) => {
             name: product.name,
             oldPrice: product.price,
             newPrice: searchResult.price,
-            priceChanged: searchResult.price !== product.price,
+            priceChanged: priceChanged,
+            oldReference: product.reference,
+            newReference: searchResult.scrapedReference,
+            referenceChanged: referenceChanged,
           },
           timestamp: new Date().toISOString(),
         }),
