@@ -132,39 +132,47 @@ function extractPriceFromDetailPage(html: string): number | null {
 
 // Extract reference from product detail page HTML
 function extractReferenceFromDetailPage(html: string): string | null {
-  // Pattern 1: "Referência: XXXX" or "Referência : XXXX"
-  const refPatterns = [
-    /Refer[êe]ncia\s*:\s*([A-Z0-9]+)/i,
-    /Ref\.?\s*:\s*([A-Z0-9]+)/i,
-    /SKU\s*:\s*([A-Z0-9]+)/i,
-    /Código\s*:\s*([A-Z0-9]+)/i,
-  ];
-  
-  for (const pattern of refPatterns) {
-    const match = html.match(pattern);
-    if (match && match[1]) {
-      console.log(`Found reference via pattern: ${match[1]}`);
-      return match[1].trim();
-    }
-  }
-
-  // Pattern 2: Look in product-reference span/div
-  const refSpanMatch = html.match(/<(?:span|div)[^>]*class="[^"]*product-reference[^"]*"[^>]*>([^<]+)</i);
-  if (refSpanMatch && refSpanMatch[1]) {
-    const ref = refSpanMatch[1].replace(/Refer[êe]ncia\s*:\s*/i, '').trim();
-    if (ref) {
-      console.log(`Found reference in product-reference element: ${ref}`);
+  // Pattern 1: Look for itemprop="sku" (most reliable - contains actual product reference)
+  const skuMatch = html.match(/itemprop="sku"[^>]*>([^<]+)</i);
+  if (skuMatch && skuMatch[1]) {
+    const ref = skuMatch[1].trim();
+    if (ref && ref.length >= 2) {
+      console.log(`Found reference in itemprop="sku": ${ref}`);
       return ref;
     }
   }
 
-  // Pattern 3: data-id-product attribute
-  const dataIdMatch = html.match(/data-id-product="([^"]+)"/i);
-  if (dataIdMatch && dataIdMatch[1]) {
-    console.log(`Found reference in data-id-product: ${dataIdMatch[1]}`);
-    return dataIdMatch[1];
+  // Pattern 2: Look in product-reference div with label/span structure
+  const refDivMatch = html.match(/<div[^>]*class="[^"]*product-reference[^"]*"[^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/i);
+  if (refDivMatch && refDivMatch[1]) {
+    const ref = refDivMatch[1].trim();
+    if (ref && ref.length >= 2) {
+      console.log(`Found reference in product-reference div: ${ref}`);
+      return ref;
+    }
   }
 
+  // Pattern 3: "Referência: XXXX" followed by reference value
+  const refLabelMatch = html.match(/Refer[êe]ncia\s*:\s*<\/label>\s*<span[^>]*>([^<]+)</i);
+  if (refLabelMatch && refLabelMatch[1]) {
+    const ref = refLabelMatch[1].trim();
+    if (ref && ref.length >= 2) {
+      console.log(`Found reference after Referência label: ${ref}`);
+      return ref;
+    }
+  }
+
+  // Pattern 4: Plain text "Referência: XXXX" pattern (no nested tags)
+  const refTextMatch = html.match(/Refer[êe]ncia\s*:\s*([A-Z0-9][A-Z0-9\-_]+)/i);
+  if (refTextMatch && refTextMatch[1]) {
+    const ref = refTextMatch[1].trim();
+    if (ref && ref.length >= 2) {
+      console.log(`Found reference via text pattern: ${ref}`);
+      return ref;
+    }
+  }
+
+  console.log('No reference found in HTML');
   return null;
 }
 
