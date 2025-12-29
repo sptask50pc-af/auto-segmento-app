@@ -331,6 +331,17 @@ serve(async (req) => {
       );
     }
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Backend not configured', products: [], progress: { current: 0, total: 0 } }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+
     console.log('Starting product scrape from segmentopositivo.pt');
     
     const allProducts: ScrapedProduct[] = [];
@@ -417,20 +428,40 @@ serve(async (req) => {
     for (let i = 0; i < allProducts.length; i++) {
       const product = allProducts[i];
       if (rateLimited) break;
-      
+
       try {
+        // If DB already has a non-numeric reference for this exact product name, skip re-scraping.
+        const { data: existing } = await supabase
+          .from('products')
+          .select('reference')
+          .eq('name', product.name)
+          .maybeSingle();
+
+        const existingRef = (existing as { reference?: string | null } | null)?.reference ?? null;
+        if (existingRef && !/^\d{3,}$/.test(existingRef)) {
+          // Already has a full SKU-like reference.
+          product.reference = existingRef;
+          continue;
+        }
+
         console.log(`  [${i + 1}/${allProducts.length}] Fetching reference for: ${product.name.substring(0, 40)}...`);
         const detailHtml = await scrapeWithFirecrawl(product.sourceUrl, apiKey);
         const reference = extractReferenceFromDetailPage(detailHtml);
-        
+
         if (reference) {
           product.reference = reference;
           refsFetched++;
           console.log(`    ✓ Reference: ${reference}`);
+
+          // Persist reference immediately so the user doesn't depend on the frontend loop completing.
+          await supabase
+            .from('products')
+            .update({ reference })
+            .eq('name', product.name);
         } else {
           console.log(`    ✗ No reference found`);
         }
-        
+
         // Brief pause between requests
         await new Promise(resolve => setTimeout(resolve, 1000));
       } catch (error) {
