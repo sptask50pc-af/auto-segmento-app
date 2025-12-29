@@ -129,19 +129,15 @@ function extractBrandFromName(name: string): string {
   return 'Segmento Positivo';
 }
 
-// Extract reference from product detail page HTML
+// Extract reference from product detail page HTML - returns FULL reference like "80LM9511"
 function extractReferenceFromDetailPage(html: string): string | undefined {
-  // Pattern 1: itemprop="sku" - most reliable (e.g., <span itemprop="sku">80LM2448</span>)
+  // Pattern 1: itemprop="sku" - most reliable (e.g., <span itemprop="sku">80LM9511</span>)
   const skuMatch = html.match(/itemprop="sku"[^>]*>([^<]+)</i);
   if (skuMatch && skuMatch[1]) {
     const sku = skuMatch[1].trim();
-    // Extract just the numeric part if it starts with 80LM
-    const numericMatch = sku.match(/80LM(\d+)/i) || sku.match(/(\d{4,})/);
-    if (numericMatch) {
-      return numericMatch[1];
-    }
-    if (sku.length >= 3) {
-      return sku;
+    if (sku && sku.length >= 2) {
+      console.log(`    ✓ Reference from SKU: ${sku}`);
+      return sku; // Return FULL reference like "80LM9511"
     }
   }
 
@@ -149,37 +145,40 @@ function extractReferenceFromDetailPage(html: string): string | undefined {
   const refDivMatch = html.match(/<div[^>]*class="[^"]*product-reference[^"]*"[^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/i);
   if (refDivMatch && refDivMatch[1]) {
     const ref = refDivMatch[1].trim();
-    const numericMatch = ref.match(/80LM(\d+)/i) || ref.match(/(\d{4,})/);
-    if (numericMatch) {
-      return numericMatch[1];
+    if (ref && ref.length >= 2) {
+      console.log(`    ✓ Reference from div: ${ref}`);
+      return ref; // Return FULL reference
     }
-    if (ref.length >= 3) {
+  }
+
+  // Pattern 3: Look for "Referência:" pattern followed by span
+  const refLabelMatch = html.match(/Refer[êe]ncia\s*:\s*<\/label>\s*<span[^>]*>([^<]+)</i);
+  if (refLabelMatch && refLabelMatch[1]) {
+    const ref = refLabelMatch[1].trim();
+    if (ref && ref.length >= 2) {
+      console.log(`    ✓ Reference from label: ${ref}`);
       return ref;
     }
   }
 
-  // Pattern 3: Look for "Referência:" pattern in text
+  // Pattern 4: Plain text pattern
   const refPatterns = [
     /Refer[êe]ncia[:\s]*<[^>]*>([^<]+)</i,
-    /Refer[êe]ncia[:\s]*([A-Z0-9]+)/i,
     /data-reference="([^"]+)"/i,
-    /<td[^>]*>Refer[êe]ncia<\/td>[\s\S]*?<td[^>]*>([^<]+)<\/td>/i,
   ];
   
   for (const pattern of refPatterns) {
     const match = html.match(pattern);
     if (match && match[1]) {
       const ref = match[1].trim();
-      const numericMatch = ref.match(/80LM(\d+)/i) || ref.match(/(\d{4,})/);
-      if (numericMatch) {
-        return numericMatch[1];
-      }
-      if (ref.length >= 3) {
+      if (ref && ref.length >= 2) {
+        console.log(`    ✓ Reference from pattern: ${ref}`);
         return ref;
       }
     }
   }
   
+  console.log(`    ✗ No reference found`);
   return undefined;
 }
 
