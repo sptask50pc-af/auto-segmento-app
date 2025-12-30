@@ -98,10 +98,11 @@ async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 3):
       const html = data.data?.rawHtml || data.data?.html || '';
 
       // Detect actual maintenance/blocked pages (be specific to avoid false positives)
-      const isMaintenancePage = 
-        html.includes('class="page-maintenance"') || 
+      // The site uses "page-maintenance" on the main content section.
+      const isMaintenancePage =
+        /page-maintenance/i.test(html) ||
         html.includes('id="maintenance"') ||
-        (html.includes('<title>') && html.toLowerCase().includes('manutenção') && html.length < 5000);
+        (html.includes('<title>') && html.toLowerCase().includes('manuten') && html.length < 5000);
       
       if (isMaintenancePage) {
         throw new Error('MAINTENANCE');
