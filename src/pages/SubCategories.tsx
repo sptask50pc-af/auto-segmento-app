@@ -490,7 +490,7 @@ const SubCategories = () => {
               navigate("/");
             }
           }}
-          className={`flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl backdrop-blur border shadow-lg transition-all duration-300 ${
+          className={`flex items-center gap-3 text-sm px-5 py-3.5 rounded-xl backdrop-blur border shadow-lg transition-all duration-300 min-h-[52px] active:scale-95 ${
             isPecasCategory 
               ? 'bg-zinc-900/80 border-transparent text-zinc-300 hover:text-white hover:bg-zinc-800 shadow-black/20' 
               : 'bg-muted/50 border-border hover:border-primary/40 text-muted-foreground hover:text-foreground shadow-muted/10 hover:shadow-primary/10'
@@ -498,12 +498,12 @@ const SubCategories = () => {
         >
           {isThirdLevel ? (
             <>
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
               <span className="font-medium">Voltar</span>
             </>
           ) : (
             <>
-              <Home className="w-4 h-4" />
+              <Home className="w-5 h-5" />
               <span className="font-medium">Voltar às categorias</span>
             </>
           )}

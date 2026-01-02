@@ -31,10 +31,10 @@ export function ProductListView({ categoryName, products, backPath }: ProductLis
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate(backPath)}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-2 text-sm px-4 py-3 rounded-xl bg-muted/50 border border-border hover:border-primary/40 text-muted-foreground hover:text-foreground transition-all duration-300 min-h-[48px] active:scale-95"
           >
-            <ChevronLeft className="w-4 h-4" />
-            <span>Voltar</span>
+            <ChevronLeft className="w-5 h-5" />
+            <span className="font-medium">Voltar</span>
           </button>
           
           {products.length > 0 && (
