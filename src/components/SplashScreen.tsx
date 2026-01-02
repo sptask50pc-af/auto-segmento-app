@@ -62,6 +62,26 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
             </p>
           </motion.div>
 
+          {/* Car brands tagline */}
+          <motion.div
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
+            className="relative z-10 mt-4"
+          >
+            <p className="text-xs md:text-sm text-muted-foreground/80 tracking-wide">
+              <span className="text-foreground/70 font-medium">Mercedes</span>
+              <span className="mx-2 text-primary">•</span>
+              <span className="text-foreground/70 font-medium">BMW</span>
+              <span className="mx-2 text-primary">•</span>
+              <span className="text-foreground/70 font-medium">Audi</span>
+              <span className="mx-2 text-primary">•</span>
+              <span className="text-foreground/70 font-medium">VW</span>
+              <span className="mx-2 text-primary">•</span>
+              <span className="text-foreground/70 font-medium">+ Mais</span>
+            </p>
+          </motion.div>
+
           {/* Loading indicator */}
           <motion.div
             initial={{ opacity: 0 }}
