@@ -60,12 +60,14 @@ async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 3):
       const data = await response.json();
       const html = data.data?.rawHtml || data.data?.html || '';
 
+      // Detect maintenance page - the site uses "page-maintenance" class
       const isMaintenancePage = 
-        html.includes('class="page-maintenance"') || 
+        /page-maintenance/i.test(html) ||
         html.includes('id="maintenance"') ||
-        (html.includes('<title>') && html.toLowerCase().includes('manutenção') && html.length < 5000);
+        (html.includes('<title>') && html.toLowerCase().includes('manuten') && html.length < 5000);
       
       if (isMaintenancePage) {
+        console.log('Maintenance page detected');
         throw new Error('MAINTENANCE');
       }
 
