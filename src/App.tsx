@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,7 @@ import { ProductProvider } from "@/context/ProductContext";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { AIChatBot } from "@/components/AIChatBot";
+import { SplashScreen } from "@/components/SplashScreen";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import ControlPanel from "./pages/ControlPanel";
@@ -19,35 +21,40 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <ProductProvider>
-        <CartProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/control-panel" element={<ControlPanel />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                <Route path="/subcategories/:category" element={<SubCategories />} />
-                <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
-                <Route path="/subcategories/:category/:subcategory/:subsubcategory" element={<SubCategories />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <AIChatBot />
-            </BrowserRouter>
-          </TooltipProvider>
-        </CartProvider>
-      </ProductProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ProductProvider>
+          <CartProvider>
+            <TooltipProvider>
+              {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/control-panel" element={<ControlPanel />} />
+                  <Route path="/product/:id" element={<ProductDetail />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                  <Route path="/subcategories/:category" element={<SubCategories />} />
+                  <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
+                  <Route path="/subcategories/:category/:subcategory/:subsubcategory" element={<SubCategories />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <AIChatBot />
+              </BrowserRouter>
+            </TooltipProvider>
+          </CartProvider>
+        </ProductProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
