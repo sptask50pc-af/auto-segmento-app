@@ -448,7 +448,15 @@ const SubCategories = () => {
   const isPecasCategory = category === "pecas";
 
   return (
-    <div className={`min-h-screen pb-20 ${isPecasCategory ? 'bg-black' : 'bg-background'}`}>
+    <div className={`min-h-screen pb-20 relative ${isPecasCategory ? 'bg-black' : 'bg-background'}`}>
+      {/* Background Logo Watermark */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <img 
+          src="/icon.png" 
+          alt="" 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] max-w-[400px] opacity-[0.03]"
+        />
+      </div>
       <Header title={data.name} />
 
       <main className="container px-4 py-6 space-y-6">
