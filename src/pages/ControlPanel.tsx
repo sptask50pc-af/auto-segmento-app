@@ -174,45 +174,74 @@ const ControlPanel = () => {
     setUpdateProgress({ current: 0, total: 5, status: 'Loading categories...' });
     const summary: ScrapeSummary = { total: 0, inserted: 0, updated: 0, failed: 0 };
 
+    const getInvokeErrorMessage = (error: unknown, data: unknown) => {
+      // If the function returned JSON but the client still treated it as an error, prefer that message.
+      const dataMessage = (data as any)?.error;
+      if (typeof dataMessage === 'string' && dataMessage.trim()) return dataMessage;
+
+      // Supabase Functions errors usually contain context with the raw body.
+      const anyErr = error as any;
+      const rawBody = anyErr?.context?.body;
+      if (typeof rawBody === 'string' && rawBody.trim()) {
+        try {
+          const parsed = JSON.parse(rawBody);
+          if (typeof parsed?.error === 'string' && parsed.error.trim()) return parsed.error;
+        } catch {
+          // ignore
+        }
+      }
+
+      const status = anyErr?.context?.status;
+      if (status === 503) return 'O website está em manutenção ou bloqueou o acesso. Tente novamente mais tarde.';
+
+      return anyErr?.message || 'Falha ao atualizar produtos.';
+    };
+
     try {
       const { data, error } = await supabase.functions.invoke('scrape-products');
 
-      if (error) {
-        // Edge function returns useful JSON even on non-2xx; try to surface it.
-        const message = (data as any)?.error || error.message || 'Falha ao atualizar produtos.';
-        throw new Error(message);
+      if (error || !data?.success) {
+        const message = getInvokeErrorMessage(error, data);
+        toast({
+          title: "Erro ao atualizar",
+          description: message,
+          variant: "destructive",
+        });
+        return;
       }
 
       setUpdateProgress({ current: 3, total: 5, status: 'Processing products...' });
 
-      if (data?.success && data.products?.length > 0) {
+      if (data.products?.length > 0) {
         summary.total = data.products.length;
 
         for (let i = 0; i < data.products.length; i++) {
           const scrapedProduct = data.products[i];
           const normalizedCategory = normalizeCategory(scrapedProduct.category);
-          
+
           if (i % 10 === 0) {
-            setUpdateProgress({ 
-              current: 3 + Math.floor((i / summary.total) * 2), 
-              total: 5, 
-              status: `Processing ${i + 1}/${summary.total} products...` 
+            setUpdateProgress({
+              current: 3 + Math.floor((i / summary.total) * 2),
+              total: 5,
+              status: `Processing ${i + 1}/${summary.total} products...`,
             });
           }
-          
+
           try {
             const existingProduct = products.find(
-              p => (p.sourceUrl && p.sourceUrl === scrapedProduct.sourceUrl) ||
-                   p.name.toLowerCase().trim() === scrapedProduct.name.toLowerCase().trim()
+              (p) =>
+                (p.sourceUrl && p.sourceUrl === scrapedProduct.sourceUrl) ||
+                p.name.toLowerCase().trim() === scrapedProduct.name.toLowerCase().trim(),
             );
 
             if (existingProduct) {
-              const hasChanges = existingProduct.price !== scrapedProduct.price || 
-                  existingProduct.name !== scrapedProduct.name ||
-                  existingProduct.category !== normalizedCategory ||
-                  existingProduct.image !== scrapedProduct.image ||
-                  existingProduct.reference !== scrapedProduct.reference;
-              
+              const hasChanges =
+                existingProduct.price !== scrapedProduct.price ||
+                existingProduct.name !== scrapedProduct.name ||
+                existingProduct.category !== normalizedCategory ||
+                existingProduct.image !== scrapedProduct.image ||
+                existingProduct.reference !== scrapedProduct.reference;
+
               if (hasChanges) {
                 await updateProduct(existingProduct.id, {
                   price: scrapedProduct.price,
@@ -296,34 +325,43 @@ const ControlPanel = () => {
         body: { reference: priceReference.trim() }
       });
 
-      if (error) {
-        const message = (data as any)?.error || error.message || 'Failed to sync prices.';
-        throw new Error(message);
-      }
+      if (error || !data?.success) {
+        const anyErr = error as any;
+        let message = (data as any)?.error || anyErr?.message || 'Failed to sync prices.';
 
-      if (data?.success) {
-        const { summary } = data;
-        await refetch();
-        
-        setPriceSyncSummary({
-          total: summary?.total || 0,
-          updated: summary?.updated || 0,
-          unchanged: summary?.unchanged || 0,
-          notFound: summary?.notFound || 0,
-        });
-        setShowPriceSummary(true);
-        
-        toast({
-          title: "Prices Synced",
-          description: `${summary?.updated || 0} prices updated out of ${summary?.total || 0} products.`,
-        });
-      } else {
+        const rawBody = anyErr?.context?.body;
+        if (typeof rawBody === 'string' && rawBody.trim()) {
+          try {
+            const parsed = JSON.parse(rawBody);
+            if (typeof parsed?.error === 'string' && parsed.error.trim()) message = parsed.error;
+          } catch {
+            // ignore
+          }
+        }
+
         toast({
           title: "Error",
-          description: data?.error || "Failed to sync prices.",
+          description: message,
           variant: "destructive",
         });
+        return;
       }
+
+      const { summary } = data;
+      await refetch();
+
+      setPriceSyncSummary({
+        total: summary?.total || 0,
+        updated: summary?.updated || 0,
+        unchanged: summary?.unchanged || 0,
+        notFound: summary?.notFound || 0,
+      });
+      setShowPriceSummary(true);
+
+      toast({
+        title: "Prices Synced",
+        description: `${summary?.updated || 0} prices updated out of ${summary?.total || 0} products.`,
+      });
     } catch (error) {
       console.error('Error syncing prices:', error);
       const message = error instanceof Error ? error.message : 'Failed to sync prices.';
