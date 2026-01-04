@@ -97,18 +97,30 @@ async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 3):
       const data = await response.json();
       const html = data.data?.rawHtml || data.data?.html || '';
 
-      // Detect actual maintenance/blocked pages (be specific to avoid false positives)
-      // The site uses "page-maintenance" on the main content section.
-      const isMaintenancePage =
-        /page-maintenance/i.test(html) ||
-        html.includes('id="maintenance"') ||
-        (html.includes('<title>') && html.toLowerCase().includes('manuten') && html.length < 5000);
-      
-      if (isMaintenancePage) {
-        throw new Error('MAINTENANCE');
-      }
+       // Detect blocked/suspended pages
+       const lower = html.toLowerCase();
+       const isSuspendedPage =
+         lower.includes('account suspended') ||
+         lower.includes('this account has been suspended') ||
+         lower.includes('contact your hosting provider');
 
-      return html;
+       // Detect actual maintenance/blocked pages (be specific to avoid false positives)
+       // The site uses "page-maintenance" on the main content section.
+       const isMaintenancePage =
+         /page-maintenance/i.test(html) ||
+         html.includes('id="maintenance"') ||
+         (html.includes('<title>') && lower.includes('manuten') && html.length < 5000);
+
+       if (isSuspendedPage) {
+         console.error('Blocked page detected: account suspended');
+         throw new Error('SITE_SUSPENDED');
+       }
+
+       if (isMaintenancePage) {
+         throw new Error('MAINTENANCE');
+       }
+
+       return html;
     } catch (e) {
       if (attempt === maxRetries) throw e;
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -393,6 +405,17 @@ serve(async (req) => {
                 progress: { current: 0, total: totalCategories },
               }),
               { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          if (categoryError.message === 'SITE_SUSPENDED') {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'O website retornou "Account Suspended" (bloqueado/indisponível). Não é possível importar referências neste momento.',
+                products: [],
+                progress: { current: 0, total: totalCategories },
+              }),
+              { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
             );
           }
           if (categoryError.message === 'MAINTENANCE') {

@@ -60,18 +60,29 @@ async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 3):
       const data = await response.json();
       const html = data.data?.rawHtml || data.data?.html || '';
 
-      // Detect maintenance page - the site uses "page-maintenance" class
-      const isMaintenancePage = 
-        /page-maintenance/i.test(html) ||
-        html.includes('id="maintenance"') ||
-        (html.includes('<title>') && html.toLowerCase().includes('manuten') && html.length < 5000);
-      
-      if (isMaintenancePage) {
-        console.log('Maintenance page detected');
-        throw new Error('MAINTENANCE');
-      }
+       const lower = html.toLowerCase();
+       const isSuspendedPage =
+         lower.includes('account suspended') ||
+         lower.includes('this account has been suspended') ||
+         lower.includes('contact your hosting provider');
 
-      return html;
+       // Detect maintenance page - the site uses "page-maintenance" class
+       const isMaintenancePage =
+         /page-maintenance/i.test(html) ||
+         html.includes('id="maintenance"') ||
+         (html.includes('<title>') && lower.includes('manuten') && html.length < 5000);
+
+       if (isSuspendedPage) {
+         console.log('Blocked page detected: account suspended');
+         throw new Error('SITE_SUSPENDED');
+       }
+
+       if (isMaintenancePage) {
+         console.log('Maintenance page detected');
+         throw new Error('MAINTENANCE');
+       }
+
+       return html;
     } catch (e) {
       if (attempt === maxRetries) throw e;
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -454,14 +465,21 @@ serve(async (req) => {
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
+
     if (errorMessage === 'NO_CREDITS') {
       return new Response(
         JSON.stringify({ success: false, error: 'No credits available for price sync.', updates: [] }),
         { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
+
+    if (errorMessage === 'SITE_SUSPENDED') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Website returned "Account Suspended" (blocked/unavailable). Try again later.', updates: [] }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     if (errorMessage === 'MAINTENANCE') {
       return new Response(
         JSON.stringify({ success: false, error: 'Website is under maintenance. Try again later.', updates: [] }),
