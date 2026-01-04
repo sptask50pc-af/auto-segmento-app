@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { mainCategories } from "@/data/mockData";
 import { ChevronRight, MapPin, Phone, Clock, Sparkles } from "lucide-react";
 import liquiMolyBanner from "@/assets/liqui-moly-banner.png";
+import logo from "@/assets/logo.png";
 
 // Category images
 import pecasImg from "@/assets/categories/pecas.png";
@@ -118,37 +119,61 @@ const Index = () => {
                 className="absolute inset-0"
               >
                 <div className="h-full relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-card to-card p-6 border border-primary/30">
-                  <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/25 blur-3xl animate-pulse" />
-                  <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-primary/15 blur-2xl" />
-                  <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-primary/10 blur-xl floating" />
-                  <div className="relative flex flex-col justify-center h-full">
-                    <motion.div 
-                      className="flex items-center gap-2 mb-3"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 }}
+                  {/* Background glow effects */}
+                  <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/25 blur-2xl" />
+                  <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-primary/15 blur-xl" />
+                  
+                  <div className="relative flex items-center h-full gap-5">
+                    {/* Logo */}
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      className="flex-shrink-0"
                     >
-                      <div className="p-1.5 rounded-lg bg-primary/20">
-                        <Sparkles className="w-5 h-5 text-primary icon-glow" />
-                      </div>
-                      <span className="text-sm font-semibold text-primary tracking-wide uppercase">Peças Premium</span>
+                      <img 
+                        src={logo} 
+                        alt="Segmento Positivo" 
+                        className="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-lg"
+                      />
                     </motion.div>
-                    <motion.h1 
-                      className="text-2xl font-bold text-foreground mb-2"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      Bem-vindo ao Segmento Positivo
-                    </motion.h1>
-                    <motion.p 
-                      className="text-muted-foreground text-sm"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4 }}
-                    >
-                      Explore as melhores peças automotivas
-                    </motion.p>
+                    
+                    {/* Text content */}
+                    <div className="flex flex-col justify-center">
+                      <motion.h1 
+                        className="text-xl md:text-2xl font-bold tracking-tight"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <span className="text-foreground">SEGMENTO</span>{" "}
+                        <span className="text-primary">POSITIVO</span>
+                      </motion.h1>
+                      <motion.p 
+                        className="text-sm text-muted-foreground mt-1"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        Peças Automotivas Premium
+                      </motion.p>
+                      <motion.p 
+                        className="text-xs text-muted-foreground/70 mt-2 tracking-wide"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        <span className="text-foreground/70 font-medium">Mercedes</span>
+                        <span className="mx-1.5 text-primary">•</span>
+                        <span className="text-foreground/70 font-medium">BMW</span>
+                        <span className="mx-1.5 text-primary">•</span>
+                        <span className="text-foreground/70 font-medium">Audi</span>
+                        <span className="mx-1.5 text-primary">•</span>
+                        <span className="text-foreground/70 font-medium">VW</span>
+                        <span className="mx-1.5 text-primary">•</span>
+                        <span className="text-foreground/70 font-medium">+ Mais</span>
+                      </motion.p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
