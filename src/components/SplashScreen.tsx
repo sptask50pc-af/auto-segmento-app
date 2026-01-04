@@ -27,9 +27,9 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background"
         >
-          {/* Background glow effect */}
+          {/* Background glow effect - optimized blur */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-primary/15 blur-[60px]" />
           </div>
 
           {/* Logo */}
@@ -91,18 +91,10 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
           >
             <div className="flex gap-1.5">
               {[0, 1, 2].map((i) => (
-                <motion.div
+                <div
                   key={i}
-                  className="w-2 h-2 rounded-full bg-primary"
-                  animate={{ 
-                    scale: [1, 1.3, 1],
-                    opacity: [0.5, 1, 0.5]
-                  }}
-                  transition={{
-                    duration: 0.8,
-                    repeat: Infinity,
-                    delay: i * 0.15,
-                  }}
+                  className="w-2 h-2 rounded-full bg-primary animate-pulse"
+                  style={{ animationDelay: `${i * 150}ms` }}
                 />
               ))}
             </div>

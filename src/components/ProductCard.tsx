@@ -1,5 +1,4 @@
 import { Edit2, Trash2, ShoppingCart } from "lucide-react";
-import { motion } from "framer-motion";
 import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,50 +40,30 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ 
-        type: "spring", 
-        damping: 25, 
-        stiffness: 300,
-        delay: delay * 0.001 
-      }}
-      whileTap={{ scale: 0.98 }}
-      whileHover={{ y: -4 }}
+    <div
       className={cn(
-        "group relative overflow-hidden rounded-xl bg-card border border-border/50 p-4 transition-colors hover:border-primary/40",
+        "group relative overflow-hidden rounded-xl bg-card border border-border/50 p-4 transition-all duration-200 hover:border-primary/40 hover:-translate-y-1 active:scale-[0.98] animate-fade-in",
         !showActions && "cursor-pointer"
       )}
+      style={{ animationDelay: `${delay}ms` }}
       onClick={handleClick}
     >
       {/* Glow effect on hover */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
       
       {hasDiscount && (
-        <motion.div
-          initial={{ scale: 0, rotate: -10 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 400, delay: delay * 0.001 + 0.1 }}
-        >
-          <Badge className="absolute right-3 top-3 bg-primary text-primary-foreground z-10 shadow-lg shadow-primary/30">
-            -{discountPercent}%
-          </Badge>
-        </motion.div>
+        <Badge className="absolute right-3 top-3 bg-primary text-primary-foreground z-10 shadow-lg shadow-primary/30 animate-scale-in">
+          -{discountPercent}%
+        </Badge>
       )}
 
-      <motion.div 
-        className="relative mb-3 flex h-24 w-full items-center justify-center rounded-xl bg-gradient-to-br from-secondary to-muted/50 overflow-hidden border border-border/30 group-hover:border-primary/20 transition-colors"
-        whileHover={{ scale: 1.02 }}
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
-      >
+      <div className="relative mb-3 flex h-24 w-full items-center justify-center rounded-xl bg-gradient-to-br from-secondary to-muted/50 overflow-hidden border border-border/30 group-hover:border-primary/20 transition-all duration-200 group-hover:scale-[1.02]">
         {product.image && product.image !== '/placeholder.svg' ? (
-          <motion.img 
+          <img 
             src={product.image} 
             alt={product.name} 
-            className="h-full w-full object-contain p-2"
-            whileHover={{ scale: 1.1 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className="h-full w-full object-contain p-2 transition-transform duration-200 group-hover:scale-105"
+            loading="lazy"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/placeholder.svg';
             }}
@@ -92,7 +71,7 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
         ) : (
           <span className="text-4xl">📦</span>
         )}
-      </motion.div>
+      </div>
 
       <div className="space-y-2">
         <div>
@@ -130,43 +109,38 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
 
         {/* Quick Add to Cart */}
         {!showActions && product.inStock && (
-          <motion.div whileTap={{ scale: 0.95 }}>
-            <Button
-              size="sm"
-              className="w-full mt-2"
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart className="mr-1 h-4 w-4" />
-              Adicionar
-            </Button>
-          </motion.div>
+          <Button
+            size="sm"
+            className="w-full mt-2 active:scale-95 transition-transform"
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="mr-1 h-4 w-4" />
+            Adicionar
+          </Button>
         )}
       </div>
 
       {showActions && (
         <div className="mt-3 flex gap-2" onClick={(e) => e.stopPropagation()}>
-          <motion.div className="flex-1" whileTap={{ scale: 0.95 }}>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="w-full"
-              onClick={() => onEdit?.(product)}
-            >
-              <Edit2 className="mr-1 h-4 w-4" />
-              Editar
-            </Button>
-          </motion.div>
-          <motion.div whileTap={{ scale: 0.95 }}>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => onDelete?.(product.id)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </motion.div>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="flex-1 active:scale-95 transition-transform"
+            onClick={() => onEdit?.(product)}
+          >
+            <Edit2 className="mr-1 h-4 w-4" />
+            Editar
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            className="active:scale-95 transition-transform"
+            onClick={() => onDelete?.(product.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
