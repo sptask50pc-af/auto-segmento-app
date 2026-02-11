@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Package, ShoppingCart, Plus, Minus } from "lucide-react";
+import { ArrowLeft, Package, ShoppingCart, Plus, Minus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useProducts } from "@/context/ProductContext";
@@ -8,14 +8,16 @@ import { ProductCard } from "@/components/ProductCard";
 import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { products } = useProducts();
+  const { products, refetch } = useProducts();
   const { addToCart } = useCart();
   const sliderRef = useRef<HTMLDivElement>(null);
   const [quantity, setQuantity] = useState(1);
+  const [isSyncingPrice, setIsSyncingPrice] = useState(false);
   const { toast } = useToast();
 
   const product = products.find((p) => p.id === id);
@@ -52,6 +54,48 @@ export default function ProductDetail() {
       description: `${quantity}x ${product.name}`,
     });
     setQuantity(1);
+  };
+
+  const handleSyncPrice = async () => {
+    if (!product.reference) {
+      toast({
+        title: "Sem referência",
+        description: "Este produto não tem referência para sincronizar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSyncingPrice(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-prices', {
+        body: { reference: product.reference }
+      });
+
+      if (error || !data?.success) {
+        const msg = data?.error || 'Falha ao sincronizar preço.';
+        toast({ title: "Erro", description: msg, variant: "destructive" });
+        return;
+      }
+
+      await refetch();
+      
+      if (data.product?.priceChanged) {
+        toast({
+          title: "Preço atualizado",
+          description: `${data.product.oldPrice.toFixed(2)}€ → ${data.product.newPrice.toFixed(2)}€`,
+        });
+      } else {
+        toast({
+          title: "Preço atual",
+          description: "O preço já está atualizado.",
+        });
+      }
+    } catch (err) {
+      toast({ title: "Erro", description: "Falha ao sincronizar preço.", variant: "destructive" });
+    } finally {
+      setIsSyncingPrice(false);
+    }
   };
 
   return (
@@ -121,6 +165,18 @@ export default function ProductDetail() {
             <span className="text-xl text-muted-foreground line-through">
               €{product.originalPrice!.toFixed(2)}
             </span>
+          )}
+          {product.reference && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-auto"
+              disabled={isSyncingPrice}
+              onClick={handleSyncPrice}
+            >
+              <RefreshCw className={cn("h-4 w-4 mr-1", isSyncingPrice && "animate-spin")} />
+              {isSyncingPrice ? "A sincronizar..." : "Atualizar Preço"}
+            </Button>
           )}
         </div>
 
