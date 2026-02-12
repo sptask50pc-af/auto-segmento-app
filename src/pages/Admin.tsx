@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Package, Search, CheckCircle, Eye } from "lucide-react";
 
 const Admin = () => {
-  const { products, loading } = useProducts();
+  const { products, loading, deleteProduct } = useProducts();
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filter products by search query
@@ -121,6 +121,7 @@ const Admin = () => {
               key={product.id}
               product={product}
               showActions={false}
+              onDelete={(id) => deleteProduct(id)}
               delay={i * 50}
             />
           ))}

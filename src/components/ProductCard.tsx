@@ -107,16 +107,31 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
           {product.inStock ? "Em estoque" : "Indisponível"}
         </Badge>
 
-        {/* Quick Add to Cart */}
-        {!showActions && product.inStock && (
-          <Button
-            size="sm"
-            className="w-full mt-2 active:scale-95 transition-transform"
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart className="mr-1 h-4 w-4" />
-            Adicionar
-          </Button>
+        {/* Quick Add to Cart & Delete */}
+        {!showActions && (
+          <div className="flex gap-2 mt-2">
+            {product.inStock && (
+              <Button
+                size="sm"
+                className="flex-1 active:scale-95 transition-transform"
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="mr-1 h-4 w-4" />
+                Adicionar
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="destructive"
+              className="active:scale-95 transition-transform"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(product.id);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         )}
       </div>
 

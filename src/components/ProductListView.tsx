@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductFilters } from "@/components/ProductFilters";
 import { Product } from "@/types/product";
+import { useProducts } from "@/context/ProductContext";
 import { ChevronLeft } from "lucide-react";
 
 interface ProductListViewProps {
@@ -15,6 +16,7 @@ interface ProductListViewProps {
 
 export function ProductListView({ categoryName, products, backPath }: ProductListViewProps) {
   const navigate = useNavigate();
+  const { deleteProduct } = useProducts();
   const [filteredProducts, setFilteredProducts] = useState(products);
 
   // Reset filtered products when products change
@@ -59,6 +61,7 @@ export function ProductListView({ categoryName, products, backPath }: ProductLis
               <ProductCard
                 key={product.id}
                 product={product}
+                onDelete={(id) => deleteProduct(id)}
                 delay={i * 50}
               />
             ))}
