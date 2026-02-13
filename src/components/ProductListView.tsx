@@ -29,6 +29,27 @@ export function ProductListView({ categoryName, products, backPath }: ProductLis
       <Header title={categoryName} />
 
       <main className="container px-4 py-6 space-y-6">
+        {/* Hero Section */}
+        <section className="relative h-[100px] overflow-hidden rounded-2xl animate-fade-in">
+          <div className="h-full relative overflow-hidden rounded-2xl p-4 border bg-gradient-to-br from-primary/20 via-card to-card border-primary/20">
+            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full blur-3xl bg-primary/20" />
+            <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full blur-2xl bg-primary/10" />
+            <div className="relative flex items-center justify-between h-full">
+              <div>
+                <h1 className="text-xl font-bold mb-1 text-foreground">{categoryName}</h1>
+                <p className="text-xs text-muted-foreground">
+                  {products.length} {products.length === 1 ? 'produto' : 'produtos'}
+                </p>
+              </div>
+              <img 
+                src="/icon.png" 
+                alt="Segmento Positivo" 
+                className="w-14 h-14 rounded-xl shadow-lg shadow-primary/20"
+              />
+            </div>
+          </div>
+        </section>
+
         {/* Back button and filters */}
         <div className="flex items-center justify-between">
           <button
