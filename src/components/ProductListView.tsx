@@ -7,6 +7,8 @@ import { ProductFilters } from "@/components/ProductFilters";
 import { Product } from "@/types/product";
 import { useProducts } from "@/context/ProductContext";
 import { ChevronLeft } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductListViewProps {
   categoryName: string;
@@ -17,7 +19,23 @@ interface ProductListViewProps {
 export function ProductListView({ categoryName, products, backPath }: ProductListViewProps) {
   const navigate = useNavigate();
   const { deleteProduct } = useProducts();
+  const { toast } = useToast();
   const [filteredProducts, setFilteredProducts] = useState(products);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const handleDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmId) return;
+    await deleteProduct(deleteConfirmId);
+    setDeleteConfirmId(null);
+    toast({
+      title: "Produto removido",
+      description: "O produto foi removido com sucesso.",
+    });
+  };
 
   // Reset filtered products when products change
   useEffect(() => {
@@ -82,7 +100,7 @@ export function ProductListView({ categoryName, products, backPath }: ProductLis
               <ProductCard
                 key={product.id}
                 product={product}
-                onDelete={(id) => deleteProduct(id)}
+                onDelete={handleDelete}
                 delay={i * 50}
               />
             ))}
@@ -100,6 +118,28 @@ export function ProductListView({ categoryName, products, backPath }: ProductLis
       </main>
 
       <BottomNav />
+
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover Produto</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem a certeza que deseja remover este produto? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-muted/50 border border-border text-muted-foreground">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive/10 border border-destructive/30 hover:border-destructive/60 text-destructive"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
