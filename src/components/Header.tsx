@@ -1,4 +1,4 @@
-import { ShoppingBag, Lock, Search, X, User, LogOut } from "lucide-react";
+import { ShoppingBag, Lock, Search, X, User, LogOut, Sun, Moon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CartButton } from "@/components/CartButton";
@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { useProducts } from "@/context/ProductContext";
 import { useAuth } from "@/context/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useTheme } from "@/context/ThemeContext";
 
 interface HeaderProps {
   title?: string;
@@ -22,6 +23,7 @@ export function Header({ title = "Início" }: HeaderProps) {
   const navigate = useNavigate();
   const { products } = useProducts();
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [password, setPassword] = useState("");
@@ -90,6 +92,16 @@ export function Header({ title = "Início" }: HeaderProps) {
           </div>
 
           <div className="flex items-center gap-1">
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              onClick={toggleTheme}
+              title={theme === "dark" ? "Mudar para tema claro" : "Mudar para tema escuro"}
+            >
+              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
             {/* Search Popover */}
             <Popover open={showSearch} onOpenChange={setShowSearch}>
               <PopoverTrigger asChild>
