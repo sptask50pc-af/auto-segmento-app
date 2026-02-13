@@ -133,8 +133,16 @@ const ControlPanel = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    await deleteProduct(id);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const handleDelete = (id: string) => {
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmId) return;
+    await deleteProduct(deleteConfirmId);
+    setDeleteConfirmId(null);
     toast({
       title: "Product Removed",
       description: "The product was successfully removed.",
@@ -548,6 +556,29 @@ const ControlPanel = () => {
           ))}
         </div>
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Product</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this product? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-muted/50 backdrop-blur border border-border hover:border-muted-foreground/40 text-muted-foreground">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive/10 backdrop-blur border border-destructive/30 hover:border-destructive/60 text-destructive"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Progress Dialog */}
       <Dialog open={isUpdating || isSyncingPrices} onOpenChange={() => {}}>
