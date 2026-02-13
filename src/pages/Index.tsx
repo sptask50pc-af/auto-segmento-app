@@ -78,7 +78,15 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 relative">
+      {/* Background watermark logo */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
+        <img 
+          src="/icon.png" 
+          alt="" 
+          className="w-[70%] max-w-[400px] opacity-[0.03]"
+        />
+      </div>
       <Header title="Início" />
 
       <motion.main 
