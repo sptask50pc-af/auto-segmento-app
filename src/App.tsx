@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProductProvider } from "@/context/ProductContext";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { AIChatBot } from "@/components/AIChatBot";
 import { SplashScreen } from "@/components/SplashScreen";
 import Index from "./pages/Index";
@@ -26,33 +27,35 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ProductProvider>
-          <CartProvider>
-            <TooltipProvider>
-              {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/control-panel" element={<ControlPanel />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                  <Route path="/subcategories/:category" element={<SubCategories />} />
-                  <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
-                  <Route path="/subcategories/:category/:subcategory/:subsubcategory" element={<SubCategories />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <AIChatBot />
-              </BrowserRouter>
-            </TooltipProvider>
-          </CartProvider>
-        </ProductProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ProductProvider>
+            <CartProvider>
+              <TooltipProvider>
+                {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/control-panel" element={<ControlPanel />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                    <Route path="/subcategories/:category" element={<SubCategories />} />
+                    <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
+                    <Route path="/subcategories/:category/:subcategory/:subsubcategory" element={<SubCategories />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <AIChatBot />
+                </BrowserRouter>
+              </TooltipProvider>
+            </CartProvider>
+          </ProductProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 };
