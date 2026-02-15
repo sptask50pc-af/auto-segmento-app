@@ -448,7 +448,7 @@ const SubCategories = () => {
   const isPecasCategory = category === "pecas";
 
   return (
-    <div className={`min-h-screen pb-20 relative ${isPecasCategory ? 'bg-black' : 'bg-background'}`}>
+    <div className={`min-h-screen pb-20 relative ${isPecasCategory ? 'dark:bg-black bg-background' : 'bg-background'}`}>
       {/* Background Logo Watermark */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <img 
@@ -462,13 +462,13 @@ const SubCategories = () => {
       <main className="container px-4 py-6 space-y-6">
         {/* Hero Section with Logo */}
         <section className="relative h-[100px] overflow-hidden rounded-2xl animate-fade-in">
-          <div className={`h-full relative overflow-hidden rounded-2xl p-4 border ${isPecasCategory ? 'bg-gradient-to-br from-zinc-900 via-black to-zinc-900 border-transparent' : 'bg-gradient-to-br from-primary/20 via-card to-card border-primary/20'}`}>
-            <div className={`absolute -right-8 -top-8 h-24 w-24 rounded-full blur-3xl ${isPecasCategory ? 'bg-zinc-700/30' : 'bg-primary/20'}`} />
-            <div className={`absolute -bottom-4 -left-4 h-20 w-20 rounded-full blur-2xl ${isPecasCategory ? 'bg-zinc-700/20' : 'bg-primary/10'}`} />
+          <div className={`h-full relative overflow-hidden rounded-2xl p-4 border ${isPecasCategory ? 'dark:bg-gradient-to-br dark:from-zinc-900 dark:via-black dark:to-zinc-900 dark:border-transparent bg-gradient-to-br from-primary/10 via-card to-card border-primary/20' : 'bg-gradient-to-br from-primary/20 via-card to-card border-primary/20'}`}>
+            <div className={`absolute -right-8 -top-8 h-24 w-24 rounded-full blur-3xl ${isPecasCategory ? 'dark:bg-zinc-700/30 bg-primary/15' : 'bg-primary/20'}`} />
+            <div className={`absolute -bottom-4 -left-4 h-20 w-20 rounded-full blur-2xl ${isPecasCategory ? 'dark:bg-zinc-700/20 bg-primary/10' : 'bg-primary/10'}`} />
             <div className="relative flex items-center justify-between h-full">
               <div>
-                <h1 className={`text-xl font-bold mb-1 ${isPecasCategory ? 'text-white' : 'text-foreground'}`}>{data.name}</h1>
-                <p className={`text-xs ${isPecasCategory ? 'text-zinc-400' : 'text-muted-foreground'}`}>
+                <h1 className={`text-xl font-bold mb-1 ${isPecasCategory ? 'dark:text-white text-foreground' : 'text-foreground'}`}>{data.name}</h1>
+                <p className={`text-xs ${isPecasCategory ? 'dark:text-zinc-400 text-muted-foreground' : 'text-muted-foreground'}`}>
                   Selecione uma subcategoria
                 </p>
               </div>
@@ -492,7 +492,7 @@ const SubCategories = () => {
           }}
           className={`flex items-center gap-3 text-sm px-5 py-3.5 rounded-xl backdrop-blur border shadow-lg transition-all duration-300 min-h-[52px] active:scale-95 ${
             isPecasCategory 
-              ? 'bg-zinc-900/80 border-transparent text-zinc-300 hover:text-white hover:bg-zinc-800 shadow-black/20' 
+              ? 'dark:bg-zinc-900/80 dark:border-transparent dark:text-zinc-300 dark:hover:text-white dark:hover:bg-zinc-800 dark:shadow-black/20 bg-muted/50 border-border hover:border-primary/40 text-muted-foreground hover:text-foreground shadow-muted/10 hover:shadow-primary/10' 
               : 'bg-muted/50 border-border hover:border-primary/40 text-muted-foreground hover:text-foreground shadow-muted/10 hover:shadow-primary/10'
           }`}
         >
@@ -520,7 +520,7 @@ const SubCategories = () => {
             >
               <div className={`relative w-20 h-20 rounded-2xl backdrop-blur border-2 shadow-lg flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-active:scale-95 overflow-hidden p-2 ${
                 isPecasCategory 
-                  ? 'bg-zinc-800 border-zinc-700/50 shadow-black/30 group-hover:border-primary group-hover:shadow-xl group-hover:shadow-primary/40' 
+                  ? 'dark:bg-zinc-800 dark:border-zinc-700/50 dark:shadow-black/30 dark:group-hover:border-primary dark:group-hover:shadow-xl dark:group-hover:shadow-primary/40 bg-muted border-border/60 shadow-background/50 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25' 
                   : 'bg-muted border-border/60 shadow-background/50 group-hover:border-primary/60 group-hover:shadow-xl group-hover:shadow-primary/25'
               }`}>
                 {subcategoryImages[item.label] ? (
@@ -530,14 +530,14 @@ const SubCategories = () => {
                     className="w-full h-full object-contain"
                   />
                 ) : (
-                  <div className={isPecasCategory ? 'text-white' : 'text-primary'}>
+                  <div className={isPecasCategory ? 'dark:text-white text-primary' : 'text-primary'}>
                     <CategoryIcon icon={item.icon} />
                   </div>
                 )}
               </div>
               <span className={`text-xs text-center leading-tight font-bold transition-colors ${
                 isPecasCategory 
-                  ? 'text-zinc-300 group-hover:text-white' 
+                  ? 'dark:text-zinc-300 dark:group-hover:text-white text-foreground group-hover:text-primary' 
                   : 'text-foreground group-hover:text-primary'
               }`}>{item.label}</span>
             </div>
