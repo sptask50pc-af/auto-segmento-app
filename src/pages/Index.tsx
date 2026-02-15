@@ -84,7 +84,7 @@ const Index = () => {
         <img 
           src="/icon.png" 
           alt="" 
-          className="w-[70%] max-w-[400px] opacity-[0.03]"
+          className="w-[70%] max-w-[400px] opacity-[0.03] watermark-logo"
         />
       </div>
       <Header title="Início" />
