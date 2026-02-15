@@ -300,8 +300,8 @@
   }
 }
 
-/* Watermark logo - more transparent in light theme */
+/* Watermark logo - blend in light theme to remove dark background */
 .light .watermark-logo {
-  opacity: 0.015 !important;
-  filter: grayscale(100%);
+  opacity: 0.04 !important;
+  mix-blend-mode: multiply;
 }
