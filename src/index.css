@@ -299,3 +299,9 @@
     transform: translateY(-5px);
   }
 }
+
+/* Watermark logo - more transparent in light theme */
+.light .watermark-logo {
+  opacity: 0.015 !important;
+  filter: grayscale(100%);
+}
