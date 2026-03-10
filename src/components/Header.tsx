@@ -76,18 +76,15 @@ export function Header({ title = "Início" }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-primary/50 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 shadow-lg shadow-primary/5">
-        {/* Decorative gradient line */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/90 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/75 shadow-sm">
+        {/* Subtle bottom accent */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
         
-        <div className="container flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
+        <div className="container flex h-14 items-center justify-between px-4">
+          <div className="flex items-center gap-2.5">
             <Link to="/" className="group flex items-center gap-2">
-              <div className="relative">
-                <img src={logo} alt="Segmento Positivo" className="h-10 w-10 rounded-xl object-contain transition-transform duration-300 group-hover:scale-105" />
-                <div className="absolute inset-0 rounded-xl bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity blur-md" />
-              </div>
-              <span className="text-xl font-bold tracking-tight group-hover:text-primary transition-colors">{title}</span>
+              <img src={logo} alt="Segmento Positivo" className="h-9 w-9 rounded-lg object-contain transition-transform duration-200 group-hover:scale-105" />
+              <span className="text-lg font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">{title}</span>
             </Link>
           </div>
 

@@ -42,22 +42,19 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-xl bg-card border border-border/50 p-4 transition-all duration-200 hover:border-primary/40 hover:-translate-y-1 active:scale-[0.98] animate-fade-in",
+        "group relative overflow-hidden rounded-xl bg-card border border-border/40 p-3.5 transition-all duration-300 hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98] animate-fade-in",
         !showActions && "cursor-pointer"
       )}
       style={{ animationDelay: `${delay}ms` }}
       onClick={handleClick}
     >
-      {/* Glow effect on hover */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-      
       {hasDiscount && (
-        <Badge className="absolute right-3 top-3 bg-primary text-primary-foreground z-10 shadow-lg shadow-primary/30 animate-scale-in">
+        <Badge className="absolute right-2.5 top-2.5 bg-primary text-primary-foreground z-10 text-[10px] font-bold px-1.5 py-0.5 animate-scale-in">
           -{discountPercent}%
         </Badge>
       )}
 
-      <div className="relative mb-3 flex h-24 w-full items-center justify-center rounded-xl bg-gradient-to-br from-secondary to-muted/50 overflow-hidden border border-border/30 group-hover:border-primary/20 transition-all duration-200 group-hover:scale-[1.02]">
+      <div className="relative mb-3 flex h-24 w-full items-center justify-center rounded-lg bg-secondary/50 overflow-hidden border border-border/20 group-hover:border-primary/15 transition-all duration-300">
         {product.image && product.image !== '/placeholder.svg' ? (
           <img 
             src={product.image} 
