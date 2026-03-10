@@ -22,7 +22,7 @@ const BottomNav = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivE
 
     const navItems = [
       { icon: Home, label: "Início", path: "/" },
-      { icon: Settings, label: "Admin", path: "/admin" },
+      { icon: ShoppingBag, label: "Loja", path: "/admin" },
     ];
 
     return (
