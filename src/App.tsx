@@ -19,6 +19,7 @@ import Cart from "./pages/Cart";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import SegmentoBot from "./pages/SegmentoBot";
 import { AdminRoute } from "@/components/AdminRoute";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => {
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                    <Route path="/segmento-bot" element={<SegmentoBot />} />
                     <Route path="/subcategories/:category" element={<SubCategories />} />
                     <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
                     <Route path="/subcategories/:category/:subcategory/:subsubcategory" element={<SubCategories />} />
