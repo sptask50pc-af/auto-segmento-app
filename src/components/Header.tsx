@@ -3,15 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CartButton } from "@/components/CartButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import logo from "@/assets/logo.png";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useProducts } from "@/context/ProductContext";
 import { useAuth } from "@/context/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTheme } from "@/context/ThemeContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface HeaderProps {
   title?: string;
@@ -28,6 +28,13 @@ export function Header({ title = "Início" }: HeaderProps) {
   const [showSearch, setShowSearch] = useState(false);
   const [password, setPassword] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (showSearch && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [showSearch]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -45,7 +52,7 @@ export function Header({ title = "Início" }: HeaderProps) {
       p.brand?.toLowerCase().includes(query) ||
       p.category.toLowerCase().includes(query) ||
       p.reference?.toLowerCase().includes(query)
-    ).slice(0, 10);
+    ).slice(0, 8);
   }, [products, searchQuery]);
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
@@ -74,158 +81,198 @@ export function Header({ title = "Início" }: HeaderProps) {
     navigate(`/product/${productId}`);
   };
 
+  const closeSearch = () => {
+    setShowSearch(false);
+    setSearchQuery("");
+  };
+
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/90 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/75 shadow-sm">
-        {/* Subtle bottom accent */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        
+      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-xl border-b border-border/40 shadow-sm">
         <div className="container flex h-14 items-center justify-between px-4">
+          {/* Logo */}
           <div className="flex items-center gap-2.5">
             <Link to="/" className="group flex items-center gap-2">
               <img src={logo} alt="Segmento Positivo" className="h-9 w-9 rounded-lg object-contain transition-transform duration-200 group-hover:scale-105" />
-              <span className="text-lg font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">{title}</span>
+              <AnimatePresence>
+                {!showSearch && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="text-lg font-bold tracking-tight text-foreground overflow-hidden whitespace-nowrap"
+                  >
+                    {title}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Link>
           </div>
 
+          {/* Netflix-style search + action buttons */}
           <div className="flex items-center gap-1">
+            {/* Netflix Search */}
+            <div className="relative flex items-center">
+              <AnimatePresence>
+                {showSearch && (
+                  <motion.div
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: 280, opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="flex items-center border border-border bg-background/80 backdrop-blur-md rounded-sm">
+                      <Search className="h-4 w-4 text-muted-foreground ml-2.5 shrink-0" />
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        placeholder="Títulos, referências, marcas..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground px-2 py-2 outline-none"
+                      />
+                      <button
+                        onClick={closeSearch}
+                        className="p-1.5 mr-1 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {!showSearch && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setShowSearch(true)}
+                >
+                  <Search className="h-5 w-5" />
+                </Button>
+              )}
+
+              {/* Search Results Dropdown */}
+              <AnimatePresence>
+                {showSearch && searchQuery.trim() && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 4, scale: 0.98 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full right-0 mt-1.5 w-[320px] bg-popover border border-border rounded-lg shadow-2xl overflow-hidden z-50"
+                  >
+                    <ScrollArea className="max-h-[360px]">
+                      {searchResults.length === 0 ? (
+                        <div className="p-8 text-center">
+                          <Search className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+                          <p className="text-sm text-muted-foreground">Nenhum resultado para "{searchQuery}"</p>
+                        </div>
+                      ) : (
+                        <div className="py-1">
+                          {searchResults.map((product, i) => (
+                            <motion.button
+                              key={product.id}
+                              initial={{ opacity: 0, x: -8 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: i * 0.03 }}
+                              onClick={() => handleProductClick(product.id)}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-accent/10 transition-colors text-left group"
+                            >
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-11 h-11 rounded-md object-cover bg-muted ring-1 ring-border/50"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-xs text-foreground truncate group-hover:text-primary transition-colors">{product.name}</p>
+                                <p className="text-[11px] text-muted-foreground mt-0.5">{product.brand || product.category}</p>
+                              </div>
+                              <span className="text-xs font-semibold text-primary shrink-0">
+                                €{product.price.toFixed(2)}
+                              </span>
+                            </motion.button>
+                          ))}
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Theme Toggle */}
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors"
               onClick={toggleTheme}
-              title={theme === "dark" ? "Mudar para tema claro" : "Mudar para tema escuro"}
             >
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              {theme === "dark" ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
             </Button>
-            {/* Search Popover */}
-            <Popover open={showSearch} onOpenChange={setShowSearch}>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                >
-                  <Search className="h-5 w-5" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent 
-                align="end" 
-                className="w-80 p-0"
-                sideOffset={8}
-              >
-                <div className="flex items-center gap-2 p-3 border-b border-border">
-                  <Search className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Pesquisar produtos..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto text-sm"
-                    autoFocus
-                  />
-                  {searchQuery && (
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-5 w-5"
-                      onClick={() => setSearchQuery("")}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  )}
-                </div>
-                
-                <ScrollArea className="max-h-[300px]">
-                  {searchQuery.trim() && searchResults.length === 0 && (
-                    <div className="p-6 text-center text-muted-foreground text-sm">
-                      Nenhum produto encontrado
-                    </div>
-                  )}
-                  
-                  {searchResults.length > 0 && (
-                    <div className="py-1">
-                      {searchResults.map((product) => (
-                        <button
-                          key={product.id}
-                          onClick={() => handleProductClick(product.id)}
-                          className="w-full flex items-center gap-3 p-2 hover:bg-accent/50 transition-colors text-left"
-                        >
-                          <img 
-                            src={product.image} 
-                            alt={product.name}
-                            className="w-10 h-10 rounded-lg object-cover bg-muted"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-xs truncate">{product.name}</p>
-                            <p className="text-xs text-muted-foreground">{product.category}</p>
-                          </div>
-                          <span className="text-xs font-semibold text-primary">
-                            €{product.price.toFixed(2)}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {!searchQuery.trim() && (
-                    <div className="p-6 text-center text-muted-foreground text-sm">
-                      Digite para pesquisar
-                    </div>
-                  )}
-                </ScrollArea>
-              </PopoverContent>
-            </Popover>
 
+            {/* Shop */}
             <Link to="/admin">
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50">
-                <ShoppingBag className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors">
+                <ShoppingBag className="h-[18px] w-[18px]" />
               </Button>
             </Link>
-            
+
+            {/* Cart */}
             <CartButton />
 
-            {/* User Account Button */}
+            {/* Auth */}
             {user ? (
               <Button
-                variant="ghost" 
-                size="icon" 
-                className="h-9 w-9 text-primary hover:text-primary hover:bg-primary/10"
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 text-primary hover:bg-primary/10 transition-colors"
                 onClick={handleSignOut}
                 title="Sair"
               >
-                <LogOut className="h-5 w-5" />
+                <LogOut className="h-[18px] w-[18px]" />
               </Button>
             ) : (
               <Link to="/auth">
-                <Button
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                  title="Entrar"
-                >
-                  <User className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors" title="Entrar">
+                  <User className="h-[18px] w-[18px]" />
                 </Button>
               </Link>
             )}
 
+            {/* Control Panel */}
             <Button
-              variant="ghost" 
-              size="icon" 
-              className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setShowPasswordDialog(true)}
             >
-              <Lock className="h-5 w-5" />
+              <Lock className="h-[18px] w-[18px]" />
             </Button>
           </div>
         </div>
       </header>
 
+      {/* Search Overlay backdrop */}
+      <AnimatePresence>
+        {showSearch && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
+            onClick={closeSearch}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Password Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md border-border/50 bg-popover">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-foreground">
               <Lock className="h-5 w-5 text-primary" />
               Painel de Controlo
             </DialogTitle>
