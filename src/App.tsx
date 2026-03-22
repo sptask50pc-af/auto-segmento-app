@@ -19,6 +19,7 @@ import Cart from "./pages/Cart";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import { AdminRoute } from "@/components/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -40,7 +41,7 @@ const App = () => {
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/admin" element={<Admin />} />
-                    <Route path="/control-panel" element={<ControlPanel />} />
+                    <Route path="/control-panel" element={<AdminRoute><ControlPanel /></AdminRoute>} />
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/checkout/success" element={<CheckoutSuccess />} />

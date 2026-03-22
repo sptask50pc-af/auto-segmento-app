@@ -17,16 +17,12 @@ interface HeaderProps {
   title?: string;
 }
 
-const CONTROL_PANEL_PASSWORD = "SP0050PC";
-
 export function Header({ title = "Início" }: HeaderProps) {
   const navigate = useNavigate();
   const { products } = useProducts();
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [password, setPassword] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
