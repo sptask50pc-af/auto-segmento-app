@@ -224,8 +224,8 @@ export const AIChatBot = () => {
                     <Sparkles className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm text-foreground">Assistente AI</h3>
-                    <p className="text-[11px] text-muted-foreground">Auto Segmento • Online</p>
+                    <h3 className="font-semibold text-sm text-foreground">Segmento Bot</h3>
+                    <p className="text-[11px] text-muted-foreground">Segmento Positivo • Online</p>
                   </div>
                 </div>
                 <button
