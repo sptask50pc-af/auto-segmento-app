@@ -2,8 +2,7 @@ import { ShoppingBag, Lock, Search, X, User, LogOut, Sun, Moon } from "lucide-re
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CartButton } from "@/components/CartButton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import logo from "@/assets/logo.png";
 import logo from "@/assets/logo.png";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
