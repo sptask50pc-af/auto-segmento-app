@@ -224,7 +224,7 @@ export function Header({ title = "Início" }: HeaderProps) {
               variant="ghost"
               size="icon"
               className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => setShowPasswordDialog(true)}
+              onClick={() => navigate('/control-panel')}
             >
               <Lock className="h-[18px] w-[18px]" />
             </Button>
@@ -244,39 +244,6 @@ export function Header({ title = "Início" }: HeaderProps) {
           />
         )}
       </AnimatePresence>
-
-      {/* Password Dialog */}
-      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent className="sm:max-w-md border-border/50 bg-popover">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-foreground">
-              <Lock className="h-5 w-5 text-primary" />
-              Painel de Controlo
-            </DialogTitle>
-            <DialogDescription>
-              Introduza a palavra-passe para aceder ao Painel de Controlo
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handlePasswordSubmit} className="space-y-4">
-            <Input
-              type="password"
-              placeholder="Palavra-passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full"
-              autoFocus
-            />
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setShowPasswordDialog(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit">
-                Entrar
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
