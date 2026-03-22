@@ -109,6 +109,7 @@ export const AIChatBot = () => {
   const scrollBottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     scrollBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -122,6 +123,25 @@ export const AIChatBot = () => {
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
+
+    if (!user) {
+      toast({
+        title: "Autenticação necessária",
+        description: "Por favor, faça login para usar o assistente.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({
+        title: "Sessão expirada",
+        description: "Por favor, faça login novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const userMessage: Message = { role: 'user', content: input.trim() };
     const newMessages = [...messages, userMessage];
@@ -144,6 +164,7 @@ export const AIChatBot = () => {
     try {
       await streamChat({
         messages: newMessages,
+        token: session.access_token,
         onDelta: (chunk) => upsertAssistant(chunk),
         onDone: () => setIsLoading(false),
         onError: (error) => {
