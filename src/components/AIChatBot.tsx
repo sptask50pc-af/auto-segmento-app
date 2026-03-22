@@ -215,7 +215,8 @@ export const AIChatBot = () => {
               </div>
 
               {/* Messages */}
-              <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+              <ScrollArea className="flex-1 p-4">
+                <div ref={scrollAreaRef}></div>
                 <div className="space-y-3">
                   {messages.map((msg, i) => (
                     <motion.div
