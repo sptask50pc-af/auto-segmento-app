@@ -51,25 +51,6 @@ export function Header({ title = "Início" }: HeaderProps) {
     ).slice(0, 8);
   }, [products, searchQuery]);
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === CONTROL_PANEL_PASSWORD) {
-      setShowPasswordDialog(false);
-      setPassword("");
-      navigate('/control-panel');
-      toast({
-        title: "Acesso concedido",
-        description: "Bem-vindo ao Painel de Controlo",
-      });
-    } else {
-      toast({
-        title: "Palavra-passe incorreta",
-        description: "Por favor, tente novamente",
-        variant: "destructive",
-      });
-      setPassword("");
-    }
-  };
 
   const handleProductClick = (productId: string) => {
     setShowSearch(false);
