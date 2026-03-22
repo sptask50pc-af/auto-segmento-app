@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, Send, Loader2, Bot, User, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
