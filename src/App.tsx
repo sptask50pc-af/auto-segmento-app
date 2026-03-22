@@ -19,6 +19,7 @@ import Cart from "./pages/Cart";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import SegmentoBot from "./pages/SegmentoBot";
 import { AdminRoute } from "@/components/AdminRoute";
 
 const queryClient = new QueryClient();
