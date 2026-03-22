@@ -102,7 +102,7 @@ async function streamChat({
 export const AIChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Olá! Sou o assistente da Auto Segmento. Como posso ajudá-lo a encontrar peças ou acessórios para o seu veículo?' }
+    { role: 'assistant', content: 'Olá! 👋 Sou o Segmento Bot. Como posso ajudá-lo a encontrar peças ou acessórios?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);

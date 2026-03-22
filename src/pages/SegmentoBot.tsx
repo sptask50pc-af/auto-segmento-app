@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Bot, User, Sparkles, ArrowLeft, Zap } from 'lucide-react';
+import { Send, Loader2, Bot, User, ArrowLeft, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';

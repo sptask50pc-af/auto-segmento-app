@@ -22,6 +22,7 @@ const BottomNav = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivE
 
     const navItems = [
       { icon: Home, label: "Início", path: "/" },
+      { icon: Zap, label: "Segmento Bot", path: "/segmento-bot" },
       { icon: Settings, label: "Admin", path: "/admin" },
     ];
 
