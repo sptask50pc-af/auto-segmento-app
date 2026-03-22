@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, Send, Loader2, Bot, User, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -102,14 +101,12 @@ export const AIChatBot = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollBottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    scrollBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   useEffect(() => {
@@ -214,7 +211,7 @@ export const AIChatBot = () => {
               </div>
 
               {/* Messages */}
-              <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+              <ScrollArea className="flex-1 p-4">
                 <div className="space-y-3">
                   {messages.map((msg, i) => (
                     <motion.div
@@ -259,6 +256,7 @@ export const AIChatBot = () => {
                       </div>
                     </div>
                   )}
+                  <div ref={scrollBottomRef} />
                 </div>
               </ScrollArea>
 
