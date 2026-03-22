@@ -1,6 +1,6 @@
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Home, Settings, User, LogOut, Zap } from "lucide-react";
+import { Home, Settings, User, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -22,7 +22,6 @@ const BottomNav = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivE
 
     const navItems = [
       { icon: Home, label: "Início", path: "/" },
-      { icon: Zap, label: "Segmento Bot", path: "/segmento-bot" },
       { icon: Settings, label: "Admin", path: "/admin" },
     ];
 

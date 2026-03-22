@@ -102,7 +102,7 @@ async function streamChat({
 export const AIChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Olá! 👋 Sou o Segmento Bot. Como posso ajudá-lo a encontrar peças ou acessórios?' }
+    { role: 'assistant', content: 'Olá! Sou o assistente da Auto Segmento. Como posso ajudá-lo a encontrar peças ou acessórios para o seu veículo?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -224,8 +224,8 @@ export const AIChatBot = () => {
                     <Sparkles className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm text-foreground">Segmento Bot</h3>
-                    <p className="text-[11px] text-muted-foreground">Segmento Positivo • Online</p>
+                    <h3 className="font-semibold text-sm text-foreground">Assistente AI</h3>
+                    <p className="text-[11px] text-muted-foreground">Auto Segmento • Online</p>
                   </div>
                 </div>
                 <button
@@ -312,18 +312,33 @@ export const AIChatBot = () => {
         )}
       </AnimatePresence>
 
-      {/* Floating Segmento Bot button - desktop only (mobile uses BottomNav) */}
-      {!isOpen && (
-        <motion.button
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", damping: 20, stiffness: 300 }}
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 hidden md:flex w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 items-center justify-center shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 active:scale-95 transition-all"
-        >
-          <Sparkles className="w-6 h-6 text-primary-foreground" />
-        </motion.button>
-      )}
+      {/* Bottom AI Bar - always visible */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:bottom-4 md:left-auto md:right-4 md:w-auto">
+        {!isOpen && (
+          <motion.div
+            initial={{ y: 60 }}
+            animate={{ y: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="bg-card/95 backdrop-blur-xl border-t border-border/50 shadow-xl shadow-black/10 md:rounded-2xl md:border md:shadow-2xl"
+          >
+            <button
+              onClick={() => setIsOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-3.5 md:px-5 md:py-3 group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/20 group-active:scale-95 transition-transform">
+                <Sparkles className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium text-foreground">Pergunte ao Assistente AI</p>
+                <p className="text-[11px] text-muted-foreground">Peças, compatibilidade, recomendações...</p>
+              </div>
+              <div className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-semibold">
+                AI
+              </div>
+            </button>
+          </motion.div>
+        )}
+      </div>
     </>
   );
 };
