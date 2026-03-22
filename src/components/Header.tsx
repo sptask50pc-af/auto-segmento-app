@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CartButton } from "@/components/CartButton";
 import logo from "@/assets/logo.png";
-import logo from "@/assets/logo.png";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useProducts } from "@/context/ProductContext";
