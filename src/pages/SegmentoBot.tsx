@@ -154,7 +154,7 @@ const SegmentoBot = () => {
         <div className="flex-1">
           <h1 className="text-base font-bold text-foreground tracking-tight">Segmento Bot</h1>
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[11px] text-muted-foreground">Online • Segmento Positivo</span>
           </div>
         </div>
