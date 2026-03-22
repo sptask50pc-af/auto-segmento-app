@@ -256,6 +256,7 @@ export const AIChatBot = () => {
                       </div>
                     </div>
                   )}
+                  <div ref={scrollBottomRef} />
                 </div>
               </ScrollArea>
 
