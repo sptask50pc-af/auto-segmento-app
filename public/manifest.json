@@ -3,11 +3,9 @@
   "short_name": "Segmento Positivo",
   "description": "Peças Automotivas Premium",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
   "orientation": "portrait",
   "start_url": "/",
-  "scope": "/",
-  "background_color": "#1f1f1f",
+  "background_color": "#0a0a0a",
   "theme_color": "#1f1f1f",
   "icons": [
     {
