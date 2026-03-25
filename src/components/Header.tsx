@@ -2,6 +2,8 @@ import { ShoppingBag, Lock, Search, X, User, LogOut, Sun, Moon } from "lucide-re
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CartButton } from "@/components/CartButton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import logo from "@/assets/logo.png";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -15,12 +17,16 @@ interface HeaderProps {
   title?: string;
 }
 
+const CONTROL_PANEL_PASSWORD = "SP0050PC";
+
 export function Header({ title = "Início" }: HeaderProps) {
   const navigate = useNavigate();
   const { products } = useProducts();
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [password, setPassword] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,6 +55,25 @@ export function Header({ title = "Início" }: HeaderProps) {
     ).slice(0, 8);
   }, [products, searchQuery]);
 
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === CONTROL_PANEL_PASSWORD) {
+      setShowPasswordDialog(false);
+      setPassword("");
+      navigate('/control-panel');
+      toast({
+        title: "Acesso concedido",
+        description: "Bem-vindo ao Painel de Controlo",
+      });
+    } else {
+      toast({
+        title: "Palavra-passe incorreta",
+        description: "Por favor, tente novamente",
+        variant: "destructive",
+      });
+      setPassword("");
+    }
+  };
 
   const handleProductClick = (productId: string) => {
     setShowSearch(false);
@@ -222,7 +247,7 @@ export function Header({ title = "Início" }: HeaderProps) {
               variant="ghost"
               size="icon"
               className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => navigate('/control-panel')}
+              onClick={() => setShowPasswordDialog(true)}
             >
               <Lock className="h-[18px] w-[18px]" />
             </Button>
@@ -242,6 +267,39 @@ export function Header({ title = "Início" }: HeaderProps) {
           />
         )}
       </AnimatePresence>
+
+      {/* Password Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-md border-border/50 bg-popover">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Lock className="h-5 w-5 text-primary" />
+              Painel de Controlo
+            </DialogTitle>
+            <DialogDescription>
+              Introduza a palavra-passe para aceder ao Painel de Controlo
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <Input
+              type="password"
+              placeholder="Palavra-passe"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full"
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowPasswordDialog(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">
+                Entrar
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
