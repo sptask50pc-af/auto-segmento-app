@@ -77,7 +77,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 relative">
+    <div className="min-h-screen bg-background pb-36 relative">
       {/* Background watermark logo */}
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0">
         <img 
