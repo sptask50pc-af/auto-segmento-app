@@ -258,7 +258,7 @@ const Index = () => {
           </div>
 
           <motion.div 
-            className="grid grid-cols-4 gap-3"
+            className="grid grid-cols-4 gap-4"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -267,24 +267,27 @@ const Index = () => {
               <motion.div
                 key={category.id}
                 variants={itemVariants}
-                whileTap={{ scale: 0.93 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => handleCategoryClick(category.label)}
-                className="group flex flex-col items-center gap-2 cursor-pointer"
+                className="group flex flex-col items-center gap-2.5 cursor-pointer"
               >
                 <motion.div 
-                  className="relative w-[72px] h-[72px] rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center overflow-hidden p-2.5 group-hover:border-primary/40 group-hover:shadow-md group-hover:shadow-primary/10 transition-all duration-300"
-                  whileHover={{ y: -2 }}
+                  className="relative w-[76px] h-[76px] rounded-2xl bg-gradient-to-br from-card to-secondary/30 border border-border/40 shadow-md shadow-black/5 flex items-center justify-center overflow-hidden p-3 group-hover:border-primary/50 group-hover:shadow-lg group-hover:shadow-primary/15 transition-all duration-300"
+                  whileHover={{ y: -4, scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400, damping: 20 }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/8 group-hover:to-primary/3 transition-all duration-300" />
+                  {/* Glow effect on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/10 group-hover:via-primary/5 group-hover:to-transparent transition-all duration-500" />
+                  {/* Subtle shine effect */}
+                  <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-white/10 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <img
                     src={categoryImages[category.label]}
                     alt={category.label}
-                    className="w-full h-full object-contain relative z-10 transition-transform duration-300 group-hover:scale-110"
+                    className="w-full h-full object-contain relative z-10 transition-all duration-300 group-hover:scale-110 drop-shadow-sm"
                   />
                 </motion.div>
                 <div className="flex flex-col items-center">
-                  <span className="text-[11px] text-center text-foreground/90 leading-tight font-semibold group-hover:text-primary transition-colors line-clamp-2">
+                  <span className="text-[11px] text-center text-foreground/90 leading-tight font-bold group-hover:text-primary transition-colors duration-200 line-clamp-2">
                     {category.label}
                   </span>
                 </div>
