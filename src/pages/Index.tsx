@@ -224,24 +224,27 @@ const Index = () => {
 
         {/* Trust Badges */}
         <motion.section 
-          className="grid grid-cols-3 gap-2"
+          className="grid grid-cols-3 gap-3"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {[
-            { icon: Truck, value: "Entrega", label: "Rápida", color: "text-blue-400" },
-            { icon: Shield, value: "100%", label: "Original", color: "text-emerald-400" },
-            { icon: Star, value: "500+", label: "Produtos", color: "text-amber-400" },
+            { icon: Truck, value: "Entrega", label: "Rápida", color: "text-blue-400", bg: "bg-blue-500/10" },
+            { icon: Shield, value: "100%", label: "Original", color: "text-emerald-400", bg: "bg-emerald-500/10" },
+            { icon: Star, value: "500+", label: "Produtos", color: "text-amber-400", bg: "bg-amber-500/10" },
           ].map((stat) => (
             <motion.div
               key={stat.label}
               variants={itemVariants}
-              className="relative bg-card/60 backdrop-blur-sm rounded-xl p-3 border border-border/30 text-center overflow-hidden group hover:border-primary/20 transition-all duration-300"
+              whileTap={{ scale: 0.95 }}
+              className="relative bg-card/80 backdrop-blur-sm rounded-2xl p-4 border border-border/30 text-center overflow-hidden group hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
             >
-              <stat.icon className={`w-4 h-4 mx-auto mb-1.5 ${stat.color}`} />
-              <p className="text-sm font-bold text-foreground leading-none">{stat.value}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{stat.label}</p>
+              <div className={`w-10 h-10 mx-auto mb-2 rounded-xl ${stat.bg} flex items-center justify-center`}>
+                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+              </div>
+              <p className="text-sm font-extrabold text-foreground leading-none">{stat.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-1 font-medium">{stat.label}</p>
             </motion.div>
           ))}
         </motion.section>
