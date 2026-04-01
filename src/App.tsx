@@ -18,6 +18,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import Auth from "./pages/Auth";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => {
                     <Route path="/subcategories/:category" element={<SubCategories />} />
                     <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
                     <Route path="/subcategories/:category/:subcategory/:subsubcategory" element={<SubCategories />} />
+                    <Route path="/about" element={<About />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <AIChatBot />
