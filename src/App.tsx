@@ -48,6 +48,7 @@ const App = () => {
                     <Route path="/subcategories/:category" element={<SubCategories />} />
                     <Route path="/subcategories/:category/:subcategory" element={<SubCategories />} />
                     <Route path="/subcategories/:category/:subcategory/:subsubcategory" element={<SubCategories />} />
+                    <Route path="/about" element={<About />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <AIChatBot />
