@@ -286,8 +286,8 @@ export const AIChatBot = () => {
         )}
       </AnimatePresence>
 
-      {/* Bottom AI Bar - always visible */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:bottom-4 md:left-auto md:right-4 md:w-auto">
+      {/* Bottom AI Bar - above BottomNav on mobile */}
+      <div className="fixed bottom-16 left-0 right-0 z-40 md:bottom-4 md:left-auto md:right-4 md:w-auto">
         {!isOpen && (
           <motion.div
             initial={{ y: 60 }}
