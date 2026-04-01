@@ -2,8 +2,8 @@ import { motion } from "framer-motion";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import {
-  Code2, Layers, Palette, Smartphone, Sparkles, Database,
-  Shield, Zap, Globe, ArrowRight, Github, Heart, MonitorSmartphone,
+  Code2, Layers, Palette, Sparkles, Database,
+  Shield, Zap, Globe, Heart, MonitorSmartphone,
   Component, Bot, ShoppingCart
 } from "lucide-react";
 import logo from "@/assets/logo.png";
@@ -13,7 +13,7 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, type: "spring", damping: 25, stiffness: 300 },
+    transition: { delay: i * 0.08, type: "spring" as const, damping: 25, stiffness: 300 },
   }),
 };
 
