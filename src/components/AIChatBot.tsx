@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`;
+const env = (import.meta as any).env ?? {};
+const CHAT_URL = `${env.VITE_SUPABASE_URL ?? ""}/functions/v1/ai-assistant`;
 
 async function streamChat({
   messages,
@@ -23,7 +24,7 @@ async function streamChat({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${env.VITE_SUPABASE_PUBLISHABLE_KEY ?? ""}`,
     },
     body: JSON.stringify({ messages }),
   });

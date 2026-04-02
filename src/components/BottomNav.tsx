@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 const BottomNav = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => {
     const location = useLocation();
-    const { user, signOut } = useAuth();
+    const { user, signOut } = useAuth() as { user: any; signOut: () => Promise<void> };
     const { toast } = useToast();
 
     const handleSignOut = async () => {
