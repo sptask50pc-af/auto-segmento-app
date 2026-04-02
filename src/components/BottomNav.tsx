@@ -32,7 +32,7 @@ const BottomNav = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivE
         animate={{ y: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/85 md:hidden shadow-xl shadow-black/20",
+          "fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl supports-[backdrop-filter]:bg-card/85 md:hidden shadow-xl shadow-black/20",
           className
         )}
         role="navigation"
@@ -41,7 +41,7 @@ const BottomNav = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivE
         {/* Decorative top gradient line */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
         
-        <div className="flex items-center justify-around h-16">
+        <div className="flex h-16 items-center justify-around px-2">
           {navItems.map((item, index) => {
             const isActive = location.pathname === item.path;
             return (

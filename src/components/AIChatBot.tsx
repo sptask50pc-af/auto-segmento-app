@@ -1,8 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, Send, Loader2, Bot, User, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -95,13 +97,14 @@ async function streamChat({
   onDone();
 }
 
-export const AIChatBot = () => {
+export const AIChatBot = forwardRef<HTMLDivElement>((_, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: 'Olá! Sou o assistente da Auto Segmento. Como posso ajudá-lo a encontrar peças ou acessórios para o seu veículo?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const isMobile = useIsMobile();
   const scrollBottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -170,48 +173,47 @@ export const AIChatBot = () => {
   };
 
   return (
-    <>
-      {/* Chat Panel - slides up from bottom */}
+    <div ref={ref} className="contents">
       <AnimatePresence>
         {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
+          <motion.div
+            key="ai-chat-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40"
+          >
+            <div
+              className="absolute inset-0 bg-background/60 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             />
 
-            {/* Chat Window */}
             <motion.div
-              initial={{ y: "100%", opacity: 0 }}
+              initial={{ y: '100%', opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: "100%", opacity: 0 }}
-              transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border rounded-t-2xl shadow-2xl overflow-hidden max-h-[75vh] flex flex-col md:left-auto md:right-4 md:bottom-4 md:rounded-2xl md:max-w-md md:max-h-[520px] md:border"
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="absolute bottom-0 left-0 right-0 flex max-h-[calc(100dvh-1rem)] flex-col overflow-hidden rounded-t-2xl border-t border-border bg-card shadow-2xl pb-[env(safe-area-inset-bottom)] md:bottom-4 md:left-auto md:right-4 md:max-h-[520px] md:max-w-md md:rounded-2xl md:border"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
+              <div className="flex items-center justify-between border-b border-border bg-card px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center">
-                    <Sparkles className="w-4 h-4 text-primary" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15">
+                    <Sparkles className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm text-foreground">Assistente AI</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Assistente AI</h3>
                     <p className="text-[11px] text-muted-foreground">Auto Segmento • Online</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors"
+                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent/10 hover:text-foreground"
+                  aria-label="Fechar assistente"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
 
-              {/* Messages */}
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-3">
                   {messages.map((msg, i) => (
@@ -223,36 +225,36 @@ export const AIChatBot = () => {
                       className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       {msg.role === 'assistant' && (
-                        <div className="w-7 h-7 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center mt-0.5">
-                          <Bot className="w-3.5 h-3.5 text-primary" />
+                        <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                          <Bot className="h-3.5 w-3.5 text-primary" />
                         </div>
                       )}
                       <div
                         className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 ${
                           msg.role === 'user'
-                            ? 'bg-primary text-primary-foreground rounded-br-md'
-                            : 'bg-muted text-foreground rounded-bl-md'
+                            ? 'rounded-br-md bg-primary text-primary-foreground'
+                            : 'rounded-bl-md bg-muted text-foreground'
                         }`}
                       >
-                        <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                        <p className="whitespace-pre-wrap text-[13px] leading-relaxed">{msg.content}</p>
                       </div>
                       {msg.role === 'user' && (
-                        <div className="w-7 h-7 rounded-lg bg-primary/20 flex-shrink-0 flex items-center justify-center mt-0.5">
-                          <User className="w-3.5 h-3.5 text-primary" />
+                        <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary/20">
+                          <User className="h-3.5 w-3.5 text-primary" />
                         </div>
                       )}
                     </motion.div>
                   ))}
                   {isLoading && messages[messages.length - 1]?.role === 'user' && (
-                    <div className="flex gap-2 justify-start">
-                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex-shrink-0 flex items-center justify-center">
-                        <Bot className="w-3.5 h-3.5 text-primary" />
+                    <div className="flex justify-start gap-2">
+                      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <Bot className="h-3.5 w-3.5 text-primary" />
                       </div>
-                      <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
+                      <div className="rounded-2xl rounded-bl-md bg-muted px-4 py-3">
                         <div className="flex gap-1">
-                          <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/50" style={{ animationDelay: '0ms' }} />
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/50" style={{ animationDelay: '150ms' }} />
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/50" style={{ animationDelay: '300ms' }} />
                         </div>
                       </div>
                     </div>
@@ -261,9 +263,8 @@ export const AIChatBot = () => {
                 </div>
               </ScrollArea>
 
-              {/* Input */}
-              <div className="p-3 border-t border-border bg-card">
-                <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-3 py-1 border border-border/50 focus-within:border-primary/40 transition-colors">
+              <div className="border-t border-border bg-card p-3">
+                <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-muted/50 px-3 py-1 transition-colors focus-within:border-primary/40">
                   <input
                     ref={inputRef}
                     value={input}
@@ -271,49 +272,70 @@ export const AIChatBot = () => {
                     onKeyDown={handleKeyDown}
                     placeholder="Pergunte algo..."
                     disabled={isLoading}
-                    className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground py-2 outline-none"
+                    className="flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                   />
                   <button
                     onClick={sendMessage}
                     disabled={isLoading || !input.trim()}
-                    className="p-2 rounded-lg bg-primary text-primary-foreground disabled:opacity-30 hover:bg-primary/90 transition-all active:scale-95"
+                    className="rounded-lg bg-primary p-2 text-primary-foreground transition-all active:scale-95 hover:bg-primary/90 disabled:opacity-30"
+                    aria-label="Enviar mensagem"
                   >
-                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Bottom AI Bar - above BottomNav on mobile */}
-      <div className="fixed bottom-16 left-0 right-0 z-40 md:bottom-4 md:left-auto md:right-4 md:w-auto">
-        {!isOpen && (
+      {!isOpen && (
+        <div
+          className={cn(
+            'fixed z-40',
+            isMobile
+              ? 'bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4'
+              : 'bottom-4 right-4'
+          )}
+        >
           <motion.div
-            initial={{ y: 60 }}
-            animate={{ y: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="bg-card/95 backdrop-blur-xl border-t border-border/50 shadow-xl shadow-black/10 md:rounded-2xl md:border md:shadow-2xl"
+            initial={{ y: 60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className={cn(
+              'border border-border/50 bg-card/95 backdrop-blur-xl shadow-xl',
+              isMobile ? 'rounded-full' : 'rounded-2xl md:shadow-2xl'
+            )}
           >
             <button
               onClick={() => setIsOpen(true)}
-              className="w-full flex items-center gap-3 px-4 py-3.5 md:px-5 md:py-3 group"
+              aria-label="Abrir assistente AI"
+              className={cn(
+                'group flex items-center gap-3',
+                isMobile ? 'h-14 w-14 justify-center' : 'px-5 py-3'
+              )}
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/20 group-active:scale-95 transition-transform">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-md shadow-primary/20 transition-transform group-active:scale-95">
+                <Sparkles className="h-4 w-4 text-primary-foreground" />
               </div>
-              <div className="flex-1 text-left">
-                <p className="text-sm font-medium text-foreground">Pergunte ao Assistente AI</p>
-                <p className="text-[11px] text-muted-foreground">Peças, compatibilidade, recomendações...</p>
-              </div>
-              <div className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-semibold">
-                AI
-              </div>
+
+              {!isMobile && (
+                <>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium text-foreground">Pergunte ao Assistente AI</p>
+                    <p className="text-[11px] text-muted-foreground">Peças, compatibilidade, recomendações...</p>
+                  </div>
+                  <div className="rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
+                    AI
+                  </div>
+                </>
+              )}
             </button>
           </motion.div>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
-};
+});
+
+AIChatBot.displayName = 'AIChatBot';
