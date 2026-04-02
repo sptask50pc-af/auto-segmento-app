@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { AIChatBot } from "@/components/AIChatBot";
 import { SplashScreen } from "@/components/SplashScreen";
 import { PageTransition } from "@/components/PageTransition";
+import { MobileBackButton } from "@/components/MobileBackButton";
 import { AnimatePresence } from "framer-motion";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
@@ -63,6 +64,7 @@ const App = () => {
                 <Sonner />
                 <BrowserRouter>
                   <AnimatedRoutes />
+                  <MobileBackButton />
                   <AIChatBot />
                 </BrowserRouter>
               </TooltipProvider>

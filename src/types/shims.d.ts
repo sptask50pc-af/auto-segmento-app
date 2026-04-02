@@ -135,6 +135,7 @@ declare module "lucide-react" {
 
   export const ArrowLeft: LucideIcon;
   export const ArrowRight: LucideIcon;
+  export const ArrowUp: LucideIcon;
   export const Camera: LucideIcon;
   export const Check: LucideIcon;
   export const CheckCircle: LucideIcon;
