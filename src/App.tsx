@@ -12,6 +12,7 @@ import { AIChatBot } from "@/components/AIChatBot";
 import { SplashScreen } from "@/components/SplashScreen";
 import { PageTransition } from "@/components/PageTransition";
 import { MobileBackButton } from "@/components/MobileBackButton";
+import { BottomNav } from "@/components/BottomNav";
 import { AnimatePresence } from "framer-motion";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
@@ -51,6 +52,7 @@ const AnimatedRoutes = () => {
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
+  const [aiOpen, setAiOpen] = useState(false);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -65,7 +67,8 @@ const App = () => {
                 <BrowserRouter>
                   <AnimatedRoutes />
                   <MobileBackButton />
-                  <AIChatBot />
+                  <BottomNav onAIClick={() => setAiOpen(true)} />
+                  <AIChatBot externalOpen={aiOpen} onExternalClose={() => setAiOpen(false)} />
                 </BrowserRouter>
               </TooltipProvider>
             </CartProvider>
