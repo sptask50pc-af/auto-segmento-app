@@ -97,14 +97,28 @@ async function streamChat({
   onDone();
 }
 
-export const AIChatBot = forwardRef<HTMLDivElement>((_, ref) => {
-  const [isOpen, setIsOpen] = useState(false);
+interface AIChatBotProps {
+  externalOpen?: boolean;
+  onExternalClose?: () => void;
+}
+
+export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalOpen, onExternalClose }, ref) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const isMobile = useIsMobile();
+
+  const setIsOpen = (val: boolean) => {
+    if (!val && onExternalClose) {
+      onExternalClose();
+    }
+    setInternalOpen(val);
+  };
+
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: 'Olá! Sou o assistente da Auto Segmento. Como posso ajudá-lo a encontrar peças ou acessórios para o seu veículo?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const isMobile = useIsMobile();
   const scrollBottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -181,7 +195,7 @@ export const AIChatBot = forwardRef<HTMLDivElement>((_, ref) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-[60]"
           >
             <div
               className="absolute inset-0 bg-background/60 backdrop-blur-sm"
@@ -192,12 +206,24 @@ export const AIChatBot = forwardRef<HTMLDivElement>((_, ref) => {
               initial={{ y: '100%', opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-              className="absolute bottom-0 left-0 right-0 flex max-h-[calc(100dvh-1rem)] flex-col overflow-hidden rounded-t-2xl border-t border-border bg-card shadow-2xl pb-[env(safe-area-inset-bottom)] md:bottom-4 md:left-auto md:right-4 md:max-h-[520px] md:max-w-md md:rounded-2xl md:border"
+              transition={{ type: 'spring', damping: 30, stiffness: 350 }}
+              className={cn(
+                "absolute bottom-0 left-0 right-0 flex flex-col overflow-hidden rounded-t-3xl border-t border-border bg-card shadow-2xl",
+                isMobile
+                  ? "max-h-[85dvh] pb-[env(safe-area-inset-bottom)]"
+                  : "md:bottom-4 md:left-auto md:right-4 md:max-h-[520px] md:max-w-md md:rounded-2xl md:border"
+              )}
             >
-              <div className="flex items-center justify-between border-b border-border bg-card px-4 py-3">
+              {/* Drag handle for mobile */}
+              {isMobile && (
+                <div className="flex justify-center pt-2 pb-1">
+                  <div className="h-1 w-10 rounded-full bg-muted-foreground/20" />
+                </div>
+              )}
+
+              <div className="flex items-center justify-between border-b border-border/50 bg-card px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5">
                     <Sparkles className="h-4 w-4 text-primary" />
                   </div>
                   <div>
@@ -207,7 +233,7 @@ export const AIChatBot = forwardRef<HTMLDivElement>((_, ref) => {
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent/10 hover:text-foreground"
+                  className="rounded-xl p-2 text-muted-foreground transition-all duration-200 hover:bg-accent/10 hover:text-foreground active:scale-90"
                   aria-label="Fechar assistente"
                 >
                   <X className="h-4 w-4" />
@@ -263,8 +289,8 @@ export const AIChatBot = forwardRef<HTMLDivElement>((_, ref) => {
                 </div>
               </ScrollArea>
 
-              <div className="border-t border-border bg-card p-3">
-                <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-muted/50 px-3 py-1 transition-colors focus-within:border-primary/40">
+              <div className="border-t border-border/50 bg-card p-3">
+                <div className="flex items-center gap-2 rounded-2xl border border-border/40 bg-muted/40 px-3 py-1 transition-all duration-200 focus-within:border-primary/40 focus-within:bg-muted/60">
                   <input
                     ref={inputRef}
                     value={input}
@@ -272,12 +298,12 @@ export const AIChatBot = forwardRef<HTMLDivElement>((_, ref) => {
                     onKeyDown={handleKeyDown}
                     placeholder="Pergunte algo..."
                     disabled={isLoading}
-                    className="flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                    className="flex-1 bg-transparent py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                   />
                   <button
                     onClick={sendMessage}
                     disabled={isLoading || !input.trim()}
-                    className="rounded-lg bg-primary p-2 text-primary-foreground transition-all active:scale-95 hover:bg-primary/90 disabled:opacity-30"
+                    className="rounded-xl bg-primary p-2.5 text-primary-foreground transition-all duration-200 active:scale-90 hover:bg-primary/90 disabled:opacity-30"
                     aria-label="Enviar mensagem"
                   >
                     {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -289,47 +315,30 @@ export const AIChatBot = forwardRef<HTMLDivElement>((_, ref) => {
         )}
       </AnimatePresence>
 
-      {!isOpen && (
-        <div
-          className={cn(
-            'fixed z-40',
-            isMobile
-              ? 'bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4'
-              : 'bottom-4 right-4'
-          )}
-        >
+      {/* Desktop-only floating launcher */}
+      {!isOpen && !isMobile && (
+        <div className="fixed z-40 bottom-4 right-4">
           <motion.div
             initial={{ y: 60, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={cn(
-              'border border-border/50 bg-card/95 backdrop-blur-xl shadow-xl',
-              isMobile ? 'rounded-full' : 'rounded-2xl md:shadow-2xl'
-            )}
+            className="rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl"
           >
             <button
               onClick={() => setIsOpen(true)}
               aria-label="Abrir assistente AI"
-              className={cn(
-                'group flex items-center gap-3',
-                isMobile ? 'h-14 w-14 justify-center' : 'px-5 py-3'
-              )}
+              className="group flex items-center gap-3 px-5 py-3"
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-md shadow-primary/20 transition-transform group-active:scale-95">
                 <Sparkles className="h-4 w-4 text-primary-foreground" />
               </div>
-
-              {!isMobile && (
-                <>
-                  <div className="flex-1 text-left">
-                    <p className="text-sm font-medium text-foreground">Pergunte ao Assistente AI</p>
-                    <p className="text-[11px] text-muted-foreground">Peças, compatibilidade, recomendações...</p>
-                  </div>
-                  <div className="rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
-                    AI
-                  </div>
-                </>
-              )}
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium text-foreground">Pergunte ao Assistente AI</p>
+                <p className="text-[11px] text-muted-foreground">Peças, compatibilidade, recomendações...</p>
+              </div>
+              <div className="rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
+                AI
+              </div>
             </button>
           </motion.div>
         </div>
