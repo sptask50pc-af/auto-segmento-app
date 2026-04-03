@@ -24,10 +24,12 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
       });
     };
 
-    const leftItems = [
+    const navItems = [
       { icon: Home, label: "Início", path: "/" },
       { icon: Settings, label: "Admin", path: "/admin" },
     ];
+
+    const authActive = location.pathname === "/auth";
 
     return (
       <motion.div
@@ -42,46 +44,45 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
         role="navigation"
         {...(props as any)}
       >
-        {/* Main bar */}
-        <div className="relative border-t border-border/40 bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/80 shadow-[0_-4px_30px_-10px_rgba(0,0,0,0.3)] pb-[env(safe-area-inset-bottom)]">
-          {/* Decorative top gradient line */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <div className="relative border-t border-border/30 bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/80 shadow-[0_-4px_30px_-10px_rgba(0,0,0,0.25)] pb-[env(safe-area-inset-bottom)]">
+          {/* Top gradient accent */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
 
-          <div className="flex h-[60px] items-center justify-around px-3">
-            {/* Left nav items */}
-            {leftItems.map((item) => {
+          <div className="grid grid-cols-4 h-[62px] items-end px-1">
+            {/* Nav items on left */}
+            {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-0.5 min-w-[56px] py-1.5 transition-all duration-200 rounded-xl active:scale-90",
+                    "flex flex-col items-center justify-center gap-0.5 py-2 transition-all duration-200 active:scale-90",
                     isActive ? "text-primary" : "text-muted-foreground"
                   )}
                 >
                   <motion.div
                     whileTap={{ scale: 0.85 }}
                     className={cn(
-                      "p-2 rounded-xl relative transition-colors duration-200",
-                      isActive && "bg-primary/15"
+                      "p-1.5 rounded-xl relative transition-colors duration-200",
+                      isActive && "bg-primary/12"
                     )}
                   >
                     {isActive && (
                       <motion.div
-                        layoutId="nav-indicator"
-                        className="absolute inset-0 bg-primary/15 rounded-xl"
+                        layoutId="bottomnav-indicator"
+                        className="absolute inset-0 bg-primary/12 rounded-xl"
                         transition={{ type: "spring", stiffness: 500, damping: 35 }}
                       />
                     )}
                     <item.icon className={cn(
-                      "h-[22px] w-[22px] relative z-10 transition-all duration-200",
-                      isActive && "drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]"
+                      "h-[21px] w-[21px] relative z-10 transition-all duration-200",
+                      isActive && "drop-shadow-[0_0_6px_hsl(var(--primary)/0.4)]"
                     )} />
                   </motion.div>
                   <span className={cn(
-                    "text-[10px] transition-all duration-200",
-                    isActive ? "font-semibold" : "font-medium opacity-70"
+                    "text-[10px] leading-tight transition-all duration-200",
+                    isActive ? "font-semibold" : "font-medium opacity-60"
                   )}>
                     {item.label}
                   </span>
@@ -89,67 +90,68 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
               );
             })}
 
-            {/* Center AI Button - elevated */}
-            <div className="flex flex-col items-center justify-center -mt-5">
-              <motion.button
-                whileTap={{ scale: 0.88 }}
-                onClick={onAIClick}
-                className="relative flex items-center justify-center h-[52px] w-[52px] rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-200 active:shadow-primary/50"
-                aria-label="Abrir assistente AI"
-              >
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent" />
-                <Sparkles className="h-[22px] w-[22px] relative z-10" />
-              </motion.button>
-              <span className="text-[10px] font-semibold text-primary mt-0.5">AI</span>
-            </div>
-
             {/* Auth button */}
             {user ? (
               <motion.button
                 whileTap={{ scale: 0.85 }}
                 onClick={handleSignOut}
-                className="flex flex-col items-center justify-center gap-0.5 min-w-[56px] py-1.5 transition-all duration-200 text-primary active:scale-90"
+                className="flex flex-col items-center justify-center gap-0.5 py-2 transition-all duration-200 text-primary active:scale-90"
               >
-                <div className="p-2 rounded-xl">
-                  <LogOut className="h-[22px] w-[22px]" />
+                <div className="p-1.5 rounded-xl">
+                  <LogOut className="h-[21px] w-[21px]" />
                 </div>
-                <span className="text-[10px] font-medium">Sair</span>
+                <span className="text-[10px] leading-tight font-medium">Sair</span>
               </motion.button>
             ) : (
               <Link
                 to="/auth"
                 className={cn(
-                  "flex flex-col items-center justify-center gap-0.5 min-w-[56px] py-1.5 transition-all duration-200 active:scale-90",
-                  location.pathname === "/auth" ? "text-primary" : "text-muted-foreground"
+                  "flex flex-col items-center justify-center gap-0.5 py-2 transition-all duration-200 active:scale-90",
+                  authActive ? "text-primary" : "text-muted-foreground"
                 )}
               >
                 <motion.div
                   whileTap={{ scale: 0.85 }}
                   className={cn(
-                    "p-2 rounded-xl relative",
-                    location.pathname === "/auth" && "bg-primary/15"
+                    "p-1.5 rounded-xl relative",
+                    authActive && "bg-primary/12"
                   )}
                 >
-                  {location.pathname === "/auth" && (
+                  {authActive && (
                     <motion.div
-                      layoutId="nav-indicator"
-                      className="absolute inset-0 bg-primary/15 rounded-xl"
+                      layoutId="bottomnav-indicator"
+                      className="absolute inset-0 bg-primary/12 rounded-xl"
                       transition={{ type: "spring", stiffness: 500, damping: 35 }}
                     />
                   )}
                   <User className={cn(
-                    "h-[22px] w-[22px] relative z-10",
-                    location.pathname === "/auth" && "drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]"
+                    "h-[21px] w-[21px] relative z-10",
+                    authActive && "drop-shadow-[0_0_6px_hsl(var(--primary)/0.4)]"
                   )} />
                 </motion.div>
                 <span className={cn(
-                  "text-[10px] transition-all duration-200",
-                  location.pathname === "/auth" ? "font-semibold" : "font-medium opacity-70"
+                  "text-[10px] leading-tight transition-all duration-200",
+                  authActive ? "font-semibold" : "font-medium opacity-60"
                 )}>
                   Conta
                 </span>
               </Link>
             )}
+
+            {/* AI Button - right side, slightly elevated */}
+            <div className="flex flex-col items-center justify-center pb-1">
+              <motion.button
+                whileTap={{ scale: 0.88 }}
+                whileHover={{ scale: 1.05 }}
+                onClick={onAIClick}
+                className="relative flex items-center justify-center h-11 w-11 -mt-3 rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground shadow-md shadow-primary/25 transition-shadow duration-200 active:shadow-primary/40"
+                aria-label="Abrir assistente AI"
+              >
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent to-white/10" />
+                <Sparkles className="h-[18px] w-[18px] relative z-10" />
+              </motion.button>
+              <span className="text-[9px] font-bold text-primary mt-1 tracking-wide">AI</span>
+            </div>
           </div>
         </div>
       </motion.div>

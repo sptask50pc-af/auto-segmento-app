@@ -12,91 +12,152 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
-      setTimeout(onComplete, 500); // Wait for exit animation
-    }, 2000);
+      setTimeout(onComplete, 600);
+    }, 2500);
 
     return () => clearTimeout(timer);
   }, [onComplete]);
+
+  const brands = ["Mercedes", "BMW", "Audi", "VW", "+ Mais"];
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background"
+          exit={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background overflow-hidden"
         >
-          {/* Background glow effect - optimized blur */}
+          {/* Animated background layers */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-primary/15 blur-[60px]" />
+            {/* Primary glow */}
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/12 blur-[80px]"
+            />
+            {/* Secondary glow orbit */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 0.6 }}
+              transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
+              className="absolute top-1/3 left-1/3 w-[300px] h-[300px] rounded-full bg-primary/8 blur-[60px]"
+            />
+            {/* Radial lines */}
+            <motion.div
+              initial={{ opacity: 0, rotate: -30 }}
+              animate={{ opacity: 0.04, rotate: 0 }}
+              transition={{ duration: 2, ease: "easeOut" }}
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `repeating-conic-gradient(from 0deg, transparent 0deg, transparent 8deg, hsl(var(--primary)) 8deg, hsl(var(--primary)) 8.5deg)`,
+              }}
+            />
           </div>
 
-          {/* Logo */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="relative z-10"
-          >
-            <img 
-              src={logo} 
-              alt="Segmento Positivo" 
-              className="w-32 h-32 md:w-40 md:h-40 object-contain"
+          {/* Logo with ring animation */}
+          <div className="relative z-10">
+            {/* Outer ring */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0, rotate: -180 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute -inset-5 rounded-full border border-primary/20"
             />
-          </motion.div>
+            {/* Inner ring with pulse */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute -inset-3 rounded-full border border-primary/10 animate-pulse-glow"
+            />
+            {/* Logo */}
+            <motion.div
+              initial={{ scale: 0.3, opacity: 0, rotate: -10 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <img
+                src={logo}
+                alt="Segmento Positivo"
+                className="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-[0_0_30px_hsl(var(--primary)/0.3)]"
+              />
+            </motion.div>
+          </div>
 
-          {/* Brand name */}
+          {/* Brand name with staggered letters */}
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
+            initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-            className="relative z-10 mt-6 text-center"
+            transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className="relative z-10 mt-8 text-center"
           >
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
               <span className="text-foreground">SEGMENTO</span>{" "}
-              <span className="text-primary">POSITIVO</span>
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                className="text-primary drop-shadow-[0_0_20px_hsl(var(--primary)/0.4)]"
+              >
+                POSITIVO
+              </motion.span>
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.7 }}
+              className="mt-2.5 text-sm text-muted-foreground tracking-widest uppercase"
+            >
               Peças Automotivas Premium
-            </p>
+            </motion.p>
           </motion.div>
 
-          {/* Car brands tagline */}
-          <motion.div
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
-            className="relative z-10 mt-4"
-          >
-            <p className="text-xs md:text-sm text-muted-foreground/80 tracking-wide">
-              <span className="text-foreground/70 font-medium">Mercedes</span>
-              <span className="mx-2 text-primary">•</span>
-              <span className="text-foreground/70 font-medium">BMW</span>
-              <span className="mx-2 text-primary">•</span>
-              <span className="text-foreground/70 font-medium">Audi</span>
-              <span className="mx-2 text-primary">•</span>
-              <span className="text-foreground/70 font-medium">VW</span>
-              <span className="mx-2 text-primary">•</span>
-              <span className="text-foreground/70 font-medium">+ Mais</span>
-            </p>
-          </motion.div>
-
-          {/* Loading indicator */}
+          {/* Car brands with stagger */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.6 }}
-            className="relative z-10 mt-12"
+            transition={{ duration: 0.4, delay: 0.8 }}
+            className="relative z-10 mt-6 flex items-center gap-1"
           >
-            <div className="flex gap-1.5">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="w-2 h-2 rounded-full bg-primary animate-pulse"
-                  style={{ animationDelay: `${i * 150}ms` }}
-                />
-              ))}
+            {brands.map((brand, i) => (
+              <motion.span
+                key={brand}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.9 + i * 0.08, ease: "easeOut" }}
+                className="flex items-center"
+              >
+                {i > 0 && (
+                  <span className="mx-2 text-primary text-xs">•</span>
+                )}
+                <span className="text-xs md:text-sm text-foreground/70 font-medium tracking-wide">
+                  {brand}
+                </span>
+              </motion.span>
+            ))}
+          </motion.div>
+
+          {/* Loading bar */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 1.2 }}
+            className="relative z-10 mt-14 w-32"
+          >
+            <div className="h-[3px] w-full rounded-full bg-muted overflow-hidden">
+              <motion.div
+                initial={{ x: "-100%" }}
+                animate={{ x: "100%" }}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="h-full w-1/2 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent"
+              />
             </div>
           </motion.div>
         </motion.div>
