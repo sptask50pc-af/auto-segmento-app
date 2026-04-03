@@ -38,17 +38,17 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
         animate={{ y: 0 }}
         transition={{ type: "spring", damping: 30, stiffness: 350 }}
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-50 md:hidden",
+          "fixed bottom-4 left-4 right-4 z-50 md:hidden rounded-2xl mx-auto max-w-sm",
           className
         )}
         role="navigation"
         {...(props as any)}
       >
-        <div className="relative border-t border-border/30 bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/80 shadow-[0_-4px_30px_-10px_rgba(0,0,0,0.25)] pb-[env(safe-area-inset-bottom)]">
+        <div className="relative border border-border/30 bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/80 shadow-lg shadow-black/20 rounded-2xl pb-[env(safe-area-inset-bottom)]">
           {/* Top gradient accent */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
 
-          <div className="grid grid-cols-4 h-[62px] items-end px-1">
+          <div className="grid grid-cols-4 h-[68px] items-center px-2">
             {/* Nav items on left */}
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
@@ -57,14 +57,14 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-0.5 py-2 transition-all duration-200 active:scale-90",
+                    "flex flex-col items-center justify-center gap-0.5 py-3 px-1 transition-all duration-200 active:scale-90 rounded-lg",
                     isActive ? "text-primary" : "text-muted-foreground"
                   )}
                 >
                   <motion.div
                     whileTap={{ scale: 0.85 }}
                     className={cn(
-                      "p-1.5 rounded-xl relative transition-colors duration-200",
+                      "p-2 rounded-xl relative transition-colors duration-200",
                       isActive && "bg-primary/12"
                     )}
                   >
