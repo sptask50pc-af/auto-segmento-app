@@ -57,14 +57,15 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-0.5 py-3 px-1 transition-all duration-200 active:scale-90 rounded-lg",
+                    "flex flex-col items-center justify-center gap-0.5 py-3 px-1 transition-all duration-100 active:scale-95 rounded-lg",
                     isActive ? "text-primary" : "text-muted-foreground"
                   )}
                 >
                   <motion.div
-                    whileTap={{ scale: 0.85 }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ duration: 0.1 }}
                     className={cn(
-                      "p-2 rounded-xl relative transition-colors duration-200",
+                      "p-2 rounded-xl relative transition-colors duration-100",
                       isActive && "bg-primary/12"
                     )}
                   >
