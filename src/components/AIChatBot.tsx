@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, Send, Loader2, Bot, User, Sparkles } from 'lucide-react';
+import { X, Send, Loader2, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -95,6 +95,38 @@ async function streamChat({
   }
 
   onDone();
+}
+
+/* Custom SVG robot logo */
+function BotLogo({ size = 18, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {/* antenna */}
+      <line x1="16" y1="2" x2="16" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="16" cy="2" r="1.5" fill="currentColor" />
+      {/* head */}
+      <rect x="6" y="7" width="20" height="14" rx="4" fill="currentColor" opacity="0.15" stroke="currentColor" strokeWidth="1.5" />
+      {/* eyes */}
+      <circle cx="12" cy="14" r="2.5" fill="currentColor" />
+      <circle cx="20" cy="14" r="2.5" fill="currentColor" />
+      <circle cx="12.8" cy="13.2" r="0.8" fill="white" />
+      <circle cx="20.8" cy="13.2" r="0.8" fill="white" />
+      {/* mouth */}
+      <path d="M12 18.5 Q16 21 20 18.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      {/* body */}
+      <rect x="10" y="22" width="12" height="7" rx="2" fill="currentColor" opacity="0.15" stroke="currentColor" strokeWidth="1.5" />
+      {/* arms */}
+      <rect x="3" y="23" width="6" height="3" rx="1.5" fill="currentColor" opacity="0.6" />
+      <rect x="23" y="23" width="6" height="3" rx="1.5" fill="currentColor" opacity="0.6" />
+    </svg>
+  );
 }
 
 interface AIChatBotProps {
@@ -214,7 +246,6 @@ export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalO
                   : "md:bottom-4 md:left-auto md:right-4 md:max-h-[520px] md:max-w-md md:rounded-2xl md:border"
               )}
             >
-              {/* Drag handle for mobile */}
               {isMobile && (
                 <div className="flex justify-center pt-2 pb-1">
                   <div className="h-1 w-10 rounded-full bg-muted-foreground/20" />
@@ -223,8 +254,8 @@ export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalO
 
               <div className="flex items-center justify-between border-b border-border/50 bg-card px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5">
-                    <Sparkles className="h-4 w-4 text-primary" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <BotLogo size={22} />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-foreground">Assistente AI</h3>
@@ -251,8 +282,8 @@ export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalO
                       className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       {msg.role === 'assistant' && (
-                        <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                          <Bot className="h-3.5 w-3.5 text-primary" />
+                        <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          <BotLogo size={16} />
                         </div>
                       )}
                       <div
@@ -273,8 +304,8 @@ export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalO
                   ))}
                   {isLoading && messages[messages.length - 1]?.role === 'user' && (
                     <div className="flex justify-start gap-2">
-                      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                        <Bot className="h-3.5 w-3.5 text-primary" />
+                      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <BotLogo size={16} />
                       </div>
                       <div className="rounded-2xl rounded-bl-md bg-muted px-4 py-3">
                         <div className="flex gap-1">
@@ -329,8 +360,8 @@ export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalO
               aria-label="Abrir assistente AI"
               className="group flex items-center gap-3 px-5 py-3"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-md shadow-primary/20 transition-transform group-active:scale-95">
-                <Sparkles className="h-4 w-4 text-primary-foreground" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20 transition-transform group-active:scale-95">
+                <BotLogo size={20} />
               </div>
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium text-foreground">Pergunte ao Assistente AI</p>
