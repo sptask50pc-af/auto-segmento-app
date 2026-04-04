@@ -16,7 +16,7 @@ export function CartButton() {
       onClick={() => navigate("/cart")}
       title="View Cart"
     >
-      <ShoppingCart className="h-6 w-6 group-hover:text-primary transition-colors duration-200" />
+      <ShoppingCart className="h-7 w-7 group-hover:text-primary transition-colors duration-200" />
       {totalItems > 0 && (
         <span className="absolute -top-1 -right-1 h-6 w-6 flex items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold shadow-md animate-pulse">
           {totalItems > maxItems ? `${maxItems}+` : totalItems}
