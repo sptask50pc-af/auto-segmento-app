@@ -16,6 +16,18 @@ interface PriceUpdate {
   sourceUrl?: string;
 }
 
+function parseAndValidatePrice(raw: string): number | null {
+  const normalized = raw.replace(/\s/g, '').replace(',', '.');
+  const price = parseFloat(normalized);
+  if (!Number.isFinite(price)) return null;
+  if (price < 0.01 || price > 5000) return null;
+  return price;
+}
+
+function escapeRegex(text: string): string {
+  return text.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+}
+
 async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 3): Promise<string> {
   console.log(`Scraping ${url}...`);
 
@@ -94,50 +106,27 @@ async function scrapeWithFirecrawl(url: string, apiKey: string, maxRetries = 3):
 
 // Extract price from product detail page HTML
 function extractPriceFromDetailPage(html: string): number | null {
-  // Try itemprop price content first
+  // Try itemprop price content first and trust it completely
   const priceContentMatch = html.match(/itemprop="price"[^>]*content="([\d.,]+)"/i);
   if (priceContentMatch) {
-    const price = parseFloat(priceContentMatch[1].replace(',', '.'));
-    if (price > 0) return price;
+    const price = parseAndValidatePrice(priceContentMatch[1]);
+    if (price !== null) return price;
+    return null;
   }
 
-  // Try data-price attribute
+  // Try data-price attribute next
   const dataPriceMatch = html.match(/data-price="([\d.,]+)"/i);
   if (dataPriceMatch) {
-    const price = parseFloat(dataPriceMatch[1].replace(',', '.'));
-    if (price > 0) return price;
+    const price = parseAndValidatePrice(dataPriceMatch[1]);
+    if (price !== null) return price;
+    return null;
   }
 
-  // Try current-price span
+  // Try current-price span as a last reliable selector
   const currentPriceMatch = html.match(/<span[^>]*class="[^"]*current-price[^"]*"[^>]*>[^<]*?([\d]+[.,]\d{2})/i);
   if (currentPriceMatch) {
-    const price = parseFloat(currentPriceMatch[1].replace(',', '.'));
-    if (price > 0) return price;
-  }
-
-  // Try price span
-  const priceSpanMatch = html.match(/<span[^>]*class="[^"]*price[^"]*"[^>]*>([^<]*)<\/span>/gi);
-  if (priceSpanMatch) {
-    for (const span of priceSpanMatch) {
-      const numMatch = span.match(/([\d]+[.,]\d{2})/);
-      if (numMatch) {
-        const price = parseFloat(numMatch[1].replace(/\s/g, '').replace(',', '.'));
-        if (price > 0) return price;
-      }
-    }
-  }
-
-  // Try euro patterns
-  const euroPatterns = [
-    /([\d]+[.,]\d{2})\s*€/,
-    /€\s*([\d]+[.,]\d{2})/,
-  ];
-  for (const pattern of euroPatterns) {
-    const match = html.match(pattern);
-    if (match) {
-      const price = parseFloat(match[1].replace(/\s/g, '').replace(',', '.'));
-      if (price > 0) return price;
-    }
+    const price = parseAndValidatePrice(currentPriceMatch[1]);
+    if (price !== null) return price;
   }
 
   return null;
@@ -221,23 +210,24 @@ async function searchProductByReference(reference: string, apiKey: string): Prom
       const productUrl = normalizeUrl(titleMatch[1]);
       const productName = (titleMatch[2] || '').trim();
 
-      // If the search term appears in the name, accept this card
-      const matchesRef = productName.toLowerCase().includes(reference.toLowerCase());
-      if (!matchesRef) continue;
+      // Match reference using exact word boundaries to avoid partial hits
+      const referenceRegex = new RegExp(`\\b${escapeRegex(reference)}\\b`, 'i');
+      if (!referenceRegex.test(productName)) continue;
 
-      // Extract price from the search result card
+      // Extract price from the search result card using only reliable selectors
       let price = 0;
       const priceContentMatch = productHtml.match(/itemprop="price"[^>]*content="([\d.,]+)"/i);
-      if (priceContentMatch) price = parseFloat(priceContentMatch[1].replace(',', '.')) || 0;
-
-      if (price === 0) {
-        const dataPriceMatch = productHtml.match(/data-price="([\d.,]+)"/i);
-        if (dataPriceMatch) price = parseFloat(dataPriceMatch[1].replace(',', '.')) || 0;
+      if (priceContentMatch) {
+        const parsed = parseAndValidatePrice(priceContentMatch[1]);
+        if (parsed !== null) price = parsed;
       }
 
       if (price === 0) {
-        const euroMatch = productHtml.match(/([\d]+[.,]\d{2})\s*€/);
-        if (euroMatch) price = parseFloat(euroMatch[1].replace(',', '.')) || 0;
+        const dataPriceMatch = productHtml.match(/data-price="([\d.,]+)"/i);
+        if (dataPriceMatch) {
+          const parsed = parseAndValidatePrice(dataPriceMatch[1]);
+          if (parsed !== null) price = parsed;
+        }
       }
 
       // Always fetch detail page to get reference

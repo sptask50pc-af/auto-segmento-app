@@ -31,22 +31,20 @@ const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
-        <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
-        <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />
-        <Route path="/control-panel" element={<PageTransition><ControlPanel /></PageTransition>} />
-        <Route path="/product/:id" element={<PageTransition><ProductDetail /></PageTransition>} />
-        <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
-        <Route path="/checkout/success" element={<PageTransition><CheckoutSuccess /></PageTransition>} />
-        <Route path="/subcategories/:category" element={<PageTransition><SubCategories /></PageTransition>} />
-        <Route path="/subcategories/:category/:subcategory" element={<PageTransition><SubCategories /></PageTransition>} />
-        <Route path="/subcategories/:category/:subcategory/:subsubcategory" element={<PageTransition><SubCategories /></PageTransition>} />
-        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
-        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
-      </Routes>
-    </AnimatePresence>
+    <Routes location={location} key={location.pathname}>
+      <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+      <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+      <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />
+      <Route path="/control-panel" element={<PageTransition><ControlPanel /></PageTransition>} />
+      <Route path="/product/:id" element={<PageTransition><ProductDetail /></PageTransition>} />
+      <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
+      <Route path="/checkout/success" element={<PageTransition><CheckoutSuccess /></PageTransition>} />
+      <Route path="/subcategories/:category" element={<PageTransition><SubCategories /></PageTransition>} />
+      <Route path="/subcategories/:category/:subcategory" element={<PageTransition><SubCategories /></PageTransition>} />
+      <Route path="/subcategories/:category/:subcategory/:subsubcategory" element={<PageTransition><SubCategories /></PageTransition>} />
+      <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+      <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+    </Routes>
   );
 };
 
