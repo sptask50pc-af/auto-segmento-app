@@ -132,17 +132,17 @@ function BotLogo({ size = 18, className = "" }: { size?: number; className?: str
 interface AIChatBotProps {
   externalOpen?: boolean;
   onExternalClose?: () => void;
+  onExternalOpen?: () => void;
 }
 
-export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalOpen, onExternalClose }, ref) => {
+export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalOpen, onExternalClose, onExternalOpen }, ref) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
   const isMobile = useIsMobile();
 
   const setIsOpen = (val: boolean) => {
-    if (!val && onExternalClose) {
-      onExternalClose();
-    }
+    if (val && onExternalOpen) onExternalOpen();
+    if (!val && onExternalClose) onExternalClose();
     setInternalOpen(val);
   };
 
