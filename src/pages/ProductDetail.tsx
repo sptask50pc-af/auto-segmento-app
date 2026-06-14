@@ -170,11 +170,11 @@ export default function ProductDetail() {
             <Button
               size="sm"
               variant="outline"
-              className="ml-auto"
+              className="ml-auto md:h-10 md:px-4 md:text-base"
               disabled={isSyncingPrice}
               onClick={handleSyncPrice}
             >
-              <RefreshCw className={cn("h-4 w-4 mr-1", isSyncingPrice && "animate-spin")} />
+              <RefreshCw className={cn("h-4 w-4 mr-1 md:h-5 md:w-5", isSyncingPrice && "animate-spin")} />
               {isSyncingPrice ? "A sincronizar..." : "Atualizar Preço"}
             </Button>
           )}
