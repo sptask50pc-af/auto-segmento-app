@@ -66,7 +66,7 @@ const App = () => {
                   <AnimatedRoutes />
                   <MobileBackButton />
                   <BottomNav onAIClick={() => setAiOpen(true)} />
-                  <AIChatBot externalOpen={aiOpen} onExternalClose={() => setAiOpen(false)} />
+                  <AIChatBot externalOpen={aiOpen} onExternalOpen={() => setAiOpen(true)} onExternalClose={() => setAiOpen(false)} />
                 </BrowserRouter>
               </TooltipProvider>
             </CartProvider>
