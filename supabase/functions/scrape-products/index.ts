@@ -336,6 +336,27 @@ serve(async (req) => {
   }
 
   try {
+    // Require authenticated admin user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized', products: [], progress: { current: 0, total: 0 } }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const authClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+    );
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+    if (userErr || !userData?.user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized', products: [], progress: { current: 0, total: 0 } }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
     if (!apiKey) {
       return new Response(
@@ -354,6 +375,18 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+
+    // Verify admin role
+    const { data: isAdmin, error: roleErr } = await supabase.rpc('has_role', {
+      _user_id: userData.user.id,
+      _role: 'admin',
+    });
+    if (roleErr || !isAdmin) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Forbidden: admin role required', products: [], progress: { current: 0, total: 0 } }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     console.log('Starting product scrape from segmentopositivo.pt');
     

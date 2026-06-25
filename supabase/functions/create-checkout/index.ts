@@ -28,6 +28,28 @@ serve(async (req) => {
       throw new Error("Stripe not configured");
     }
 
+    // Require authenticated user (prevents anonymous abuse of Stripe sessions)
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const supabaseAuth = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+    );
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userErr } = await supabaseAuth.auth.getUser(token);
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userId = userData.user.id;
+
     const { items } = await req.json() as { items: CartItem[] };
 
     if (!items || items.length === 0) {
@@ -125,6 +147,7 @@ serve(async (req) => {
       payment_intent_data: {
         description: "Compra - Segmento Positivo",
       },
+      metadata: { user_id: userId },
     });
 
     console.log("Checkout session created:", session.id);
