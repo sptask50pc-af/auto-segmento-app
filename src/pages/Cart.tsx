@@ -144,8 +144,8 @@ export default function Cart() {
             ))}
           </div>
 
-          {/* Footer */}
-          <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 space-y-4">
+          {/* Footer — sits above the mobile BottomNav so it never covers it */}
+          <div className="fixed left-0 right-0 bg-card border-t border-border p-4 space-y-4 bottom-[calc(96px+env(safe-area-inset-bottom))] md:bottom-0 rounded-t-2xl md:rounded-none shadow-lg shadow-black/20 mx-2 md:mx-0">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Total</span>
               <span className="text-2xl font-bold text-primary">
