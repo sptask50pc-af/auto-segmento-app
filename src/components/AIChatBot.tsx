@@ -5,7 +5,6 @@ import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -23,19 +22,11 @@ async function streamChat({
   onDone: () => void;
   onError: (error: string) => void;
 }) {
-  // Use the user's session JWT — the edge function requires an authenticated user.
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) {
-    onError("Inicie sessão para falar com o assistente.");
-    return;
-  }
-
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${session.access_token}`,
-      apikey: env.VITE_SUPABASE_PUBLISHABLE_KEY ?? "",
+      Authorization: `Bearer ${env.VITE_SUPABASE_PUBLISHABLE_KEY ?? ""}`,
     },
     body: JSON.stringify({ messages }),
   });
@@ -141,17 +132,17 @@ function BotLogo({ size = 18, className = "" }: { size?: number; className?: str
 interface AIChatBotProps {
   externalOpen?: boolean;
   onExternalClose?: () => void;
-  onExternalOpen?: () => void;
 }
 
-export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalOpen, onExternalClose, onExternalOpen }, ref) => {
+export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalOpen, onExternalClose }, ref) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
   const isMobile = useIsMobile();
 
   const setIsOpen = (val: boolean) => {
-    if (val && onExternalOpen) onExternalOpen();
-    if (!val && onExternalClose) onExternalClose();
+    if (!val && onExternalClose) {
+      onExternalClose();
+    }
     setInternalOpen(val);
   };
 

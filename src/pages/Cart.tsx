@@ -74,8 +74,8 @@ export default function Cart() {
         </div>
       ) : (
         <>
-          {/* Cart Items — extra bottom padding so footer + bottom nav don't cover the last item */}
-          <div className="p-4 space-y-4 pb-[260px] md:pb-[180px]">
+          {/* Cart Items */}
+          <div className="p-4 space-y-4">
             {items.map((item) => (
               <div
                 key={item.product.id}
@@ -144,8 +144,8 @@ export default function Cart() {
             ))}
           </div>
 
-          {/* Footer — sits above the mobile BottomNav so it never covers it */}
-          <div className="fixed left-0 right-0 bg-card border-t border-border p-4 space-y-4 bottom-[calc(96px+env(safe-area-inset-bottom))] md:bottom-0 rounded-t-2xl md:rounded-none shadow-lg shadow-black/20 mx-2 md:mx-0">
+          {/* Footer */}
+          <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Total</span>
               <span className="text-2xl font-bold text-primary">

@@ -13,7 +13,6 @@ import { SplashScreen } from "@/components/SplashScreen";
 import { PageTransition } from "@/components/PageTransition";
 import { MobileBackButton } from "@/components/MobileBackButton";
 import { BottomNav } from "@/components/BottomNav";
-import { RequireAdmin } from "@/components/RequireAdmin";
 import { AnimatePresence } from "framer-motion";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
@@ -35,8 +34,8 @@ const AnimatedRoutes = () => {
     <Routes location={location} key={location.pathname}>
       <Route path="/" element={<PageTransition><Index /></PageTransition>} />
       <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
-      <Route path="/admin" element={<RequireAdmin><PageTransition><Admin /></PageTransition></RequireAdmin>} />
-      <Route path="/control-panel" element={<RequireAdmin><PageTransition><ControlPanel /></PageTransition></RequireAdmin>} />
+      <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />
+      <Route path="/control-panel" element={<PageTransition><ControlPanel /></PageTransition>} />
       <Route path="/product/:id" element={<PageTransition><ProductDetail /></PageTransition>} />
       <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
       <Route path="/checkout/success" element={<PageTransition><CheckoutSuccess /></PageTransition>} />
@@ -67,7 +66,7 @@ const App = () => {
                   <AnimatedRoutes />
                   <MobileBackButton />
                   <BottomNav onAIClick={() => setAiOpen(true)} />
-                  <AIChatBot externalOpen={aiOpen} onExternalOpen={() => setAiOpen(true)} onExternalClose={() => setAiOpen(false)} />
+                  <AIChatBot externalOpen={aiOpen} onExternalClose={() => setAiOpen(false)} />
                 </BrowserRouter>
               </TooltipProvider>
             </CartProvider>
