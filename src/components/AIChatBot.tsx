@@ -5,6 +5,8 @@ import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -22,11 +24,19 @@ async function streamChat({
   onDone: () => void;
   onError: (error: string) => void;
 }) {
+  // Use the user's session JWT — the edge function requires an authenticated user.
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    onError("Inicie sessão para falar com o assistente.");
+    return;
+  }
+
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${env.VITE_SUPABASE_PUBLISHABLE_KEY ?? ""}`,
+      Authorization: `Bearer ${session.access_token}`,
+      apikey: env.VITE_SUPABASE_PUBLISHABLE_KEY ?? "",
     },
     body: JSON.stringify({ messages }),
   });
