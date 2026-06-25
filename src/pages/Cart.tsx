@@ -74,8 +74,8 @@ export default function Cart() {
         </div>
       ) : (
         <>
-          {/* Cart Items */}
-          <div className="p-4 space-y-4">
+          {/* Cart Items — extra bottom padding so footer + bottom nav don't cover the last item */}
+          <div className="p-4 space-y-4 pb-[260px] md:pb-[180px]">
             {items.map((item) => (
               <div
                 key={item.product.id}
