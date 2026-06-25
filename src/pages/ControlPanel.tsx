@@ -475,7 +475,7 @@ const ControlPanel = () => {
           <Button 
             onClick={handleUpdateFromWebsite} 
             variant="secondary"
-            className="flex-1 min-w-[100px] gap-2 bg-blue-500/10 backdrop-blur border border-blue-500/30 hover:border-blue-500/60 text-blue-400 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition-all duration-300"
+            className="btn-robotic flex-1 min-w-[100px] gap-2"
             disabled={isUpdating || isSyncingPrices}
             title="Update products from website"
           >
@@ -485,7 +485,7 @@ const ControlPanel = () => {
           <Button 
             onClick={handleOpenPriceDialog} 
             variant="secondary"
-            className="flex-1 min-w-[120px] gap-2 bg-green-500/10 backdrop-blur border border-green-500/30 hover:border-green-500/60 text-green-400 shadow-lg shadow-green-500/10 hover:shadow-green-500/20 transition-all duration-300"
+            className="btn-robotic flex-1 min-w-[120px] gap-2"
             disabled={isUpdating || isSyncingPrices}
             title="Sync price by reference from segmentopositivo.pt"
           >

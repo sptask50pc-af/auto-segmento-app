@@ -337,3 +337,90 @@
   opacity: 0.04 !important;
   mix-blend-mode: multiply;
 }
+
+/* ============ Robotic scrape button ============ */
+@keyframes robotic-scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+@keyframes robotic-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px hsl(180 100% 50% / 0.4),
+      0 0 12px hsl(180 100% 50% / 0.35),
+      inset 0 0 12px hsl(180 100% 50% / 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px hsl(180 100% 60% / 0.7),
+      0 0 24px hsl(180 100% 50% / 0.65),
+      inset 0 0 18px hsl(180 100% 50% / 0.3);
+  }
+}
+
+.btn-robotic {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  font-family: 'Courier New', ui-monospace, monospace;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: hsl(180 100% 75%);
+  background:
+    linear-gradient(135deg, hsl(220 30% 8%), hsl(220 35% 14%));
+  border: 1px solid hsl(180 100% 50% / 0.5);
+  border-radius: 6px;
+  text-shadow: 0 0 6px hsl(180 100% 60% / 0.7);
+  animation: robotic-pulse 2.4s ease-in-out infinite;
+  transition: transform 120ms ease, color 120ms ease;
+}
+.btn-robotic:hover:not(:disabled) {
+  color: hsl(180 100% 90%);
+  transform: translateY(-1px);
+}
+.btn-robotic:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+.btn-robotic:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+/* corner brackets */
+.btn-robotic::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  pointer-events: none;
+  border: 1px solid hsl(180 100% 60% / 0.25);
+  border-radius: 4px;
+  background:
+    linear-gradient(hsl(180 100% 60%), hsl(180 100% 60%)) top left / 8px 1px no-repeat,
+    linear-gradient(hsl(180 100% 60%), hsl(180 100% 60%)) top left / 1px 8px no-repeat,
+    linear-gradient(hsl(180 100% 60%), hsl(180 100% 60%)) top right / 8px 1px no-repeat,
+    linear-gradient(hsl(180 100% 60%), hsl(180 100% 60%)) top right / 1px 8px no-repeat,
+    linear-gradient(hsl(180 100% 60%), hsl(180 100% 60%)) bottom left / 8px 1px no-repeat,
+    linear-gradient(hsl(180 100% 60%), hsl(180 100% 60%)) bottom left / 1px 8px no-repeat,
+    linear-gradient(hsl(180 100% 60%), hsl(180 100% 60%)) bottom right / 8px 1px no-repeat,
+    linear-gradient(hsl(180 100% 60%), hsl(180 100% 60%)) bottom right / 1px 8px no-repeat;
+  border-color: transparent;
+}
+/* scanning sweep */
+.btn-robotic::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    hsl(180 100% 60% / 0.18) 45%,
+    hsl(180 100% 80% / 0.35) 50%,
+    hsl(180 100% 60% / 0.18) 55%,
+    transparent 100%
+  );
+  width: 40%;
+  height: 100%;
+  animation: robotic-scan 2.6s linear infinite;
+  mix-blend-mode: screen;
+}

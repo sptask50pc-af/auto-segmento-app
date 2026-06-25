@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +20,7 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [isSyncingPrice, setIsSyncingPrice] = useState(false);
   const { toast } = useToast();
+  const { isAdmin } = useIsAdmin();
 
   const product = products.find((p) => p.id === id);
 
@@ -166,16 +168,15 @@ export default function ProductDetail() {
               €{product.originalPrice!.toFixed(2)}
             </span>
           )}
-          {product.reference && (
+          {product.reference && isAdmin && (
             <Button
               size="sm"
-              variant="outline"
-              className="ml-auto"
+              className="ml-auto btn-robotic h-9 px-4 text-xs"
               disabled={isSyncingPrice}
               onClick={handleSyncPrice}
             >
-              <RefreshCw className={cn("h-4 w-4 mr-1", isSyncingPrice && "animate-spin")} />
-              {isSyncingPrice ? "A sincronizar..." : "Atualizar Preço"}
+              <RefreshCw className={cn("h-4 w-4 mr-2", isSyncingPrice && "animate-spin")} />
+              {isSyncingPrice ? "Sync..." : "Sync"}
             </Button>
           )}
         </div>
