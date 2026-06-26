@@ -356,7 +356,13 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     console.log('Starting product scrape from segmentopositivo.pt');
-    
+
+    // Hard wall-clock budget so we always return a response before the
+    // edge function gets killed (Supabase kills long invocations around ~150s).
+    const START_TIME = Date.now();
+    const TOTAL_BUDGET_MS = 110_000;
+    const timeLeft = () => TOTAL_BUDGET_MS - (Date.now() - START_TIME);
+
     const allProducts: ScrapedProduct[] = [];
     const seenUrls = new Set<string>();
     const totalCategories = CATEGORY_URLS.length;
@@ -445,13 +451,19 @@ serve(async (req) => {
       );
     }
     
-    // Second pass: scrape individual product pages to get references for ALL products
-    console.log(`\nFetching references for ALL ${allProducts.length} products...`);
-    
+    // Second pass: best-effort enrichment with references.
+    // We only do this while we still have time budget — otherwise we'd time out
+    // and the frontend would receive no products at all.
+    console.log(`\nFetching references (best-effort) for up to ${allProducts.length} products. Time left: ${Math.round(timeLeft()/1000)}s`);
+
     let refsFetched = 0;
     for (let i = 0; i < allProducts.length; i++) {
       const product = allProducts[i];
       if (rateLimited) break;
+      if (timeLeft() < 15_000) {
+        console.log(`  ⏱  Time budget exhausted — skipping remaining reference fetches.`);
+        break;
+      }
 
       try {
         // If DB already has a non-numeric reference for this exact product name, skip re-scraping.
@@ -487,7 +499,7 @@ serve(async (req) => {
         }
 
         // Brief pause between requests
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 300));
       } catch (error) {
         console.error(`  Error fetching reference:`, error);
         if (error instanceof Error && error.message === 'RATE_LIMIT') {
