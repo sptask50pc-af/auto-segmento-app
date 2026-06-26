@@ -75,7 +75,7 @@ export default function Cart() {
       ) : (
         <>
           {/* Cart Items */}
-          <div className="p-4 space-y-4">
+          <div className="p-4 space-y-4 pb-48 md:pb-40">
             {items.map((item) => (
               <div
                 key={item.product.id}
@@ -145,7 +145,7 @@ export default function Cart() {
           </div>
 
           {/* Footer */}
-          <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 space-y-4">
+          <div className="fixed bottom-28 left-4 right-4 md:bottom-0 md:left-0 md:right-0 md:rounded-none rounded-2xl bg-card border border-border md:border-t md:border-x-0 md:border-b-0 p-4 space-y-4 shadow-2xl z-40 pb-[calc(env(safe-area-inset-bottom)+1rem)] md:pb-4">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Total</span>
               <span className="text-2xl font-bold text-primary">
