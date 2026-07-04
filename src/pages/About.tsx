@@ -4,7 +4,7 @@ import { BottomNav } from "@/components/BottomNav";
 import {
   Code2, Layers, Palette, Sparkles, Database,
   Shield, Zap, Globe, Heart, MonitorSmartphone,
-  Component, Bot, ShoppingCart
+  Component, Bot, ShoppingCart, QrCode
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 
