@@ -1,4 +1,4 @@
-import { ShoppingBag, Lock, Search, X, User, LogOut, Sun, Moon } from "lucide-react";
+import { ShoppingBag, Lock, Search, X, User, LogOut, Sun, Moon, QrCode } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CartButton } from "@/components/CartButton";
