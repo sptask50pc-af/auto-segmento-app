@@ -1,6 +1,6 @@
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Home, Package, User, LogOut, Sparkles } from "lucide-react";
+import { Home, Package, User, LogOut, Sparkles, QrCode } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
