@@ -49,7 +49,7 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
           {/* Top gradient accent */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
 
-          <div className="grid grid-cols-4 h-[68px] items-center px-2">
+          <div className="grid grid-cols-5 h-[68px] items-center px-1">
             {/* Nav items on left */}
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
