@@ -4,7 +4,7 @@ import { BottomNav } from "@/components/BottomNav";
 import {
   Code2, Layers, Palette, Sparkles, Database,
   Shield, Zap, Globe, Heart, MonitorSmartphone,
-  Component, Bot, ShoppingCart
+  Component, Bot, ShoppingCart, QrCode
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -197,6 +197,25 @@ const About = () => {
               <p className="text-xs text-muted-foreground">Projeto de PAP — Eptoliva</p>
             </div>
           </motion.div>
+        </motion.section>
+
+        {/* QR Code Share */}
+        <motion.section custom={1.5} variants={fadeUp} initial="hidden" animate="visible">
+          <div className="bg-card/80 backdrop-blur-sm rounded-2xl border border-border/30 p-6 flex flex-col items-center gap-4 hover:border-primary/20 transition-all duration-300">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <QrCode className="w-5 h-5 text-primary" />
+            </div>
+            <div className="text-center">
+              <h2 className="text-base font-bold text-foreground">Partilhar App</h2>
+              <p className="text-xs text-muted-foreground mt-1">Aponte a câmara do telemóvel para aceder à loja</p>
+            </div>
+            <img
+              src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://auto-segmento-app.lovable.app"
+              alt="QR Code para aceder à loja Segmento Positivo"
+              className="w-44 h-44 rounded-xl bg-white p-2 shadow-lg"
+            />
+            <p className="text-[11px] text-muted-foreground font-mono">auto-segmento-app.lovable.app</p>
+          </div>
         </motion.section>
 
         {/* Tech Stack */}
