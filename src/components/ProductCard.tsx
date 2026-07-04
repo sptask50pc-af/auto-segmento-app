@@ -1,4 +1,5 @@
 import { Edit2, Trash2, ShoppingCart } from "lucide-react";
+import { useState } from "react";
 import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const [imgFailed, setImgFailed] = useState(false);
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercent = hasDiscount
     ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
@@ -55,15 +57,14 @@ export function ProductCard({ product, onEdit, onDelete, showActions = false, de
       )}
 
       <div className="relative mb-3 flex h-24 w-full items-center justify-center rounded-lg bg-secondary/50 overflow-hidden border border-border/20 group-hover:border-primary/15 transition-all duration-300">
-        {product.image && product.image !== '/placeholder.svg' ? (
+        {product.image && product.image !== '/placeholder.svg' && !imgFailed ? (
           <img 
             src={product.image} 
             alt={product.name} 
             className="h-full w-full object-contain p-2 transition-transform duration-200 group-hover:scale-105"
             loading="lazy"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/placeholder.svg';
-            }}
+            referrerPolicy="no-referrer"
+            onError={() => setImgFailed(true)}
           />
         ) : (
           <span className="text-4xl">📦</span>
