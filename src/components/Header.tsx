@@ -220,6 +220,13 @@ export function Header({ title = "Início" }: HeaderProps) {
               </Button>
             </Link>
 
+            {/* About / QR */}
+            <Link to="/about">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors" title="Sobre / Partilhar">
+                <QrCode className="h-[18px] w-[18px]" />
+              </Button>
+            </Link>
+
             {/* Cart */}
             <CartButton />
 
