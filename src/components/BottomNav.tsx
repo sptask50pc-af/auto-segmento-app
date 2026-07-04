@@ -27,6 +27,7 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
     const navItems = [
       { icon: Home, label: "Início", path: "/" },
       { icon: Package, label: "Produtos", path: "/admin" },
+      { icon: QrCode, label: "Sobre", path: "/about" },
     ];
 
     const authActive = location.pathname === "/auth";
