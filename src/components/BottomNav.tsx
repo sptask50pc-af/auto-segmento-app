@@ -1,6 +1,6 @@
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Home, Package, User, LogOut, Sparkles } from "lucide-react";
+import { Home, Package, User, LogOut, Sparkles, QrCode } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -27,6 +27,7 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
     const navItems = [
       { icon: Home, label: "Início", path: "/" },
       { icon: Package, label: "Produtos", path: "/admin" },
+      { icon: QrCode, label: "Sobre", path: "/about" },
     ];
 
     const authActive = location.pathname === "/auth";
@@ -48,7 +49,7 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
           {/* Top gradient accent */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
 
-          <div className="grid grid-cols-4 h-[68px] items-center px-2">
+          <div className="grid grid-cols-5 h-[68px] items-center px-1">
             {/* Nav items on left */}
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
