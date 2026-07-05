@@ -115,6 +115,8 @@ const ControlPanel = () => {
   const [priceSyncSummary, setPriceSyncSummary] = useState<PriceSyncSummary>({ total: 0, updated: 0, unchanged: 0, notFound: 0 });
   const [showReferenceDialog, setShowReferenceDialog] = useState(false);
   const [priceReference, setPriceReference] = useState('');
+  const [isFetchingImages, setIsFetchingImages] = useState(false);
+  const [imagesProgress, setImagesProgress] = useState({ done: 0, total: 0, updated: 0, failed: 0 });
 
   // Filter products by search query
   const filteredProducts = useMemo(() => {
