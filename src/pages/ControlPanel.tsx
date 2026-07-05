@@ -551,6 +551,18 @@ const ControlPanel = () => {
             <DollarSign className={`h-5 w-5 ${isSyncingPrices ? 'animate-pulse' : ''}`} />
             {isSyncingPrices ? 'Syncing...' : 'Sync Price'}
           </Button>
+          <Button
+            onClick={handleFetchImages}
+            variant="secondary"
+            className="flex-1 min-w-[140px] gap-2 bg-purple-500/10 backdrop-blur border border-purple-500/30 hover:border-purple-500/60 text-purple-400 shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300"
+            disabled={isUpdating || isSyncingPrices || isFetchingImages}
+            title="Fetch missing product images from the web and rehost them"
+          >
+            <ImageIcon className={`h-5 w-5 ${isFetchingImages ? 'animate-pulse' : ''}`} />
+            {isFetchingImages
+              ? `Fetching ${imagesProgress.done}/${imagesProgress.total}...`
+              : 'Fetch Images'}
+          </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button 
