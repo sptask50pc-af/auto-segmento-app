@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Package, RefreshCw, Search, CheckCircle, AlertCircle, XCircle, Shield, DollarSign } from "lucide-react";
+import { Plus, Package, RefreshCw, Search, CheckCircle, AlertCircle, XCircle, Shield, DollarSign, Image as ImageIcon } from "lucide-react";
 import { Product } from "@/types/product";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -115,6 +115,8 @@ const ControlPanel = () => {
   const [priceSyncSummary, setPriceSyncSummary] = useState<PriceSyncSummary>({ total: 0, updated: 0, unchanged: 0, notFound: 0 });
   const [showReferenceDialog, setShowReferenceDialog] = useState(false);
   const [priceReference, setPriceReference] = useState('');
+  const [isFetchingImages, setIsFetchingImages] = useState(false);
+  const [imagesProgress, setImagesProgress] = useState({ done: 0, total: 0, updated: 0, failed: 0 });
 
   // Filter products by search query
   const filteredProducts = useMemo(() => {
@@ -314,6 +316,63 @@ const ControlPanel = () => {
     setShowReferenceDialog(true);
   };
 
+  const handleFetchImages = async () => {
+    const missing = products.filter(
+      (p) => !p.image || !p.image.includes('supabase.co/storage')
+    );
+    if (missing.length === 0) {
+      toast({ title: 'All good', description: 'All products already have rehosted images.' });
+      return;
+    }
+
+    setIsFetchingImages(true);
+    setImagesProgress({ done: 0, total: missing.length, updated: 0, failed: 0 });
+
+    const BATCH = 15;
+    let totalUpdated = 0;
+    let totalFailed = 0;
+    let processed = 0;
+
+    try {
+      while (processed < missing.length) {
+        const { data, error } = await supabase.functions.invoke('fetch-product-images', {
+          body: { limit: BATCH, onlyMissing: true },
+        });
+
+        if (error || !data?.success) {
+          const msg = (data as any)?.error || (error as any)?.message || 'Failed to fetch images.';
+          toast({ title: 'Image fetch error', description: msg, variant: 'destructive' });
+          break;
+        }
+
+        const s = data.summary as { total: number; updated: number; failed: number };
+        processed += s.total;
+        totalUpdated += s.updated;
+        totalFailed += s.failed;
+        setImagesProgress({
+          done: Math.min(processed, missing.length),
+          total: missing.length,
+          updated: totalUpdated,
+          failed: totalFailed,
+        });
+
+        if (s.total === 0) break; // nothing left
+      }
+
+      await refetch();
+      toast({
+        title: 'Images updated',
+        description: `${totalUpdated} recovered, ${totalFailed} could not be found.`,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unknown error';
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
+    } finally {
+      setIsFetchingImages(false);
+      setImagesProgress({ done: 0, total: 0, updated: 0, failed: 0 });
+    }
+  };
+
   const handleSyncPriceByReference = async () => {
     if (!priceReference.trim()) {
       toast({
@@ -491,6 +550,18 @@ const ControlPanel = () => {
           >
             <DollarSign className={`h-5 w-5 ${isSyncingPrices ? 'animate-pulse' : ''}`} />
             {isSyncingPrices ? 'Syncing...' : 'Sync Price'}
+          </Button>
+          <Button
+            onClick={handleFetchImages}
+            variant="secondary"
+            className="flex-1 min-w-[140px] gap-2 bg-purple-500/10 backdrop-blur border border-purple-500/30 hover:border-purple-500/60 text-purple-400 shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-300"
+            disabled={isUpdating || isSyncingPrices || isFetchingImages}
+            title="Fetch missing product images from the web and rehost them"
+          >
+            <ImageIcon className={`h-5 w-5 ${isFetchingImages ? 'animate-pulse' : ''}`} />
+            {isFetchingImages
+              ? `Fetching ${imagesProgress.done}/${imagesProgress.total}...`
+              : 'Fetch Images'}
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
