@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Package, RefreshCw, Search, CheckCircle, AlertCircle, XCircle, Shield, DollarSign } from "lucide-react";
+import { Plus, Package, RefreshCw, Search, CheckCircle, AlertCircle, XCircle, Shield, DollarSign, Image as ImageIcon } from "lucide-react";
 import { Product } from "@/types/product";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
