@@ -316,6 +316,63 @@ const ControlPanel = () => {
     setShowReferenceDialog(true);
   };
 
+  const handleFetchImages = async () => {
+    const missing = products.filter(
+      (p) => !p.image || !p.image.includes('supabase.co/storage')
+    );
+    if (missing.length === 0) {
+      toast({ title: 'All good', description: 'All products already have rehosted images.' });
+      return;
+    }
+
+    setIsFetchingImages(true);
+    setImagesProgress({ done: 0, total: missing.length, updated: 0, failed: 0 });
+
+    const BATCH = 15;
+    let totalUpdated = 0;
+    let totalFailed = 0;
+    let processed = 0;
+
+    try {
+      while (processed < missing.length) {
+        const { data, error } = await supabase.functions.invoke('fetch-product-images', {
+          body: { limit: BATCH, onlyMissing: true },
+        });
+
+        if (error || !data?.success) {
+          const msg = (data as any)?.error || (error as any)?.message || 'Failed to fetch images.';
+          toast({ title: 'Image fetch error', description: msg, variant: 'destructive' });
+          break;
+        }
+
+        const s = data.summary as { total: number; updated: number; failed: number };
+        processed += s.total;
+        totalUpdated += s.updated;
+        totalFailed += s.failed;
+        setImagesProgress({
+          done: Math.min(processed, missing.length),
+          total: missing.length,
+          updated: totalUpdated,
+          failed: totalFailed,
+        });
+
+        if (s.total === 0) break; // nothing left
+      }
+
+      await refetch();
+      toast({
+        title: 'Images updated',
+        description: `${totalUpdated} recovered, ${totalFailed} could not be found.`,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unknown error';
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
+    } finally {
+      setIsFetchingImages(false);
+      setImagesProgress({ done: 0, total: 0, updated: 0, failed: 0 });
+    }
+  };
+
   const handleSyncPriceByReference = async () => {
     if (!priceReference.trim()) {
       toast({
