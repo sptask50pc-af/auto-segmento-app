@@ -131,10 +131,11 @@ function BotLogo({ size = 18, className = "" }: { size?: number; className?: str
 
 interface AIChatBotProps {
   externalOpen?: boolean;
+  onExternalOpen?: () => void;
   onExternalClose?: () => void;
 }
 
-export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalOpen, onExternalClose }, ref) => {
+export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalOpen, onExternalOpen, onExternalClose }, ref) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
   const isMobile = useIsMobile();
@@ -356,7 +357,10 @@ export const AIChatBot = forwardRef<HTMLDivElement, AIChatBotProps>(({ externalO
             className="rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl"
           >
             <button
-              onClick={() => setIsOpen(true)}
+              onClick={() => {
+                if (onExternalOpen) onExternalOpen();
+                else setInternalOpen(true);
+              }}
               aria-label="Abrir assistente AI"
               className="group flex items-center gap-3 px-5 py-3"
             >
