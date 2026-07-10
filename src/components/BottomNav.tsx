@@ -5,6 +5,9 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 interface BottomNavProps extends React.HTMLAttributes<HTMLDivElement> {
   onAIClick?: () => void;
@@ -23,6 +26,17 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
         description: "Até breve!",
       });
     };
+
+    const userMeta = user?.user_metadata ?? {};
+    const displayName: string = userMeta.full_name || userMeta.name || user?.email?.split("@")[0] || "Conta";
+    const avatarUrl: string | undefined = userMeta.avatar_url || userMeta.picture;
+    const initials = displayName
+      .split(" ")
+      .map((s: string) => s[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
 
     const navItems = [
       { icon: Home, label: "Início", path: "/" },
@@ -94,16 +108,47 @@ const BottomNav = React.forwardRef<HTMLDivElement, BottomNavProps>(
 
             {/* Auth button */}
             {user ? (
-              <motion.button
-                whileTap={{ scale: 0.85 }}
-                onClick={handleSignOut}
-                className="flex flex-col items-center justify-center gap-0.5 py-2 transition-all duration-200 text-primary active:scale-90"
-              >
-                <div className="p-1.5 rounded-xl">
-                  <LogOut className="h-[21px] w-[21px]" />
-                </div>
-                <span className="text-[10px] leading-tight font-medium">Sair</span>
-              </motion.button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <motion.button
+                    whileTap={{ scale: 0.85 }}
+                    className="flex flex-col items-center justify-center gap-0.5 py-2 transition-all duration-200 text-primary active:scale-90"
+                  >
+                    <Avatar className="h-8 w-8 ring-2 ring-primary/30">
+                      <AvatarImage src={avatarUrl} alt={displayName} />
+                      <AvatarFallback className="text-[11px] font-semibold bg-primary/15 text-primary">
+                        {initials || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-[10px] leading-tight font-medium truncate max-w-[52px]">
+                      {displayName}
+                    </span>
+                  </motion.button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-64 p-3 mb-2">
+                  <div className="flex items-center gap-3 pb-3 border-b border-border">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={avatarUrl} alt={displayName} />
+                      <AvatarFallback className="bg-primary/15 text-primary">
+                        {initials || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate">{displayName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start mt-2 text-destructive hover:text-destructive"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Terminar sessão
+                  </Button>
+                </PopoverContent>
+              </Popover>
             ) : (
               <Link
                 to="/auth"
